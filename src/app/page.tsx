@@ -1,16 +1,11 @@
 'use client';
 
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
-  Home,
-  Layers,
-  Sparkles,
-  RotateCcw,
   ArrowRight,
   ArrowUpRight,
-  Globe,
   Building2,
   Users,
   FileText,
@@ -38,16 +33,12 @@ import {
   ProductModuleItem,
   SupportedLocale,
 } from '@/components/landing/landing-types';
+import { FogHero } from '@/components/landing/fog-hero';
 import { toast } from 'sonner';
 
 export default function LandingPage() {
   const [locale, setLocale] = useState<SupportedLocale>('en');
   const isBn = locale === 'bn';
-
-  // Filter states
-  const [selectedType, setSelectedType] = useState<string>('all');
-  const [selectedModule, setSelectedModule] = useState<string>('all');
-  const [selectedScale, setSelectedScale] = useState<string>('all');
 
   // Modal states
   const [quickViewModule, setQuickViewModule] = useState<ProductModuleItem | null>(null);
@@ -91,25 +82,6 @@ export default function LandingPage() {
     setLocale((prev) => (prev === 'en' ? 'bn' : 'en'));
   }, []);
 
-  const handleResetFilters = useCallback(() => {
-    setSelectedType('all');
-    setSelectedModule('all');
-    setSelectedScale('all');
-    showToastNotification(
-      locale === 'bn' ? 'সকল ফিল্টার রিসেট করা হয়েছে' : 'Filters reset to default'
-    );
-  }, [locale, showToastNotification]);
-
-  const handleSearchClick = useCallback(() => {
-    const el = document.getElementById('properties');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
-    showToastNotification(
-      locale === 'bn' ? 'মডিউল তালিকা আপডেট হয়েছে' : 'Management modules filtered'
-    );
-  }, [locale, showToastNotification]);
-
   const handleConsultationSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!consultName || !consultPhone) return;
@@ -150,16 +122,6 @@ export default function LandingPage() {
     };
   }, [isConsultationOpen, quickViewModule]);
 
-  // Filtered modules
-  const filteredModules = useMemo(() => {
-    return PRODUCT_MODULES.filter((item) => {
-      if (selectedModule !== 'all' && item.category !== selectedModule) {
-        return false;
-      }
-      return true;
-    });
-  }, [selectedModule]);
-
   const totalTestimonials = TESTIMONIALS.length;
   const currentTestimonial = TESTIMONIALS[testimonialIndex] || TESTIMONIALS[0];
 
@@ -171,11 +133,7 @@ export default function LandingPage() {
     setTestimonialIndex((prev) => (prev === totalTestimonials - 1 ? 0 : prev + 1));
   };
 
-  const card1 = filteredModules[0] || PRODUCT_MODULES[0];
-  const card2 = filteredModules[1] || PRODUCT_MODULES[1] || card1;
-  const card3 = filteredModules[2] || PRODUCT_MODULES[2] || card1;
-  const card4 = filteredModules[3] || PRODUCT_MODULES[3] || card1;
-  const card5 = filteredModules[4] || PRODUCT_MODULES[4] || card1;
+  const [card1, card2, card3, card4, card5] = PRODUCT_MODULES;
 
   return (
     <div className="bg-[#111214] min-h-screen text-white font-sans antialiased">
@@ -186,240 +144,13 @@ export default function LandingPage() {
         
 
         {/* ─────────────────────────────────────────────────────────────
-            1. TOP NAVIGATION BAR (Obsidian + Accent Emerald #10B981)
+            1–2. NAVIGATION + HERO (Morning / Night fog scene)
         ───────────────────────────────────────────────────────────── */}
-        <header className="sticky top-0 z-40 bg-[#16171a]/95 backdrop-blur-md border-b border-white/10">
-          <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 h-16 flex items-center justify-between">
-            {/* Brand Logo */}
-            <Link href="#hero" className="flex items-center gap-2.5 group">
-              {/* Emerald Logo */}
-              <img className="w-8 h-8 transition-transform group-hover:scale-105" src="/logo.png" alt="BariVara Logo" />
-              <span className="font-extrabold tracking-[0.18em] text-sm sm:text-base text-white">
-                BARIVARA
-              </span>
-            </Link>
-
-            {/* Center Navigation Links */}
-            <nav className="hidden md:flex items-center gap-7 text-xs font-medium text-gray-300">
-              <a href="#hero" className="text-[#10B981] font-semibold transition">
-                {isBn ? 'হোম' : 'Home'}
-              </a>
-              <a href="#process" className="hover:text-[#10B981] transition">
-                {isBn ? 'পদ্ধতি' : 'How It Works'}
-              </a>
-              <a href="#properties" className="hover:text-[#10B981] transition">
-                {isBn ? 'কোর ফিচার' : 'Features'}
-              </a>
-              <a href="#testimonials" className="hover:text-[#10B981] transition">
-                {isBn ? 'অভিজ্ঞতা' : 'Reviews'}
-              </a>
-              <a href="#blog" className="hover:text-[#10B981] transition">
-                {isBn ? 'ব্লগ ও গাইড' : 'Guides'}
-              </a>
-              <a href="#cta" className="hover:text-[#10B981] transition">
-                {isBn ? 'যোগাযোগ' : 'Contact'}
-              </a>
-            </nav>
-
-            {/* Right Action Buttons */}
-            <div className="flex items-center gap-2.5">
-              {/* Bilingual Switcher */}
-              <button
-                onClick={toggleLocale}
-                aria-label="Switch Language"
-                className="btn-press flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#1c1d21] hover:bg-[#24262b] border border-white/15 text-[11px] font-medium text-gray-200 transition"
-              >
-                <Globe className="w-3.5 h-3.5 text-[#10B981]" />
-                <span>{isBn ? 'English' : 'বাংলা'}</span>
-              </button>
-
-              {/* Login Link */}
-              <Link
-                href="/login"
-                className="hidden lg:inline-flex btn-press px-3 py-1.5 rounded bg-transparent hover:bg-white/5 border border-white/15 text-gray-300 font-semibold text-[11px] transition"
-              >
-                {isBn ? 'লগ ইন' : 'Sign In'}
-              </Link>
-
-              {/* Primary Action Button (Solid Emerald #12664F + Hover #0E513F) */}
-              <button
-                onClick={() => setIsConsultationOpen(true)}
-                className="btn-press px-3.5 py-1.5 rounded bg-[#12664F] hover:bg-[#0E513F] text-white font-bold text-[11px] flex items-center gap-1.5 transition shadow-sm border border-[#10B981]/40"
-              >
-                <span>{isBn ? 'যোগাযোগ করুন' : 'Get in Touch'}</span>
-                <ArrowUpRight className="w-3.5 h-3.5 text-[#10B981]" />
-              </button>
-            </div>
-          </div>
-        </header>
-
-        {/* ─────────────────────────────────────────────────────────────
-            2. HERO SECTION (Backdrop, Refined Sky Title & Filter Strip)
-        ───────────────────────────────────────────────────────────── */}
-        <section id="hero" className="relative w-full">
-          {/* Sky & Property Container */}
-          <div className="relative w-full h-[540px] sm:h-[630px] lg:h-[700px] overflow-hidden bg-[#16171a]">
-            {/* Background Architecture Photo */}
-            <Image
-              src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2000&q=85"
-              alt="BariVara Modern Residence"
-              fill
-              priority
-              sizes="100vw"
-              className="object-cover object-center brightness-95 contrast-105"
-            />
-
-            {/* Bright sky upper gradient so giant BARIVARA typography pops cleanly */}
-            <div className="absolute inset-0 bg-gradient-to-b from-[#111214]/80 via-transparent to-[#16171a] pointer-events-none" />
-
-            {/* Giant "BARIVARA" Display Title Across the Top Sky */}
-            <div className="absolute top-5 sm:top-7 inset-x-0 flex justify-center pointer-events-none px-4">
-              <h1 className="text-[16vw] sm:text-[13.5vw] lg:text-[168px] tracking-[0.16em] text-center select-none font-black text-white/80 drop-shadow-[0_4px_30px_rgba(0,0,0,0.6)]">
-                BARIVARA
-              </h1>
-            </div>
-
-            {/* Center-Left Floating Info Overlay */}
-            <div className="absolute left-6 sm:left-12 lg:left-24 top-1/2 -translate-y-4 max-w-xs sm:max-w-sm bg-[#111214]/90 backdrop-blur-md border border-white/15 p-4 sm:p-5 rounded-lg shadow-2xl">
-              <p className="text-xs sm:text-sm text-gray-100 font-medium leading-relaxed">
-                {isBn
-                  ? 'কাগজের খাতার বিশৃঙ্খলা ভুলে বাড়ি ও ফ্ল্যাটের সম্পূর্ণ হিসাব রাখুন এক জায়গায়। ১-ক্লিকে হোয়াটসঅ্যাপ রসিদ, বিদ্যুৎ সাব-মিটার বিল বণ্টন ও বিকাশ/নগদ পেমেন্ট রিকনসিলিয়েশন।'
-                  : 'Leave paper khata chaos behind. Manage rents, calculate electricity sub-meter splits, and dispatch official 1-click WhatsApp receipts for 1–15 units.'}
-              </p>
-              <div className="mt-3 pt-3 border-t border-white/10 flex items-center justify-between text-[11px] text-gray-300">
-                <span className="flex items-center gap-1.5 font-medium">
-                  <span className="w-2 h-2 rounded-full bg-[#10B981]" />
-                  {isBn ? '১–১৫ ইউনিটের বাড়িওয়ালাদের জন্য' : 'For 1–15 Unit Landlords'}
-                </span>
-                <a href="#properties" className="text-[#10B981] hover:text-[#059669] font-semibold hover:underline">
-                  {isBn ? 'মডিউল দেখুন ↓' : 'Explore Modules ↓'}
-                </a>
-              </div>
-            </div>
-
-            {/* Bottom Filter Bar Overlapping Hero Footer */}
-            <div className="absolute bottom-0 inset-x-0 bg-[#16171a]/95 backdrop-blur-md border-t border-b border-white/10">
-              <div className="max-w-6xl mx-auto px-4 sm:px-8 py-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-center">
-                  
-                  {/* Filter 1: Property Type */}
-                  <div className="lg:col-span-3 flex items-center justify-between border-b sm:border-b-0 sm:border-r border-white/10 pb-2 sm:pb-0 sm:pr-4">
-                    <div>
-                      <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-[#10B981] font-semibold">
-                        <Home className="w-3 h-3 text-[#10B981]" />
-                        <span>{isBn ? 'প্রপার্টির ধরন' : 'Property Type'}</span>
-                      </div>
-                      <select
-                        id="filter-prop-type"
-                        value={selectedType}
-                        onChange={(e) => setSelectedType(e.target.value)}
-                        className="bg-transparent text-white text-xs font-medium focus:outline-none mt-0.5 cursor-pointer pr-2"
-                      >
-                        <option value="all" className="bg-[#16171a] text-white">
-                          {isBn ? 'সকল প্রপার্টি ও ফ্ল্যাট' : 'All Properties & Flats'}
-                        </option>
-                        <option value="residential" className="bg-[#16171a] text-white">
-                          {isBn ? 'আবাসিক ফ্ল্যাট (ফ্যামিলি)' : 'Residential Flats (Family)'}
-                        </option>
-                        <option value="commercial" className="bg-[#16171a] text-white">
-                          {isBn ? 'বাণিজ্যিক স্পেস ও দোকান' : 'Commercial Spaces & Shops'}
-                        </option>
-                        <option value="sublet" className="bg-[#16171a] text-white">
-                          {isBn ? 'সাবলেট ও মেস রুম' : 'Sublet & Bachelor Mess'}
-                        </option>
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Filter 2: Capability / Feature */}
-                  <div className="lg:col-span-3 flex items-center justify-between border-b sm:border-b-0 lg:border-r border-white/10 pb-2 sm:pb-0 sm:pr-4">
-                    <div>
-                      <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-[#10B981] font-semibold">
-                        <Layers className="w-3 h-3 text-[#10B981]" />
-                        <span>{isBn ? 'প্রধান ফিচার' : 'Key Feature'}</span>
-                      </div>
-                      <select
-                        id="filter-module"
-                        value={selectedModule}
-                        onChange={(e) => setSelectedModule(e.target.value)}
-                        className="bg-transparent text-white text-xs font-medium focus:outline-none mt-0.5 cursor-pointer pr-2"
-                      >
-                        <option value="all" className="bg-[#16171a] text-white">
-                          {isBn ? 'সকল ফিচার দেখুন' : 'All Features'}
-                        </option>
-                        <option value="Receipts" className="bg-[#16171a] text-white">
-                          {isBn ? '১-ক্লিক হোয়াটসঅ্যাপ রসিদ' : '1-Click WhatsApp Receipts'}
-                        </option>
-                        <option value="Utilities" className="bg-[#16171a] text-white">
-                          {isBn ? 'বিদ্যুৎ সাব-মিটার ও বিল বণ্টন' : 'Sub-Meter Electricity & Utilities'}
-                        </option>
-                        <option value="Tenants" className="bg-[#16171a] text-white">
-                          {isBn ? 'ভাড়াটিয়া এনআইডি ও পুলিশ ফরম' : 'Tenant NID & Police Form'}
-                        </option>
-                        <option value="Payments" className="bg-[#16171a] text-white">
-                          {isBn ? 'বিকাশ/নগদ ও বকেয়া হিসাব' : 'bKash/Nagad Reconciliation'}
-                        </option>
-                        <option value="Ledger" className="bg-[#16171a] text-white">
-                          {isBn ? 'আয়-ব্যয় খতিয়ান ও সিএসভি' : 'Monthly Khata & Tax CSV'}
-                        </option>
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Filter 3: Scale / Range */}
-                  <div className="lg:col-span-3 flex items-center justify-between border-b sm:border-b-0 sm:border-r border-white/10 pb-2 sm:pb-0 sm:pr-4">
-                    <div>
-                      <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-[#10B981] font-semibold">
-                        <Sparkles className="w-3 h-3 text-[#10B981]" />
-                        <span>{isBn ? 'ইউনিট সংখ্যা' : 'Units Scale'}</span>
-                      </div>
-                      <select
-                        id="filter-scale"
-                        value={selectedScale}
-                        onChange={(e) => setSelectedScale(e.target.value)}
-                        className="bg-transparent text-white text-xs font-medium focus:outline-none mt-0.5 cursor-pointer pr-2 tabular-nums"
-                      >
-                        <option value="all" className="bg-[#16171a] text-white">
-                          {isBn ? '১–১৫+ ইউনিট (সকল)' : '1–15+ Units (All)'}
-                        </option>
-                        <option value="small" className="bg-[#16171a] text-white">
-                          {isBn ? '১–৫টি ফ্ল্যাট' : '1–5 Flats'}
-                        </option>
-                        <option value="medium" className="bg-[#16171a] text-white">
-                          {isBn ? '৬–১০টি ফ্ল্যাট' : '6–10 Flats'}
-                        </option>
-                        <option value="large" className="bg-[#16171a] text-white">
-                          {isBn ? '১১–১৫+ ফ্ল্যাট' : '11–15+ Flats'}
-                        </option>
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Filter 4: Actions (Primary Emerald #12664F + Hover #0E513F) */}
-                  <div className="lg:col-span-3 flex items-center justify-end gap-2">
-                    <button
-                      onClick={handleResetFilters}
-                      className="px-3 py-2 rounded bg-[#1c1d21] hover:bg-[#24262b] border border-white/15 text-[11px] text-gray-300 transition"
-                    >
-                      <span className="flex items-center gap-1">
-                        <RotateCcw className="w-3 h-3" />
-                        <span>{isBn ? 'রিসেট' : 'Reset'}</span>
-                      </span>
-                    </button>
-                    <button
-                      onClick={handleSearchClick}
-                      className="flex-1 sm:flex-initial px-4 py-2 rounded bg-[#12664F] hover:bg-[#0E513F] text-white font-bold text-xs flex items-center justify-center gap-1.5 transition shadow border border-[#10B981]/40"
-                    >
-                      <span>{isBn ? 'অনুসন্ধান' : 'Search'}</span>
-                      <ArrowRight className="w-3.5 h-3.5 text-[#10B981]" />
-                    </button>
-                  </div>
-
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        <FogHero
+          isBn={isBn}
+          onToggleLocale={toggleLocale}
+          onContact={() => setIsConsultationOpen(true)}
+        />
 
         {/* ─────────────────────────────────────────────────────────────
             3. CORE MODULES & FEATURES BENTO GRID
