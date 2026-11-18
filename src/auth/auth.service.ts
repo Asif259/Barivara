@@ -28,6 +28,13 @@ const OTP_MAX_ATTEMPTS = 5; // 5 attempts per OTP
 const RESET_TOKEN_EXPIRY_MS = 5 * 60 * 1000; // 5 minutes
 const OTP_COOLDOWN_MS = 60 * 1000; // 60 seconds cooldown between resends
 
+let dummyHashPromise: Promise<string> | undefined;
+/** Lazily-created argon2 hash (default params) used to equalise login timing. */
+function getDummyHash(): Promise<string> {
+  dummyHashPromise ??= argon2.hash(crypto.randomBytes(16).toString('hex'));
+  return dummyHashPromise;
+}
+
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
@@ -141,6 +148,9 @@ export class AuthService {
     });
 
     if (!user) {
+      // Burn the same argon2 work as a real verify so response time does not
+      // reveal whether the account exists.
+      await argon2.verify(await getDummyHash(), dto.password).catch(() => false);
       throw new UnauthorizedException({
         errorCode: ErrorCode.AUTH_INVALID_CREDENTIALS,
         message: 'ভুল ইমেইল/ফোন অথবা পাসওয়ার্ড।',
@@ -647,7 +657,7 @@ export class AuthService {
     };
   }
 
-  async resetPasswordDirect(dto: ResetPasswordDirectDto, ipAddress?: string, userAgent?: string) {
+  async resetPasswordDirect(userId: string, dto: ResetPasswordDirectDto, ipAddress?: string, userAgent?: string) {
     if (dto.newPassword !== dto.confirmPassword) {
       throw new BadRequestException({
         errorCode: ErrorCode.VALIDATION_ERROR,
@@ -662,20 +672,16 @@ export class AuthService {
       });
     }
 
-    const rawIdentifier = dto.identifier.trim();
-    const isEmail = rawIdentifier.includes('@');
-    const normalizedIdentifier = isEmail ? rawIdentifier.toLowerCase() : rawIdentifier;
-
+    // The account is the authenticated caller, never a client-supplied identifier,
+    // so this endpoint cannot be used to guess another account's password.
     const user = await this.prisma.user.findFirst({
-      where: isEmail
-        ? { email: normalizedIdentifier, isActive: true, deletedAt: null }
-        : { phone: normalizedIdentifier, isActive: true, deletedAt: null },
+      where: { id: userId, isActive: true, deletedAt: null },
     });
 
     if (!user) {
       throw new UnauthorizedException({
         errorCode: ErrorCode.AUTH_INVALID_CREDENTIALS,
-        message: 'বর্তমান ব্যবহারকারী বা পাসওয়ার্ড ভুল।',
+        message: 'বর্তমান ব্যবহারকারী বা পাসওয়ার্ড ভুল।',
       });
     }
 

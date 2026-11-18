@@ -51,6 +51,12 @@ export class FilesService {
       this.validateFileSize(dto.category, dto.size);
 
       // 3. Validate entity ownership before embedding entityId in the storage path
+      if (!!dto.entityType !== !!dto.entityId) {
+        throw new BadRequestException({
+          errorCode: ErrorCode.VALIDATION_ERROR,
+          message: 'entityType এবং entityId একসাথে প্রদান করতে হবে।',
+        });
+      }
       if (dto.entityType && dto.entityId) {
         await this.validateEntityOwnership(userId, dto.entityType, dto.entityId);
       }
@@ -150,13 +156,15 @@ export class FilesService {
         });
       }
 
-      // Verify the object actually exists in Supabase Storage
-      const exists = await this.supabaseStorage.objectExists(
+      // Verify the object exists and that what was actually stored matches the
+      // category rules. Size and MIME at request time are only client claims, and
+      // a signed upload URL does not bind the uploaded bytes to them.
+      const info = await this.supabaseStorage.getObjectInfo(
         media.bucket,
         media.storagePath,
       );
 
-      if (!exists) {
+      if (!info) {
         this.logger.warn(
           `File not found in storage for completion: fileId=${fileId} bucket=${media.bucket} path=${media.storagePath}`
         );
@@ -172,6 +180,33 @@ export class FilesService {
         });
       }
 
+      try {
+        if (info.mimeType !== undefined) {
+          const actualMime = info.mimeType.split(';')[0].trim().toLowerCase();
+          if (actualMime !== media.mimeType.toLowerCase()) {
+            throw new BadRequestException({
+              errorCode: ErrorCode.FILE_INVALID_MIME_TYPE,
+              message: 'আপলোড করা ফাইলের ধরন ঘোষিত ধরনের সাথে মেলে না।',
+            });
+          }
+          this.validateMimeType(media.category, actualMime);
+        }
+        if (info.size !== undefined) {
+          this.validateFileSize(media.category, info.size);
+        }
+      } catch (validationErr) {
+        await this.prisma.media.update({
+          where: { id: fileId },
+          data: { status: 'FAILED' },
+        });
+        this.supabaseStorage
+          .deleteObject(media.bucket, media.storagePath)
+          .catch((e) =>
+            this.logger.warn(`Failed to purge rejected upload: ${e.message}`),
+          );
+        throw validationErr;
+      }
+
       const updated = await this.prisma.media.update({
         where: { id: fileId },
         data: { status: 'COMPLETED' },
@@ -184,7 +219,12 @@ export class FilesService {
         data: this.sanitizeMedia(updated),
       };
     } catch (err) {
-      if (err instanceof NotFoundException || err instanceof ForbiddenException || err instanceof BadRequestException) {
+      if (
+        err instanceof NotFoundException ||
+        err instanceof ForbiddenException ||
+        err instanceof BadRequestException ||
+        err instanceof PayloadTooLargeException
+      ) {
         throw err;
       }
       this.logger.error(
@@ -443,7 +483,7 @@ export class FilesService {
   /**
    * Validates that the caller owns the entity referenced by entityType + entityId.
    * This prevents IDOR: a user cannot embed another user's entity ID in their upload path.
-   * Only known entity types are checked. Unknown types are silently allowed (fallback path).
+   * entityType is restricted to the known types by the DTO; anything else is rejected.
    */
   private async validateEntityOwnership(
     userId: string,
@@ -452,7 +492,7 @@ export class FilesService {
   ): Promise<void> {
     let owned = false;
 
-    switch (entityType.toLowerCase()) {
+    switch (entityType) {
       case 'tenant': {
         // A tenant is valid if they have agreements under the user's properties,
         // or if they were created by this user and have no agreements yet.
@@ -495,8 +535,11 @@ export class FilesService {
         break;
       }
       default:
-        // Unknown entity types are not validated — path falls back to user-scoped path
-        return;
+        // Defence in depth: the DTO already restricts entityType to the cases above.
+        throw new BadRequestException({
+          errorCode: ErrorCode.VALIDATION_ERROR,
+          message: 'অবৈধ entityType।',
+        });
     }
 
     if (!owned) {

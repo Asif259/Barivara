@@ -12,20 +12,32 @@ import {
 } from './dto';
 import { ErrorCode } from '../common/constants/error-codes';
 import { ReminderStatus } from '@prisma/client';
+import { buildOrderBy } from '../common/utils/order-by.util';
+
+const REMINDER_SORT_FIELDS = ['scheduledAt', 'status', 'type', 'channel', 'createdAt'] as const;
 
 @Injectable()
 export class RemindersService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(userId: string, dto: CreateReminderDto) {
-    const tenant = await this.prisma.tenant.findFirst({
-      where: { id: dto.tenantId, deletedAt: null },
+    // Caller must have a relationship with the tenant regardless of monthlyRentId.
+    const tenantAccess = await this.prisma.tenant.findFirst({
+      where: {
+        id: dto.tenantId,
+        deletedAt: null,
+        OR: [
+          { agreements: { some: { unit: { property: { ownerId: userId } } } } },
+          { createdById: userId, agreements: { none: {} } },
+        ],
+      },
+      select: { id: true },
     });
 
-    if (!tenant) {
-      throw new NotFoundException({
-        errorCode: ErrorCode.TENANT_NOT_FOUND,
-        message: 'ভাড়াটিয়া পাওয়া যায়নি।',
+    if (!tenantAccess) {
+      throw new ForbiddenException({
+        errorCode: ErrorCode.TENANT_ACCESS_DENIED,
+        message: 'এই ভাড়াটিয়ার জন্য রিমাইন্ডার তৈরি করার অনুমতি নেই।',
       });
     }
 
@@ -57,6 +69,14 @@ export class RemindersService {
         });
       }
 
+      // The rent must belong to the tenant the reminder is addressed to.
+      if (rent.agreement.tenantId !== dto.tenantId) {
+        throw new ForbiddenException({
+          errorCode: ErrorCode.TENANT_ACCESS_DENIED,
+          message: 'এই ভাড়ার হিসাব উল্লিখিত ভাড়াটিয়ার নয়।',
+        });
+      }
+
       // Check deduplication for same pending reminder
       const existing = await this.prisma.reminder.findFirst({
         where: {
@@ -71,26 +91,6 @@ export class RemindersService {
         throw new ConflictException({
           errorCode: ErrorCode.DUPLICATE_RESOURCE,
           message: 'এই সময়ের জন্য ইতিমধ্যে একটি রিমাইন্ডার নির্ধারিত আছে।',
-        });
-      }
-    } else {
-      // If no monthlyRentId, verify tenant has agreements under user's properties or was created by user
-      const tenantAccess = await this.prisma.tenant.findFirst({
-        where: {
-          id: dto.tenantId,
-          deletedAt: null,
-          OR: [
-            { agreements: { some: { unit: { property: { ownerId: userId } } } } },
-            { createdById: userId, agreements: { none: {} } },
-          ],
-        },
-        select: { id: true },
-      });
-
-      if (!tenantAccess) {
-        throw new ForbiddenException({
-          errorCode: ErrorCode.TENANT_ACCESS_DENIED,
-          message: 'এই ভাড়াটিয়ার জন্য রিমাইন্ডার তৈরি করার অনুমতি নেই।',
         });
       }
     }
@@ -162,9 +162,7 @@ export class RemindersService {
         where,
         skip: query.skip,
         take: query.take,
-        orderBy: query.sortBy
-          ? { [query.sortBy]: query.sortOrder || 'desc' }
-          : { scheduledAt: 'desc' },
+        orderBy: buildOrderBy(query.sortBy, REMINDER_SORT_FIELDS, query.sortOrder, { scheduledAt: 'desc' }),
         include: {
           tenant: {
             select: { id: true, name: true, phone: true },

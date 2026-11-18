@@ -113,6 +113,11 @@ export class EnvironmentVariables {
   JWT_REFRESH_EXPIRES_IN: string;
 
   @IsOptional()
+  @IsInt()
+  @Min(0)
+  TRUST_PROXY?: number;
+
+  @IsOptional()
   @IsString()
   FRONTEND_URL: string;
 
@@ -150,6 +155,23 @@ export function validate(config: Record<string, unknown>): EnvironmentVariables 
       : e.property,
     );
     throw new Error(`Environment validation failed:\n  ${messages.join('\n  ')}`);
+  }
+
+  // Weak or reused signing secrets make every token forgeable; enforce in production.
+  if (validated.NODE_ENV === Environment.Production) {
+    const problems: string[] = [];
+    if ((validated.JWT_ACCESS_SECRET ?? '').length < 32) {
+      problems.push('JWT_ACCESS_SECRET: must be at least 32 characters');
+    }
+    if ((validated.JWT_REFRESH_SECRET ?? '').length < 32) {
+      problems.push('JWT_REFRESH_SECRET: must be at least 32 characters');
+    }
+    if (validated.JWT_ACCESS_SECRET === validated.JWT_REFRESH_SECRET) {
+      problems.push('JWT_REFRESH_SECRET: must differ from JWT_ACCESS_SECRET');
+    }
+    if (problems.length > 0) {
+      throw new Error(`Environment validation failed:\n  ${problems.join('\n  ')}`);
+    }
   }
 
   return validated;

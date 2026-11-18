@@ -79,7 +79,7 @@ const makePrisma = () => ({
 
 // Inner prisma passed inside $transaction callback
 const mockPrismaInner: any = {
-  monthlyRent: { findUnique: jest.fn(), update: jest.fn() },
+  monthlyRent: { findUnique: jest.fn(), update: jest.fn(), updateMany: jest.fn(), findUniqueOrThrow: jest.fn() },
   payment: { create: jest.fn(), update: jest.fn(), findFirst: jest.fn(), aggregate: jest.fn() },
   auditLog: { create: jest.fn().mockResolvedValue({}) },
 };
@@ -93,6 +93,8 @@ describe('PaymentsService', () => {
     // Reset inner transaction mock
     mockPrismaInner.monthlyRent.findUnique.mockReset();
     mockPrismaInner.monthlyRent.update.mockReset();
+    mockPrismaInner.monthlyRent.updateMany.mockReset().mockResolvedValue({ count: 1 });
+    mockPrismaInner.monthlyRent.findUniqueOrThrow.mockReset();
     mockPrismaInner.payment.create.mockReset();
     mockPrismaInner.payment.update.mockReset();
     mockPrismaInner.payment.findFirst.mockReset();
@@ -126,7 +128,7 @@ describe('PaymentsService', () => {
 
       const createdPayment = { id: PAYMENT_ID, amount: new Prisma.Decimal(10000), status: PaymentStatus.COMPLETED };
       mockPrismaInner.payment.create.mockResolvedValue(createdPayment);
-      mockPrismaInner.monthlyRent.update.mockResolvedValue({
+      mockPrismaInner.monthlyRent.findUniqueOrThrow.mockResolvedValue({
         ...rent, paidAmount: new Prisma.Decimal(10000),
         remainingAmount: new Prisma.Decimal(15500), status: RentStatus.PARTIAL,
       });
@@ -135,7 +137,7 @@ describe('PaymentsService', () => {
       expect(result.data).toBeDefined();
 
       // The updated rent status must be PARTIAL
-      const updateCall = mockPrismaInner.monthlyRent.update.mock.calls[0][0];
+      const updateCall = mockPrismaInner.monthlyRent.updateMany.mock.calls[0][0];
       expect(updateCall.data.status).toBe(RentStatus.PARTIAL);
       expect(updateCall.data.paidDate).toBeNull();
       // Partial payment preserves remaining balance: 25500 - 10000 = 15500
@@ -149,7 +151,7 @@ describe('PaymentsService', () => {
       mockPrismaInner.monthlyRent.findUnique.mockResolvedValue(septRent);
 
       mockPrismaInner.payment.create.mockResolvedValue({ id: PAYMENT_ID, amount: new Prisma.Decimal(12000) });
-      mockPrismaInner.monthlyRent.update.mockResolvedValue({
+      mockPrismaInner.monthlyRent.findUniqueOrThrow.mockResolvedValue({
         ...septRent,
         paidAmount: new Prisma.Decimal(12000),
         remainingAmount: new Prisma.Decimal(8000),
@@ -162,10 +164,10 @@ describe('PaymentsService', () => {
         paymentMethod: 'CASH',
       });
 
-      expect(mockPrismaInner.monthlyRent.update).toHaveBeenCalledTimes(1);
-      expect(mockPrismaInner.monthlyRent.update).toHaveBeenCalledWith(
+      expect(mockPrismaInner.monthlyRent.updateMany).toHaveBeenCalledTimes(1);
+      expect(mockPrismaInner.monthlyRent.updateMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { id: 'sept-rent-uuid' },
+          where: expect.objectContaining({ id: 'sept-rent-uuid' }),
           data: expect.objectContaining({
             remainingAmount: expect.any(Prisma.Decimal),
           }),
@@ -179,14 +181,14 @@ describe('PaymentsService', () => {
       mockPrismaInner.monthlyRent.findUnique.mockResolvedValue(rent);
 
       mockPrismaInner.payment.create.mockResolvedValue({ id: PAYMENT_ID, amount: new Prisma.Decimal(25500) });
-      mockPrismaInner.monthlyRent.update.mockResolvedValue({
+      mockPrismaInner.monthlyRent.findUniqueOrThrow.mockResolvedValue({
         ...rent, paidAmount: new Prisma.Decimal(25500),
         remainingAmount: new Prisma.Decimal(0), status: RentStatus.PAID,
       });
 
       await service.create(OWNER_ID, FULL_DTO);
 
-      const updateCall = mockPrismaInner.monthlyRent.update.mock.calls[0][0];
+      const updateCall = mockPrismaInner.monthlyRent.updateMany.mock.calls[0][0];
       expect(updateCall.data.status).toBe(RentStatus.PAID);
       expect(updateCall.data.paidDate).toBeDefined();
       expect(updateCall.data.paidDate).not.toBeNull();
@@ -238,6 +240,18 @@ describe('PaymentsService', () => {
       });
     });
 
+    it('concurrent payment: lost compare-and-swap → 409, no payment row created', async () => {
+      const rent = makeMockRent();
+      mockPrisma.monthlyRent.findUnique.mockResolvedValue(rent);
+      mockPrismaInner.monthlyRent.findUnique.mockResolvedValue(rent);
+      mockPrismaInner.monthlyRent.updateMany.mockResolvedValue({ count: 0 });
+
+      await expect(service.create(OWNER_ID, PARTIAL_DTO)).rejects.toMatchObject({
+        response: { errorCode: ErrorCode.CONCURRENT_MODIFICATION },
+      });
+      expect(mockPrismaInner.payment.create).not.toHaveBeenCalled();
+    });
+
     it('captures owner signature snapshot at payment creation time', async () => {
       const rent = makeMockRent();
       mockPrisma.monthlyRent.findUnique.mockResolvedValue(rent);
@@ -247,7 +261,7 @@ describe('PaymentsService', () => {
       });
 
       mockPrismaInner.payment.create.mockResolvedValue({ id: PAYMENT_ID });
-      mockPrismaInner.monthlyRent.update.mockResolvedValue({ ...rent, status: RentStatus.PARTIAL });
+      mockPrismaInner.monthlyRent.findUniqueOrThrow.mockResolvedValue({ ...rent, status: RentStatus.PARTIAL });
 
       await service.create(OWNER_ID, PARTIAL_DTO);
 

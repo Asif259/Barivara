@@ -6,6 +6,9 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTenantDto, UpdateTenantDto, TenantFilterDto } from './dto';
 import { ErrorCode } from '../common/constants/error-codes';
+import { buildOrderBy } from '../common/utils/order-by.util';
+
+const TENANT_SORT_FIELDS = ['name', 'phone', 'email', 'createdAt'] as const;
 
 
 
@@ -102,9 +105,7 @@ export class TenantsService {
         where,
         skip: query.skip,
         take: query.take,
-        orderBy: query.sortBy
-          ? { [query.sortBy]: query.sortOrder || 'desc' }
-          : { createdAt: 'desc' },
+        orderBy: buildOrderBy(query.sortBy, TENANT_SORT_FIELDS, query.sortOrder, { createdAt: 'desc' }),
         select: {
           id: true,
           name: true,

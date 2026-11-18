@@ -93,8 +93,6 @@ describe('RemindersService - Security Tests', () => {
 
   describe('create - Tenant Access Guard', () => {
     it('throws ForbiddenException when creating reminder for foreign tenant without monthlyRent', async () => {
-      // Tenant exists in system
-      mockPrisma.tenant.findFirst.mockResolvedValueOnce({ id: TENANT_ID });
       // Caller has no relation/agreements with tenant
       mockPrisma.tenant.findFirst.mockResolvedValueOnce(null);
 
@@ -107,6 +105,44 @@ describe('RemindersService - Security Tests', () => {
       ).rejects.toMatchObject({
         response: { errorCode: ErrorCode.TENANT_ACCESS_DENIED },
       });
+    });
+
+    it('rejects a monthlyRent that belongs to a different tenant than dto.tenantId', async () => {
+      mockPrisma.tenant.findFirst.mockResolvedValueOnce({ id: TENANT_ID });
+      mockPrisma.monthlyRent.findUnique.mockResolvedValueOnce({
+        id: 'rent-1',
+        agreement: {
+          tenantId: 'someone-else',
+          unit: { property: { ownerId: OWNER_ID } },
+        },
+      });
+
+      await expect(
+        service.create(OWNER_ID, {
+          tenantId: TENANT_ID,
+          monthlyRentId: 'rent-1',
+          message: 'Pay rent',
+          scheduledAt: new Date().toISOString(),
+        } as any),
+      ).rejects.toMatchObject({
+        response: { errorCode: ErrorCode.TENANT_ACCESS_DENIED },
+      });
+    });
+
+    it('rejects a foreign tenant even when the caller supplies their own monthlyRent', async () => {
+      mockPrisma.tenant.findFirst.mockResolvedValueOnce(null);
+
+      await expect(
+        service.create(OWNER_ID, {
+          tenantId: 'victim-tenant',
+          monthlyRentId: 'rent-1',
+          message: 'x',
+          scheduledAt: new Date().toISOString(),
+        } as any),
+      ).rejects.toMatchObject({
+        response: { errorCode: ErrorCode.TENANT_ACCESS_DENIED },
+      });
+      expect(mockPrisma.monthlyRent.findUnique).not.toHaveBeenCalled();
     });
   });
 });

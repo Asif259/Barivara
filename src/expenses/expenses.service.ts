@@ -12,6 +12,9 @@ import {
 import { ErrorCode } from '../common/constants/error-codes';
 import { Prisma } from '@prisma/client';
 import { DecimalUtil } from '../common/utils/decimal.util';
+import { buildOrderBy } from '../common/utils/order-by.util';
+
+const EXPENSE_SORT_FIELDS = ['expenseDate', 'amount', 'paymentMethod', 'createdAt'] as const;
 
 @Injectable()
 export class ExpensesService {
@@ -92,9 +95,7 @@ export class ExpensesService {
         where,
         skip: query.skip,
         take: query.take,
-        orderBy: query.sortBy
-          ? { [query.sortBy]: query.sortOrder || 'desc' }
-          : { expenseDate: 'desc' },
+        orderBy: buildOrderBy(query.sortBy, EXPENSE_SORT_FIELDS, query.sortOrder, { expenseDate: 'desc' }),
         include: {
           property: {
             select: { id: true, name: true },

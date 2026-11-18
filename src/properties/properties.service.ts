@@ -10,6 +10,9 @@ import { ErrorCode } from '../common/constants/error-codes';
 import { DateUtil } from '../common/utils/date.util';
 import { Prisma } from '@prisma/client';
 import { MetricsUtil, UnitCountGroup } from '../common/utils/metrics.util';
+import { buildOrderBy } from '../common/utils/order-by.util';
+
+const PROPERTY_SORT_FIELDS = ['name', 'city', 'createdAt'] as const;
 
 @Injectable()
 export class PropertiesService {
@@ -44,9 +47,7 @@ export class PropertiesService {
         where,
         skip: query.skip,
         take: query.take,
-        orderBy: query.sortBy
-          ? { [query.sortBy]: query.sortOrder || 'desc' }
-          : { createdAt: 'desc' },
+        orderBy: buildOrderBy(query.sortBy, PROPERTY_SORT_FIELDS, query.sortOrder, { createdAt: 'desc' }),
         include: {
           _count: {
             select: { units: { where: { deletedAt: null } } },

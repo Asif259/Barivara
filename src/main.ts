@@ -1,5 +1,6 @@
 import * as dns from 'dns';
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
@@ -20,13 +21,20 @@ try {
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   // Resolve config through NestJS DI — eliminates direct process.env usage in bootstrap
   const configService = app.get(ConfigService);
   const port = configService.get<number>('port') ?? 3000;
   const nodeEnv = configService.get<string>('nodeEnv') ?? 'development';
   const frontendUrl = configService.get<string>('frontendUrl');
+
+  // Trust the configured number of proxy hops so req.ip (and therefore the
+  // throttler and audit logs) reflect the real client, not the proxy.
+  const trustProxy = configService.get<number>('trustProxy') ?? 0;
+  if (trustProxy > 0) {
+    app.set('trust proxy', trustProxy);
+  }
 
   // Security Headers
   app.use(helmet());

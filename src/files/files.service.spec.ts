@@ -1,3 +1,4 @@
+import { ErrorCode } from '../common/constants/error-codes';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import {
@@ -51,7 +52,7 @@ describe('FilesService', () => {
     getPublicUrl: jest.fn().mockReturnValue(
       'https://supabase.co/storage/v1/object/public/profile-images/path.jpg',
     ),
-    objectExists: jest.fn().mockResolvedValue(true),
+    getObjectInfo: jest.fn().mockResolvedValue({}),
     deleteObject: jest.fn().mockResolvedValue(true),
   };
 
@@ -210,11 +211,13 @@ describe('FilesService', () => {
       status: 'PENDING',
       bucket: 'tenant-documents',
       storagePath: 'tenant/id/nid/uuid.jpg',
+      mimeType: 'image/jpeg',
+      category: 'TENANT_FRONT_NID',
     };
 
     it('should complete upload when object exists in storage', async () => {
       mockPrisma.media.findUnique.mockResolvedValue(pendingMedia);
-      mockSupabaseStorage.objectExists.mockResolvedValue(true);
+      mockSupabaseStorage.getObjectInfo.mockResolvedValue({ size: 1000, mimeType: 'image/jpeg' });
       mockPrisma.media.update.mockResolvedValue({
         ...pendingMedia,
         status: 'COMPLETED',
@@ -224,9 +227,52 @@ describe('FilesService', () => {
       expect(result.data.status).toBe('COMPLETED');
     });
 
+    it('rejects and purges an upload whose stored MIME differs from the declared one', async () => {
+      mockPrisma.media.findUnique.mockResolvedValue({
+        ...pendingMedia,
+        mimeType: 'image/jpeg',
+        category: 'TENANT_FRONT_NID',
+      });
+      mockSupabaseStorage.getObjectInfo.mockResolvedValue({
+        size: 1000,
+        mimeType: 'text/html',
+      });
+      mockPrisma.media.update.mockResolvedValue({});
+
+      await expect(
+        service.completeUpload(mockUserId, mockFileId),
+      ).rejects.toMatchObject({
+        response: { errorCode: ErrorCode.FILE_INVALID_MIME_TYPE },
+      });
+      expect(mockPrisma.media.update).toHaveBeenCalledWith(
+        expect.objectContaining({ data: { status: 'FAILED' } }),
+      );
+      expect(mockSupabaseStorage.deleteObject).toHaveBeenCalled();
+    });
+
+    it('rejects and purges an upload whose stored size exceeds the category limit', async () => {
+      mockPrisma.media.findUnique.mockResolvedValue({
+        ...pendingMedia,
+        mimeType: 'image/jpeg',
+        category: 'TENANT_FRONT_NID',
+      });
+      mockSupabaseStorage.getObjectInfo.mockResolvedValue({
+        size: 500 * 1024 * 1024,
+        mimeType: 'image/jpeg',
+      });
+      mockPrisma.media.update.mockResolvedValue({});
+
+      await expect(
+        service.completeUpload(mockUserId, mockFileId),
+      ).rejects.toMatchObject({
+        response: { errorCode: ErrorCode.FILE_SIZE_EXCEEDED },
+      });
+      expect(mockSupabaseStorage.deleteObject).toHaveBeenCalled();
+    });
+
     it('should fail and mark FAILED when object is missing in storage', async () => {
       mockPrisma.media.findUnique.mockResolvedValue(pendingMedia);
-      mockSupabaseStorage.objectExists.mockResolvedValue(false);
+      mockSupabaseStorage.getObjectInfo.mockResolvedValue(null);
       mockPrisma.media.update.mockResolvedValue({
         ...pendingMedia,
         status: 'FAILED',

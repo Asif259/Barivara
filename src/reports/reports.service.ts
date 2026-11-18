@@ -7,6 +7,16 @@ import { Prisma, RentStatus } from '@prisma/client';
 import { stringify } from 'csv-stringify';
 import { ErrorCode } from '../common/constants/error-codes';
 
+/**
+ * Neutralises spreadsheet formula injection: a cell that starts with = + - @
+ * (or tab/CR) is evaluated as a formula by Excel/Sheets. Prefixing a single
+ * quote forces it to be read as text. Applied to free-text fields only.
+ */
+export function csvSafe(value: string | number): string {
+  const text = String(value);
+  return /^[=+\-@\t\r]/.test(text) ? `'${text}` : text;
+}
+
 @Injectable()
 export class ReportsService {
   constructor(private readonly prisma: PrismaService) {}
@@ -317,9 +327,9 @@ export class ReportsService {
     for (const r of rentDetails) {
       records.push([
         `${r.month}/${r.year}`,
-        r.agreement?.unit?.property?.name || '',
-        r.agreement?.unit?.unitNumber || '',
-        r.agreement?.tenant?.name || '',
+        csvSafe(r.agreement?.unit?.property?.name || ''),
+        csvSafe(r.agreement?.unit?.unitNumber || ''),
+        csvSafe(r.agreement?.tenant?.name || ''),
         r.agreement?.tenant?.phone || '',
         DecimalUtil.toFixed(r.totalAmount),
         DecimalUtil.toFixed(r.paidAmount),

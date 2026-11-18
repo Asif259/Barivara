@@ -162,4 +162,27 @@ describe('RentalAgreementsService', () => {
     });
     expect(result.data.dueDay).toBe(15);
   });
+
+  it('scopes the tenant lookup to the caller so another owner\'s tenant cannot be attached', async () => {
+    mockPrisma.unit.findFirst.mockResolvedValue({
+      id: 'unit-456',
+      property: { ownerId: 'owner-1' },
+    });
+    mockPrisma.rentalAgreement.findFirst.mockResolvedValue(null);
+    // Scoped query finds nothing: tenant belongs to a different owner
+    mockPrisma.tenant.findFirst.mockResolvedValue(null);
+
+    await expect(service.create('owner-1', validDto)).rejects.toMatchObject({
+      response: { errorCode: ErrorCode.TENANT_NOT_FOUND },
+    });
+
+    const where = mockPrisma.tenant.findFirst.mock.calls[0][0].where;
+    expect(where.OR).toEqual(
+      expect.arrayContaining([
+        { agreements: { some: { unit: { property: { ownerId: 'owner-1' } } } } },
+        { createdById: 'owner-1', agreements: { none: {} } },
+      ]),
+    );
+    expect(mockPrisma.rentalAgreement.create).not.toHaveBeenCalled();
+  });
 });

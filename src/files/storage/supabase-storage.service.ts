@@ -211,13 +211,17 @@ export class SupabaseStorageService implements OnModuleInit {
   }
 
   /**
-   * Check if an object exists in storage (verifies upload completion).
+   * Look up an object's real size and content type as stored (not as the
+   * client declared them). Returns null when the object is missing or the
+   * lookup fails. `size`/`mimeType` are undefined if storage omits metadata.
    */
-  async objectExists(bucket: string, storagePath: string): Promise<boolean> {
+  async getObjectInfo(
+    bucket: string,
+    storagePath: string,
+  ): Promise<{ size?: number; mimeType?: string } | null> {
     const client = this.getClient();
 
     try {
-      // list with prefix matching the exact path
       const pathParts = storagePath.split('/');
       const fileName = pathParts.pop();
       const folder = pathParts.join('/');
@@ -228,19 +232,33 @@ export class SupabaseStorageService implements OnModuleInit {
 
       if (error) {
         this.logger.warn(
-          `Error checking object existence for bucket="${bucket}" path="${storagePath}": ${error.message}`,
+          `Error reading object info for bucket="${bucket}" path="${storagePath}": ${error.message}`,
         );
-        return false;
+        return null;
       }
 
-      return data?.some((f) => f.name === fileName) ?? false;
+      const found = data?.find((f) => f.name === fileName);
+      if (!found) return null;
+
+      const meta = (found.metadata ?? {}) as Record<string, unknown>;
+      return {
+        size: typeof meta.size === 'number' ? meta.size : undefined,
+        mimeType: typeof meta.mimetype === 'string' ? meta.mimetype : undefined,
+      };
     } catch (err) {
       this.logger.error(
-        `Unexpected error checking object existence for bucket="${bucket}" path="${storagePath}": ${err.message}`,
-        err.stack
+        `Unexpected error reading object info for bucket="${bucket}" path="${storagePath}": ${err.message}`,
+        err.stack,
       );
-      return false;
+      return null;
     }
+  }
+
+  /**
+   * Check if an object exists in storage (verifies upload completion).
+   */
+  async objectExists(bucket: string, storagePath: string): Promise<boolean> {
+    return (await this.getObjectInfo(bucket, storagePath)) !== null;
   }
 
   /**

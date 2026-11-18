@@ -607,8 +607,7 @@ describe('AuthService', () => {
       (argon2.verify as jest.Mock<any>).mockResolvedValue(true);
       mockPrisma.user.update.mockResolvedValue({ id: 'user-1' });
 
-      const res = await service.resetPasswordDirect({
-        identifier: 'user@example.com',
+      const res = await service.resetPasswordDirect('user-1', {
         currentPassword: 'ValidCurrentPassword',
         newPassword: 'NewSecurePassword123',
         confirmPassword: 'NewSecurePassword123',
@@ -628,13 +627,37 @@ describe('AuthService', () => {
       (argon2.verify as jest.Mock<any>).mockResolvedValue(false);
 
       await expect(
-        service.resetPasswordDirect({
-          identifier: 'user@example.com',
+        service.resetPasswordDirect('user-1', {
           currentPassword: 'WrongPassword',
           newPassword: 'NewSecurePassword123',
           confirmPassword: 'NewSecurePassword123',
         }),
       ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('looks the account up by the authenticated user id, ignoring dto.identifier', async () => {
+      mockPrisma.user.findFirst.mockResolvedValue({
+        id: 'user-1',
+        passwordHash: '$old$hash',
+        isActive: true,
+        deletedAt: null,
+      });
+      (argon2.verify as jest.Mock<any>).mockResolvedValue(true);
+      mockPrisma.user.update.mockResolvedValue({ id: 'user-1' });
+
+      await service.resetPasswordDirect('user-1', {
+        identifier: 'victim@example.com',
+        currentPassword: 'ValidCurrentPassword',
+        newPassword: 'NewSecurePassword123',
+        confirmPassword: 'NewSecurePassword123',
+      } as any);
+
+      expect(mockPrisma.user.findFirst).toHaveBeenCalledWith({
+        where: { id: 'user-1', isActive: true, deletedAt: null },
+      });
+      expect(mockPrisma.user.update).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { id: 'user-1' } }),
+      );
     });
   });
 });

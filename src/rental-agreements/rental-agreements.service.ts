@@ -15,6 +15,9 @@ import { ErrorCode } from '../common/constants/error-codes';
 import { Prisma, UnitStatus, AgreementStatus, RentStatus } from '@prisma/client';
 import { DateUtil } from '../common/utils/date.util';
 import { DecimalUtil } from '../common/utils/decimal.util';
+import { buildOrderBy } from '../common/utils/order-by.util';
+
+const AGREEMENT_SORT_FIELDS = ['createdAt', 'startDate', 'endDate', 'monthlyRent', 'status'] as const;
 
 @Injectable()
 export class RentalAgreementsService {
@@ -46,9 +49,10 @@ export class RentalAgreementsService {
     await this.assertNoActiveAgreementOnUnit(dto.unitId);
 
     const tenant = await this.prisma.tenant.findFirst({
-      where: { id: dto.tenantId, deletedAt: null },
+      where: this.accessibleTenantWhere(dto.tenantId, userId),
     });
 
+    // Not found and not-accessible look identical so tenant IDs cannot be probed.
     if (!tenant) {
       throw new NotFoundException({
         errorCode: ErrorCode.TENANT_NOT_FOUND,
@@ -141,9 +145,7 @@ export class RentalAgreementsService {
         where,
         skip: query.skip,
         take: query.take,
-        orderBy: query.sortBy
-          ? { [query.sortBy]: query.sortOrder || 'desc' }
-          : { createdAt: 'desc' },
+        orderBy: buildOrderBy(query.sortBy, AGREEMENT_SORT_FIELDS, query.sortOrder, { createdAt: 'desc' }),
         include: {
           tenant: {
             select: { id: true, name: true, phone: true, profilePictureId: true },
@@ -219,7 +221,7 @@ export class RentalAgreementsService {
     // 1. If tenantId is changing
     if (dto.tenantId && dto.tenantId !== existingAgreement.tenantId) {
       const tenant = await this.prisma.tenant.findFirst({
-        where: { id: dto.tenantId, deletedAt: null },
+        where: this.accessibleTenantWhere(dto.tenantId, userId),
       });
       if (!tenant) {
         throw new NotFoundException({
@@ -410,6 +412,25 @@ export class RentalAgreementsService {
   // ---------------------------------------------------------------------------
   // Private helpers
   // ---------------------------------------------------------------------------
+
+  /**
+   * A tenant may be attached to an agreement only by a user who already has a
+   * relationship with it: an agreement under one of their properties, or an
+   * unassigned tenant they created. Prevents linking another owner's tenant.
+   */
+  private accessibleTenantWhere(
+    tenantId: string,
+    userId: string,
+  ): Prisma.TenantWhereInput {
+    return {
+      id: tenantId,
+      deletedAt: null,
+      OR: [
+        { agreements: { some: { unit: { property: { ownerId: userId } } } } },
+        { createdById: userId, agreements: { none: {} } },
+      ],
+    };
+  }
 
   /**
    * Throws ConflictException if the unit already has an active agreement.

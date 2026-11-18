@@ -168,7 +168,7 @@ export class AuthController {
   ) {
     const ipAddress = req.ip || req.socket?.remoteAddress;
     const userAgent = req.headers['user-agent'];
-    return this.authService.resetPasswordDirect(dto, ipAddress, userAgent);
+    return this.authService.resetPasswordDirect(user.id, dto, ipAddress, userAgent);
   }
 }
 

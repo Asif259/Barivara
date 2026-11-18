@@ -13,6 +13,9 @@ import {
 } from './dto';
 import { ErrorCode } from '../common/constants/error-codes';
 import { Prisma, UnitStatus } from '@prisma/client';
+import { buildOrderBy } from '../common/utils/order-by.util';
+
+const UNIT_SORT_FIELDS = ['unitNumber', 'floor', 'status', 'monthlyBaseRent', 'createdAt'] as const;
 
 @Injectable()
 export class UnitsService {
@@ -136,9 +139,7 @@ export class UnitsService {
         where,
         skip: query.skip,
         take: query.take,
-        orderBy: query.sortBy
-          ? { [query.sortBy]: query.sortOrder || 'asc' }
-          : { unitNumber: 'asc' },
+        orderBy: buildOrderBy(query.sortBy, UNIT_SORT_FIELDS, query.sortOrder, { unitNumber: 'asc' }, 'asc'),
         include: {
           agreements: {
             where: { status: 'ACTIVE', deletedAt: null },

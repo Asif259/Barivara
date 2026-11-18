@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ForbiddenException,
   BadRequestException,
+  ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { PrismaTx } from '../prisma/prisma.service';
@@ -15,6 +16,9 @@ import { RentCalculationUtil } from '../common/utils/rent-calculation.util';
 
 import { DateUtil, TIMEZONE_DHAKA } from '../common/utils/date.util';
 import { toZonedTime } from 'date-fns-tz';
+import { buildOrderBy } from '../common/utils/order-by.util';
+
+const PAYMENT_SORT_FIELDS = ['paymentDate', 'amount', 'status', 'paymentMethod', 'createdAt'] as const;
 
 @Injectable()
 export class PaymentsService {
@@ -142,22 +146,7 @@ export class PaymentsService {
         });
       }
 
-      // 1. Create Payment (with signature snapshot)
-      const payment = await tx.payment.create({
-        data: {
-          monthlyRentId: dto.monthlyRentId,
-          amount: new Prisma.Decimal(paymentAmount.toString()),
-          paymentMethod: dto.paymentMethod || 'CASH',
-          transactionId: dto.transactionId || null,
-          paymentDate,
-          receivedBy: dto.receivedBy || null,
-          note: dto.note || null,
-          status: PaymentStatus.COMPLETED,
-          ownerSignatureSnapshotId: owner?.signatureFileId || null,
-        },
-      });
-
-      // 2. Calculate new totals using fresh rent snapshot
+      // 1. Compute new totals from the snapshot read above
       const newPaidAmount = DecimalUtil.toDecimal(freshRent.paidAmount).plus(
         paymentAmount,
       );
@@ -172,15 +161,48 @@ export class PaymentsService {
         paymentDate,
       );
 
-      // 3. Update MonthlyRent
-      const updatedRent = await tx.monthlyRent.update({
-        where: { id: dto.monthlyRentId },
+      // 2. Compare-and-swap the rent balance. The WHERE clause only matches if
+      //    paidAmount is unchanged since we read it, so a concurrent payment
+      //    cannot be lost or push the rent past its total. The loser gets count 0.
+      const swapped = await tx.monthlyRent.updateMany({
+        where: {
+          id: dto.monthlyRentId,
+          paidAmount: freshRent.paidAmount,
+          status: { not: RentStatus.CANCELLED },
+        },
         data: {
           paidAmount: new Prisma.Decimal(newPaidAmount.toString()),
           remainingAmount: new Prisma.Decimal(newRemaining.toString()),
           status: newStatus,
           paidDate: newStatus === RentStatus.PAID ? paymentDate : null,
         },
+      });
+
+      if (swapped.count !== 1) {
+        throw new ConflictException({
+          errorCode: ErrorCode.CONCURRENT_MODIFICATION,
+          message:
+            'ভাড়ার হিসাব একই সময়ে অন্য একটি পরিবর্তনে হালনাগাদ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।',
+        });
+      }
+
+      // 3. Create Payment (with signature snapshot)
+      const payment = await tx.payment.create({
+        data: {
+          monthlyRentId: dto.monthlyRentId,
+          amount: new Prisma.Decimal(paymentAmount.toString()),
+          paymentMethod: dto.paymentMethod || 'CASH',
+          transactionId: dto.transactionId || null,
+          paymentDate,
+          receivedBy: dto.receivedBy || null,
+          note: dto.note || null,
+          status: PaymentStatus.COMPLETED,
+          ownerSignatureSnapshotId: owner?.signatureFileId || null,
+        },
+      });
+
+      const updatedRent = await tx.monthlyRent.findUniqueOrThrow({
+        where: { id: dto.monthlyRentId },
       });
 
       // 4. Record Audit Log
@@ -410,9 +432,7 @@ export class PaymentsService {
         where,
         skip: query.skip,
         take: query.take,
-        orderBy: query.sortBy
-          ? { [query.sortBy]: query.sortOrder || 'desc' }
-          : { paymentDate: 'desc' },
+        orderBy: buildOrderBy(query.sortBy, PAYMENT_SORT_FIELDS, query.sortOrder, { paymentDate: 'desc' }),
 include: {
             monthlyRent: {
               include: {

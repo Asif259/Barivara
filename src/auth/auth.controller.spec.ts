@@ -207,7 +207,7 @@ describe('AuthController', () => {
 
       const result = await controller.resetPasswordDirect(user as any, dto, mockReq as any);
       expect(result).toBe(expected);
-      expect(mockAuthService.resetPasswordDirect).toHaveBeenCalledWith(dto, '127.0.0.1', undefined);
+      expect(mockAuthService.resetPasswordDirect).toHaveBeenCalledWith(user.id, dto, '127.0.0.1', undefined);
     });
   });
 });

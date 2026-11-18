@@ -16,6 +16,9 @@ import { Prisma, RentStatus, AgreementStatus, AuditAction } from '@prisma/client
 import { DecimalUtil } from '../common/utils/decimal.util';
 import { DateUtil } from '../common/utils/date.util';
 import { RentCalculationUtil } from '../common/utils/rent-calculation.util';
+import { buildOrderBy } from '../common/utils/order-by.util';
+
+const RENT_SORT_FIELDS = ['year', 'month', 'dueDate', 'totalAmount', 'paidAmount', 'remainingAmount', 'status', 'createdAt'] as const;
 
 @Injectable()
 export class MonthlyRentsService {
@@ -339,9 +342,7 @@ export class MonthlyRentsService {
         where,
         skip: query.skip,
         take: query.take,
-        orderBy: query.sortBy
-          ? { [query.sortBy]: query.sortOrder || 'desc' }
-          : [{ year: 'desc' }, { month: 'desc' }],
+        orderBy: buildOrderBy(query.sortBy, RENT_SORT_FIELDS, query.sortOrder, [{ year: 'desc' }, { month: 'desc' }]),
 include: {
             agreement: {
               include: {

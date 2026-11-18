@@ -1,14 +1,15 @@
-import { IsNotEmpty, IsString, Matches, MinLength } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsOptional, IsString, Matches, MinLength } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class ResetPasswordDirectDto {
-  @ApiProperty({
-    example: 'user@example.com',
-    description: 'User email or phone number registered with BariVara',
+  @ApiPropertyOptional({
+    deprecated: true,
+    description:
+      'Ignored. The account is always the authenticated user; kept only so existing clients do not break.',
   })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty({ message: 'ইমেইল অথবা মোবাইল নম্বর প্রদান করুন' })
-  identifier!: string;
+  identifier?: string;
 
   @ApiProperty({ example: 'OldPassword123' })
   @IsString()

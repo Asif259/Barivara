@@ -10,6 +10,18 @@ export default () => ({
     accessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '15m',
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
   },
+  // Number of reverse-proxy hops in front of the app (Render/Vercel/nginx = 1).
+  // Express uses it to derive req.ip from X-Forwarded-For; without it every
+  // client shares the proxy's IP and the rate limiter. Defaults to 1 in
+  // production, 0 elsewhere. Override with TRUST_PROXY.
+  trustProxy: (() => {
+    const raw = process.env.TRUST_PROXY;
+    if (raw !== undefined && raw !== '') {
+      const n = parseInt(raw, 10);
+      return Number.isNaN(n) || n < 0 ? 0 : n;
+    }
+    return process.env.NODE_ENV === 'production' ? 1 : 0;
+  })(),
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
   mobileAppScheme: process.env.MOBILE_APP_SCHEME || 'barivara',
   redis: {
