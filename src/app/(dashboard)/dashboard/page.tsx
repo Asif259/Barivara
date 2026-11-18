@@ -7,6 +7,7 @@ import { useLanguageStore } from '@/stores/language-store';
 import { useTranslation } from '@/lib/translations';
 import { DashboardOverview, MonthlyRent, Property, ApiResponse } from '@/lib/types';
 import { formatCurrency, formatNumber, formatBnDate } from '@/lib/utils';
+import { StatCard } from '@/components/ui/stat-card';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -121,7 +122,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <label className="flex h-10 items-center gap-2 rounded-lg border border-[#E5E7EB] bg-white px-3 text-sm text-[#6B7280] focus-within:border-[#2DC2BD] focus-within:ring-2 focus-within:ring-[#2DC2BD]/10">
+          <label className="flex h-10 items-center gap-2 rounded-lg border border-[#E5E7EB] bg-white px-3 text-sm text-[#6B7280] focus-within:border-[#10B981] focus-within:ring-2 focus-within:ring-[#10B981]/10">
             <Filter className="h-4 w-4 text-[#9CA3AF]" />
             <span className="sr-only">{isEn ? 'Filter by property' : 'বাড়ি দিয়ে ফিল্টার করুন'}</span>
             <select
@@ -159,21 +160,64 @@ export default function DashboardPage() {
         </div>
 
         {isOverviewLoading ? (
-          <div className="grid grid-cols-2 divide-x divide-y divide-[#E5E7EB] rounded-[10px] border border-[#E5E7EB] bg-white lg:grid-cols-4 lg:divide-y-0">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="space-y-3 p-5">
-                <Skeleton className="h-3 w-24" />
-                <Skeleton className="h-7 w-16" />
-                <Skeleton className="h-3 w-28" />
-              </div>
+              <Card key={i} className="rounded-[10px] border-[#E5E7EB] p-5 shadow-none">
+                <div className="space-y-3">
+                  <Skeleton className="h-3.5 w-24" />
+                  <Skeleton className="h-7 w-20" />
+                  <Skeleton className="h-3 w-32" />
+                </div>
+              </Card>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 divide-x divide-y divide-[#E5E7EB] rounded-[10px] border border-[#E5E7EB] bg-white lg:grid-cols-4 lg:divide-y-0">
-            <Metric label={t.properties} value={formatNumber(overviewData?.totalProperties || 0, language)} detail={isEn ? 'Registered properties' : 'মোট নিবন্ধিত বাড়ি'} icon={Building2} />
-            <Metric label={t.units} value={formatNumber(overviewData?.totalUnits || 0, language)} detail={`${formatNumber(overviewData?.occupiedUnits || 0, language)} ${t.occupied} · ${formatNumber(overviewData?.vacantUnits || 0, language)} ${t.vacant}`} icon={Home} />
-            <Metric label={t.tenants} value={formatNumber(overviewData?.totalTenants || 0, language)} detail={isEn ? 'Active tenants' : 'সক্রিয় ভাড়াটিয়া'} icon={Users} />
-            <Metric label={t.occupancyRate} value={`${formatNumber(overviewData?.occupancyRate || 0, language)}%`} detail={isEn ? 'Units occupied' : 'ভাড়া হওয়ার হার'} icon={Percent} />
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <StatCard
+              title={t.properties}
+              value={formatNumber(overviewData?.totalProperties || 0, language)}
+              subtitle={isEn ? 'Registered properties' : 'মোট নিবন্ধিত বাড়ি'}
+              icon={Building2}
+              href="/properties"
+            />
+            <StatCard
+              title={t.units}
+              value={formatNumber(overviewData?.totalUnits || 0, language)}
+              subtitle={`${formatNumber(overviewData?.occupiedUnits || 0, language)} ${t.occupied} · ${formatNumber(overviewData?.vacantUnits || 0, language)} ${t.vacant}`}
+              icon={Home}
+              badge={(overviewData?.vacantUnits || 0) > 0 ? {
+                text: `${formatNumber(overviewData?.vacantUnits || 0, language)} ${t.vacant}`,
+                variant: 'warning',
+              } : {
+                text: isEn ? '100% Filled' : '১০০% পূর্ণ',
+                variant: 'success',
+              }}
+              href="/properties"
+            />
+            <StatCard
+              title={t.tenants}
+              value={formatNumber(overviewData?.totalTenants || 0, language)}
+              subtitle={isEn ? 'Active tenants' : 'সক্রিয় ভাড়াটিয়া'}
+              icon={Users}
+              href="/tenants"
+            />
+            <StatCard
+              title={t.occupancyRate}
+              value={`${formatNumber(overviewData?.occupancyRate || 0, language)}%`}
+              subtitle={isEn ? 'Units occupied' : 'ভাড়া হওয়ার হার'}
+              icon={Percent}
+              badge={(overviewData?.occupancyRate || 0) >= 90 ? {
+                text: isEn ? 'Optimal' : 'অনুকূল',
+                variant: 'success',
+              } : (overviewData?.occupancyRate || 0) >= 70 ? {
+                text: isEn ? 'Moderate' : 'মাঝারি',
+                variant: 'info',
+              } : {
+                text: isEn ? 'Low' : 'কম',
+                variant: 'warning',
+              }}
+              href="/properties"
+            />
           </div>
         )}
       </section>
@@ -206,7 +250,7 @@ export default function DashboardPage() {
                         : (isEn ? 'Current billing period' : 'চলতি বিলিং সময়')}
                     </CardDescription>
                   </div>
-                  <DollarSign className="h-4 w-4 text-[#307473]" />
+                  <DollarSign className="h-4 w-4 text-[#12664F]" />
                 </div>
               </CardHeader>
               <CardContent className="grid gap-6 pt-5 sm:grid-cols-3">
@@ -223,7 +267,7 @@ export default function DashboardPage() {
                     <CardTitle className="text-[17px]">{t.collectionRate}</CardTitle>
                     <CardDescription className="mt-1">{isEn ? 'Collected vs expected' : 'আদায়ের অগ্রগতি'}</CardDescription>
                   </div>
-                  <TrendingUp className="h-4 w-4 text-[#2DC2BD]" />
+                  <TrendingUp className="h-4 w-4 text-[#10B981]" />
                 </div>
               </CardHeader>
               <CardContent>
@@ -232,7 +276,7 @@ export default function DashboardPage() {
                   <span className="pb-1 text-xs text-[#6B7280] tabular-nums">{formatNumber(currentMonth?.paidCount || 0, language)} {isEn ? 'fully paid' : 'সম্পূর্ণ পরিশোধিত'}</span>
                 </div>
                 <div className="mt-5 h-2 overflow-hidden rounded-full bg-[#E8F3EF]">
-                  <div className="h-full rounded-full bg-[#2DC2BD] transition-all" style={{ width: `${Math.min(Math.max(collectionRate, 0), 100)}%` }} />
+                  <div className="h-full rounded-full bg-[#10B981] transition-all" style={{ width: `${Math.min(Math.max(collectionRate, 0), 100)}%` }} />
                 </div>
                 <div className="mt-3 flex items-center justify-between text-xs text-[#6B7280]">
                   <span>{isEn ? 'Collection progress' : 'আদায়ের অগ্রগতি'}</span>
@@ -240,6 +284,34 @@ export default function DashboardPage() {
                 </div>
               </CardContent>
             </Card>
+          </div>
+        )}
+
+        {/* Action Alert Banner for Overdue / Pending items */}
+        {outstandingCount > 0 && (
+          <div className="mt-4 flex flex-col gap-3 rounded-[10px] border border-amber-200 bg-amber-50/60 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-700">
+                <AlertCircle className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-amber-900">
+                  {formatNumber(outstandingCount, language)} {isEn ? 'unpaid or overdue invoices require attention' : 'টি অপরিশোধিত বা বকেয়া রসিদে মনোযোগ প্রয়োজন'}
+                </p>
+                <p className="text-xs text-amber-700">
+                  {isEn
+                    ? `Total outstanding due: ${formatCurrency(currentMonth?.outstanding || 0, language)}`
+                    : `মোট বকেয়া টাকার পরিমাণ: ${formatCurrency(currentMonth?.outstanding || 0, language)}`}
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/rents?status=OVERDUE"
+              className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-amber-600 px-3.5 py-2 text-xs font-medium text-white transition-colors hover:bg-amber-700 shrink-0"
+            >
+              <span>{isEn ? 'Review Invoices & Send Notices' : 'বকেয়া রসিদ দেখুন ও নোটিশ পাঠান'}</span>
+              <ArrowUpRight className="h-3.5 w-3.5" />
+            </Link>
           </div>
         )}
       </section>
@@ -258,7 +330,7 @@ export default function DashboardPage() {
                 {isEn ? 'Invoices that need attention' : 'যেসব বিলের জন্য পদক্ষেপ প্রয়োজন'}
               </CardDescription>
             </div>
-            <Link href="/rents" className="inline-flex items-center gap-1 text-sm font-medium text-[#2DC2BD] hover:text-[#0E513F]">
+            <Link href="/rents" className="inline-flex items-center gap-1 text-sm font-medium text-[#12664F] hover:text-[#0E513F]">
               {isEn ? 'View all rents' : 'সকল ভাড়া দেখুন'} <ArrowUpRight className="h-4 w-4" />
             </Link>
           </CardHeader>
@@ -501,24 +573,11 @@ export default function DashboardPage() {
   );
 }
 
-function Metric({ label, value, detail, icon: Icon }: { label: string; value: string; detail: string; icon: React.ElementType }) {
-  return (
-    <div className="min-w-0 p-5">
-      <div className="flex items-center gap-2 text-[#6B7280]">
-        <Icon className="h-4 w-4 text-[#9CA3AF]" />
-        <p className="truncate text-sm font-medium">{label}</p>
-      </div>
-      <p className="mt-3 text-2xl font-semibold tracking-tight text-[#171717] tabular-nums">{value}</p>
-      <p className="mt-1 truncate text-xs text-[#6B7280]">{detail}</p>
-    </div>
-  );
-}
-
 function FinancialFigure({ label, value, accent = false, danger = false }: { label: string; value: string; accent?: boolean; danger?: boolean }) {
   return (
     <div>
       <p className="text-[13px] text-[#6B7280]">{label}</p>
-      <p className={`mt-2 text-xl font-semibold tracking-tight tabular-nums ${danger ? 'text-[#DC2626]' : accent ? 'text-[#2DC2BD]' : 'text-[#171717]'}`}>
+      <p className={`mt-2 text-xl font-semibold tracking-tight tabular-nums ${danger ? 'text-[#DC2626]' : accent ? 'text-[#15803D]' : 'text-[#171717]'}`}>
         {value}
       </p>
     </div>

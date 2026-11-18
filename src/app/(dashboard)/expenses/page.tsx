@@ -7,11 +7,13 @@ import { apiClient } from '@/lib/api';
 import { useLanguageStore } from '@/stores/language-store';
 import { useTranslation } from '@/lib/translations';
 import { Expense, Property, ApiResponse } from '@/lib/types';
-import { formatCurrency, formatBnDate } from '@/lib/utils';
+import { formatCurrency, formatNumber, formatBnDate } from '@/lib/utils';
 import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { StatCard } from '@/components/ui/stat-card';
 import { EmptyState } from '@/components/ui/empty-state';
 import {
   Table,
@@ -43,6 +45,8 @@ import {
   Edit,
   Trash2,
   Search,
+  Receipt,
+  TrendingUp,
 } from 'lucide-react';
 
 export default function ExpensesPage() {
@@ -89,6 +93,26 @@ export default function ExpensesPage() {
   });
 
   const totalExpenseAmount = expenses?.reduce((sum, e) => sum + (Number(e.amount) || 0), 0) || 0;
+
+  const { topCategory, topCategoryAmount, averageExpense } = React.useMemo(() => {
+    const list = expenses || [];
+    if (list.length === 0) return { topCategory: null, topCategoryAmount: 0, averageExpense: 0 };
+    const sums: Record<string, number> = {};
+    for (const e of list) {
+      const cat = e.category || 'OTHER';
+      sums[cat] = (sums[cat] || 0) + (Number(e.amount) || 0);
+    }
+    let topCat = 'OTHER';
+    let max = 0;
+    for (const [c, amount] of Object.entries(sums)) {
+      if (amount > max) {
+        max = amount;
+        topCat = c;
+      }
+    }
+    const avg = totalExpenseAmount / (list.length || 1);
+    return { topCategory: topCat, topCategoryAmount: max, averageExpense: avg };
+  }, [expenses, totalExpenseAmount]);
 
   const handleCreate = () => {
     setEditingExpense(null);
@@ -139,7 +163,51 @@ export default function ExpensesPage() {
         }
       />
 
-      {/* Filter and Summary Bar */}
+      {/* Operational Expense KPI Row */}
+      {isLoading ? (
+        <div className="grid gap-4 sm:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Card key={i} className="rounded-[10px] border-[#E5E7EB] p-5 shadow-none">
+              <div className="space-y-3">
+                <Skeleton className="h-3.5 w-24" />
+                <Skeleton className="h-7 w-20" />
+                <Skeleton className="h-3 w-32" />
+              </div>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-3">
+          <StatCard
+            title={isEn ? 'Total Outflow (Expenses)' : 'মোট খরচের পরিমাণ'}
+            value={formatCurrency(totalExpenseAmount, language)}
+            subtitle={`${formatNumber(expenses?.length || 0, language)} ${isEn ? 'vouchers recorded' : 'টি খরচের হিসাব'}`}
+            icon={Wallet}
+            iconColor="text-[#DC2626]"
+            iconBgColor="bg-red-50"
+            valueClassName="text-[#DC2626]"
+          />
+          <StatCard
+            title={isEn ? 'Largest Cost Driver' : 'সর্বোচ্চ খরচের খাত'}
+            value={topCategory ? formatCurrency(topCategoryAmount, language) : '৳০'}
+            subtitle={topCategory ? `${topCategory} (${totalExpenseAmount > 0 ? Math.round((topCategoryAmount / totalExpenseAmount) * 100) : 0}% of spend)` : (isEn ? 'No expenses' : 'কোন খরচ নেই')}
+            icon={Receipt}
+            badge={topCategory ? {
+              text: topCategory,
+              variant: 'neutral',
+            } : undefined}
+            onClick={topCategory ? () => setCategoryFilter(categoryFilter === topCategory ? '' : topCategory) : undefined}
+          />
+          <StatCard
+            title={isEn ? 'Average Ticket Size' : 'গড় প্রতি খরচের আকার'}
+            value={formatCurrency(averageExpense, language)}
+            subtitle={isEn ? 'Mean cost per invoice/voucher' : 'গড় প্রতি বিলের পরিমাণ'}
+            icon={TrendingUp}
+          />
+        </div>
+      )}
+
+      {/* Filter Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-3 rounded-[10px] border border-[#E5E7EB] shadow-none">
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
@@ -178,11 +246,6 @@ export default function ExpensesPage() {
               <option value="OTHER">Other (অন্যান্য)</option>
             </select>
           </div>
-        </div>
-
-        <div className="flex items-center gap-2 bg-[#FEF7F7] px-4 py-2 rounded-lg border border-[#FECACA]">
-          <span className="text-xs font-semibold text-[#B91C1C]">{isEn ? 'Total Expenses:' : 'মোট খরচ:'}</span>
-          <span className="text-base font-black text-[#991B1B]">{formatCurrency(totalExpenseAmount, language)}</span>
         </div>
       </div>
 

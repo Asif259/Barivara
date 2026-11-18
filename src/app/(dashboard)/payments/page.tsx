@@ -7,11 +7,13 @@ import { apiClient } from '@/lib/api';
 import { useLanguageStore } from '@/stores/language-store';
 import { useTranslation } from '@/lib/translations';
 import { Payment, Property, ApiResponse } from '@/lib/types';
-import { formatCurrency, formatBnDate } from '@/lib/utils';
+import { formatCurrency, formatNumber, formatBnDate } from '@/lib/utils';
 import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { StatCard } from '@/components/ui/stat-card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { StatusBadge } from '@/components/ui/status-badge';
 import {
@@ -46,6 +48,8 @@ import {
   RotateCcw,
   Search,
   X,
+  Wallet,
+  CheckCircle2,
 } from 'lucide-react';
 
 export default function PaymentsPage() {
@@ -165,12 +169,102 @@ export default function PaymentsPage() {
     }
   };
 
+  const kpiStats = useMemo(() => {
+    const list = visiblePayments || [];
+    const validPayments = list.filter((p) => p.status !== 'REVERSED');
+    const reversedPayments = list.filter((p) => p.status === 'REVERSED');
+
+    const totalCollected = validPayments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+    const mfsPayments = validPayments.filter((p) => ['BKASH', 'NAGAD', 'ROCKET'].includes((p.paymentMethod || '').toUpperCase()));
+    const mfsAmount = mfsPayments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+    const cashBankAmount = totalCollected - mfsAmount;
+    const mfsRate = totalCollected > 0 ? Math.round((mfsAmount / totalCollected) * 100) : 0;
+    const reversedAmount = reversedPayments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+
+    return {
+      totalCollected,
+      validCount: validPayments.length,
+      mfsAmount,
+      mfsCount: mfsPayments.length,
+      mfsRate,
+      cashBankAmount,
+      cashBankCount: validPayments.length - mfsPayments.length,
+      reversedAmount,
+      reversedCount: reversedPayments.length,
+    };
+  }, [visiblePayments]);
+
   return (
     <div className="space-y-8 pb-8">
       <PageHeader
         title={t.payments}
         description={isEn ? 'Audit trail of all rent collections, methods, and receipts' : 'ভাড়া আদায়ের সকল ট্রানজেকশন, রশিদ এবং পেমেন্ট হিস্ট্রি'}
       />
+
+      {/* Tactical KPI Summary Banner */}
+      {isLoading ? (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Card key={i} className="rounded-[10px] border-[#E5E7EB] p-5 shadow-none">
+              <div className="space-y-3">
+                <Skeleton className="h-3.5 w-24" />
+                <Skeleton className="h-7 w-20" />
+                <Skeleton className="h-3 w-32" />
+              </div>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <StatCard
+            title={isEn ? 'Total Collections Logged' : 'মোট আদায়কৃত টাকা'}
+            value={formatCurrency(kpiStats.totalCollected, language)}
+            subtitle={`${formatNumber(kpiStats.validCount, language)} ${isEn ? 'verified payments' : 'টি সফল ট্রানজেকশন'}`}
+            icon={CheckCircle2}
+            valueClassName="text-[#15803D]"
+            iconColor="text-[#15803D]"
+            iconBgColor="bg-emerald-50"
+          />
+          <StatCard
+            title={isEn ? 'bKash & MFS Volume' : 'বিকাশ ও ডিজিটাল আদায়'}
+            value={formatCurrency(kpiStats.mfsAmount, language)}
+            subtitle={`${formatNumber(kpiStats.mfsCount, language)} ${isEn ? 'mobile transactions' : 'টি মোবাইল ব্যাংকিং লেনদেন'}`}
+            icon={Wallet}
+            badge={{
+              text: `${formatNumber(kpiStats.mfsRate, language)}% ${isEn ? 'MFS' : 'ডিজিটাল'}`,
+              variant: 'info',
+            }}
+            onClick={() => setMethodFilter(methodFilter === 'BKASH' ? '' : 'BKASH')}
+          />
+          <StatCard
+            title={isEn ? 'Cash & Bank Transfers' : 'নগদ ও ব্যাংক ডিপোজিট'}
+            value={formatCurrency(kpiStats.cashBankAmount, language)}
+            subtitle={`${formatNumber(kpiStats.cashBankCount, language)} ${isEn ? 'manual collections' : 'টি ক্যাশ ও ব্যাংক আদায়'}`}
+            icon={CreditCard}
+            badge={{
+              text: `${formatNumber(100 - kpiStats.mfsRate, language)}%`,
+              variant: 'neutral',
+            }}
+            onClick={() => setMethodFilter(methodFilter === 'CASH' ? '' : 'CASH')}
+          />
+          <StatCard
+            title={isEn ? 'Reversals & Adjustments' : 'বাতিলকৃত ট্রানজেকশন'}
+            value={formatCurrency(kpiStats.reversedAmount, language)}
+            subtitle={`${formatNumber(kpiStats.reversedCount, language)} ${isEn ? 'reversed entries' : 'টি বাতিল লেনদেন'}`}
+            icon={RotateCcw}
+            iconColor={kpiStats.reversedCount > 0 ? 'text-[#B45309]' : 'text-[#6B7280]'}
+            iconBgColor={kpiStats.reversedCount > 0 ? 'bg-amber-50' : 'bg-gray-50'}
+            badge={kpiStats.reversedCount > 0 ? {
+              text: isEn ? 'Audited' : 'অডিটকৃত',
+              variant: 'warning',
+            } : {
+              text: isEn ? 'Zero' : 'নেই',
+              variant: 'success',
+            }}
+            onClick={() => setStatusFilter(statusFilter === 'REVERSED' ? '' : 'REVERSED')}
+          />
+        </div>
+      )}
 
       {/* Filter Bar */}
       <div className="flex flex-wrap items-center gap-3 bg-white p-3 rounded-[10px] border border-[#E5E7EB] shadow-none">

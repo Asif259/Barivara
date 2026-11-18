@@ -8,11 +8,13 @@ import { apiClient } from '@/lib/api';
 import { useLanguageStore } from '@/stores/language-store';
 import { useTranslation } from '@/lib/translations';
 import { RentalAgreement, Property, ApiResponse } from '@/lib/types';
-import { formatCurrency, formatBnDate } from '@/lib/utils';
+import { formatCurrency, formatNumber, formatBnDate } from '@/lib/utils';
 import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { StatCard } from '@/components/ui/stat-card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { StatusBadge } from '@/components/ui/status-badge';
 import {
@@ -49,6 +51,8 @@ import {
   Edit,
   ExternalLink,
   User,
+  Wallet,
+  AlertCircle,
 } from 'lucide-react';
 
 export default function AgreementsPage() {
@@ -138,6 +142,33 @@ export default function AgreementsPage() {
     }
   };
 
+  const agreementStats = useMemo(() => {
+    const list = agreements || [];
+    const activeList = list.filter((a) => a.status === 'ACTIVE');
+    const endedList = list.filter((a) => a.status === 'ENDED');
+    const totalCommittedRent = activeList.reduce(
+      (sum, a) => sum + (Number(a.monthlyRent) || 0) + (Number(a.serviceFee) || 0),
+      0
+    );
+
+    const now = new Date();
+    const thirtyDaysFromNow = new Date();
+    thirtyDaysFromNow.setDate(now.getDate() + 30);
+
+    const expiringSoon = activeList.filter((a) => {
+      if (!a.endDate) return false;
+      const end = new Date(a.endDate);
+      return end >= now && end <= thirtyDaysFromNow;
+    }).length;
+
+    return {
+      activeCount: activeList.length,
+      endedCount: endedList.length,
+      totalCommittedRent,
+      expiringSoon,
+    };
+  }, [agreements]);
+
   return (
     <div className="space-y-8 pb-8">
       <PageHeader
@@ -150,6 +181,59 @@ export default function AgreementsPage() {
           </Button>
         }
       />
+
+      {/* Operational KPI Summary Banner */}
+      {isLoading ? (
+        <div className="grid gap-4 sm:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Card key={i} className="rounded-[10px] border-[#E5E7EB] p-5 shadow-none">
+              <div className="space-y-3">
+                <Skeleton className="h-3.5 w-24" />
+                <Skeleton className="h-7 w-20" />
+                <Skeleton className="h-3 w-32" />
+              </div>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-3">
+          <StatCard
+            title={isEn ? 'Active Leases' : 'সক্রিয় ভাড়া চুক্তি'}
+            value={formatNumber(agreementStats.activeCount, language)}
+            subtitle={isEn ? 'Currently contracted units' : 'বর্তমানে চুক্তিবদ্ধ ইউনিট'}
+            icon={FileText}
+            badge={{
+              text: isEn ? 'Active' : 'সক্রিয়',
+              variant: 'success',
+            }}
+            onClick={() => setStatusFilter('ACTIVE')}
+          />
+          <StatCard
+            title={isEn ? 'Monthly Committed Rent' : 'মাসিক নিয়মিত চুক্তি মূল্য'}
+            value={formatCurrency(agreementStats.totalCommittedRent, language)}
+            subtitle={isEn ? 'Base rent + service fees contracted' : 'মূল ভাড়া এবং সার্ভিস ফি মোট'}
+            icon={Wallet}
+            valueClassName="text-[#12664F]"
+            iconColor="text-[#12664F]"
+            iconBgColor="bg-[#E8F3EF]"
+          />
+          <StatCard
+            title={isEn ? 'Expiring in 30 Days' : '৩০ দিনের মধ্যে মেয়াদ শেষ'}
+            value={formatNumber(agreementStats.expiringSoon, language)}
+            subtitle={isEn ? 'Leases requiring renewal notice' : 'নবায়ন নোটিশ প্রয়োজন এমন চুক্তি'}
+            icon={AlertCircle}
+            iconColor={agreementStats.expiringSoon > 0 ? 'text-[#B45309]' : 'text-[#6B7280]'}
+            iconBgColor={agreementStats.expiringSoon > 0 ? 'bg-amber-50' : 'bg-gray-50'}
+            badge={agreementStats.expiringSoon > 0 ? {
+              text: isEn ? 'Needs Review' : 'পর্যালোচনা প্রয়োজন',
+              variant: 'warning',
+            } : {
+              text: isEn ? 'Normal' : 'স্বাভাবিক',
+              variant: 'neutral',
+            }}
+          />
+        </div>
+      )}
 
       {/* Filter Tabs */}
       <div className="flex items-center gap-2">

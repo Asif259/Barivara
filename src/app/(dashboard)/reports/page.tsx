@@ -176,8 +176,14 @@ export default function ReportsPage() {
               value={formatCurrency(fin?.collectedRent || 0, language)}
               subtitle={`${isEn ? 'Expected:' : 'প্রত্যাশিত:'} ${formatCurrency(fin?.expectedRent || 0, language)}`}
               icon={CheckCircle2}
-              iconColor="text-[#2DC2BD]"
-              iconBgColor="bg-[#F3FAF5]"
+              iconColor="text-[#15803D]"
+              iconBgColor="bg-emerald-50"
+              valueClassName="text-[#15803D]"
+              badge={{
+                text: `${fin?.collectionRate || 0}%`,
+                variant: (fin?.collectionRate || 0) >= 90 ? 'success' : 'info',
+              }}
+              href="/payments"
             />
             <StatCard
               title={isEn ? 'Total Expenses' : 'মোট খরচাপাতি'}
@@ -185,23 +191,41 @@ export default function ReportsPage() {
               subtitle={isEn ? 'Electricity, repairs & maintenance' : 'বিদ্যুৎ, মেরামত ও পরিচালনা'}
               icon={Wallet}
               iconColor="text-[#DC2626]"
-              iconBgColor="bg-[#FEF7F7]"
+              iconBgColor="bg-red-50"
+              valueClassName="text-[#DC2626]"
+              href="/expenses"
             />
             <StatCard
-              title={isEn ? 'Net Income' : 'নীট লাভ / আয়'}
+              title={isEn ? 'Net Operating Income' : 'নীট লাভ / আয়'}
               value={formatCurrency(netIncome, language)}
-              subtitle={isEn ? 'Revenue minus expenses' : 'মোট আদায় থেকে খরচ বাদ'}
+              subtitle={isEn ? 'Revenue minus operating costs' : 'মোট আদায় থেকে খরচ বাদ'}
               icon={TrendingUp}
-              iconColor={netIncome >= 0 ? 'text-[#2DC2BD]' : 'text-[#DC2626]'}
-              iconBgColor={netIncome >= 0 ? 'bg-[#F3FAF5]' : 'bg-[#FEF7F7]'}
+              iconColor={netIncome >= 0 ? 'text-[#12664F]' : 'text-[#DC2626]'}
+              iconBgColor={netIncome >= 0 ? 'bg-[#E8F3EF]' : 'bg-red-50'}
+              badge={netIncome >= 0 ? {
+                text: isEn ? 'Profitable' : 'লাভজনক',
+                variant: 'success',
+              } : {
+                text: isEn ? 'Deficit' : 'ঘাটতি',
+                variant: 'danger',
+              }}
             />
             <StatCard
               title={isEn ? 'Outstanding Due' : 'মোট বকেয়া'}
               value={formatCurrency(fin?.outstandingRent || 0, language)}
               subtitle={`${fin?.collectionRate || 0}% ${t.collectionRate}`}
               icon={AlertCircle}
-              iconColor="text-[#B45309]"
-              iconBgColor="bg-[#FFFCF2]"
+              iconColor={fin?.outstandingRent ? 'text-[#DC2626]' : 'text-[#12664F]'}
+              iconBgColor={fin?.outstandingRent ? 'bg-red-50' : 'bg-[#E8F3EF]'}
+              valueClassName={fin?.outstandingRent ? 'text-[#DC2626]' : undefined}
+              badge={fin?.outstandingRent ? {
+                text: isEn ? 'Uncollected' : 'বকেয়া রয়েছে',
+                variant: 'danger',
+              } : {
+                text: isEn ? 'Cleared' : 'পরিশোধিত',
+                variant: 'success',
+              }}
+              href="/rents?status=OVERDUE"
             />
           </>
         )}
@@ -213,7 +237,7 @@ export default function ReportsPage() {
           <Card className="rounded-[10px] border-[#E5E7EB] shadow-none">
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <PieChart className="w-5 h-5 text-[#2DC2BD]" />
+                <PieChart className="w-5 h-5 text-[#12664F]" />
                 {isEn ? 'Rent Invoices by Status' : 'ভাড়ার বিলসমূহের বর্তমান অবস্থা'}
               </CardTitle>
             </CardHeader>
@@ -240,7 +264,7 @@ export default function ReportsPage() {
           <Card className="rounded-[10px] border-[#E5E7EB] shadow-none">
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <Building2 className="w-5 h-5 text-[#2DC2BD]" />
+                <Building2 className="w-5 h-5 text-[#12664F]" />
                 {isEn ? 'Property Portfolio Stats' : 'বাড়ি ও ফ্ল্যাটের তথ্য'}
               </CardTitle>
             </CardHeader>

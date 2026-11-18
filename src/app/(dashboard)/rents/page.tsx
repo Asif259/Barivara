@@ -6,11 +6,13 @@ import { apiClient } from '@/lib/api';
 import { useLanguageStore } from '@/stores/language-store';
 import { useTranslation } from '@/lib/translations';
 import { MonthlyRent, Property, ApiResponse, Payment } from '@/lib/types';
-import { formatCurrency, formatBnDate, getDefaultRentPeriod } from '@/lib/utils';
+import { formatCurrency, formatNumber, formatBnDate, getDefaultRentPeriod } from '@/lib/utils';
 import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { StatCard } from '@/components/ui/stat-card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { StatusBadge } from '@/components/ui/status-badge';
 import {
@@ -50,6 +52,9 @@ import {
   Search,
   User,
   FileText,
+  AlertCircle,
+  Percent,
+  CheckCircle2,
 } from 'lucide-react';
 
 export default function MonthlyRentsPage() {
@@ -151,6 +156,17 @@ export default function MonthlyRentsPage() {
     setReceiptDialogOpen(true);
   };
 
+  // Aggregated tactical KPI stats
+  const totalBilled = rents?.reduce((acc, r) => acc + (Number(r.totalAmount) || 0), 0) || 0;
+  const totalCollected = rents?.reduce((acc, r) => acc + (Number(r.paidAmount) || 0), 0) || 0;
+  const totalDue = rents?.reduce((acc, r) => {
+    const due = Number(r.remainingAmount ?? ((Number(r.totalAmount) || 0) - (Number(r.paidAmount) || 0)));
+    return acc + Math.max(0, due);
+  }, 0) || 0;
+  const collectionRate = totalBilled > 0 ? Math.round((totalCollected / totalBilled) * 100) : 0;
+  const paidCount = rents?.filter((r) => r.status === 'PAID').length || 0;
+  const pendingOrOverdueCount = rents?.filter((r) => r.status === 'PENDING' || r.status === 'OVERDUE' || r.status === 'PARTIAL').length || 0;
+
   return (
     <div className="space-y-8 pb-8">
       <PageHeader
@@ -173,6 +189,73 @@ export default function MonthlyRentsPage() {
           </div>
         }
       />
+
+      {/* Tactical KPI Summary Banner */}
+      {isLoading ? (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Card key={i} className="rounded-[10px] border-[#E5E7EB] p-5 shadow-none">
+              <div className="space-y-3">
+                <Skeleton className="h-3.5 w-24" />
+                <Skeleton className="h-7 w-20" />
+                <Skeleton className="h-3 w-32" />
+              </div>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <StatCard
+            title={isEn ? 'Total Invoiced' : 'মোট প্রস্তুতকৃত বিল'}
+            value={formatCurrency(totalBilled, language)}
+            subtitle={`${formatNumber(rents?.length || 0, language)} ${isEn ? 'invoices generated' : 'টি বিল জেনারেট করা'}`}
+            icon={Receipt}
+          />
+          <StatCard
+            title={isEn ? 'Realized Collection' : 'আদায়কৃত ভাড়া'}
+            value={formatCurrency(totalCollected, language)}
+            subtitle={`${formatNumber(paidCount, language)} ${isEn ? 'invoices fully paid' : 'টি বিল সম্পূর্ণ পরিশোধ'}`}
+            icon={Wallet}
+            badge={{
+              text: `${formatNumber(collectionRate, language)}%`,
+              variant: collectionRate >= 90 ? 'success' : collectionRate >= 70 ? 'info' : 'warning',
+            }}
+            valueClassName="text-[#15803D]"
+            iconColor="text-[#15803D]"
+            iconBgColor="bg-emerald-50"
+          />
+          <StatCard
+            title={isEn ? 'Outstanding Due' : 'বকেয়া বিলের পরিমাণ'}
+            value={formatCurrency(totalDue, language)}
+            subtitle={`${formatNumber(pendingOrOverdueCount, language)} ${isEn ? 'invoices pending / overdue' : 'টি বিল বকেয়া / মেয়াদোত্তীর্ণ'}`}
+            icon={AlertCircle}
+            iconColor={totalDue > 0 ? 'text-[#DC2626]' : 'text-[#12664F]'}
+            iconBgColor={totalDue > 0 ? 'bg-red-50' : 'bg-[#E8F3EF]'}
+            valueClassName={totalDue > 0 ? 'text-[#DC2626]' : undefined}
+            badge={pendingOrOverdueCount > 0 ? {
+              text: isEn ? 'Action Needed' : 'পদক্ষেপ নিন',
+              variant: 'danger',
+            } : {
+              text: isEn ? 'All Settled' : 'পরিশোধিত',
+              variant: 'success',
+            }}
+            onClick={() => setStatusFilter(statusFilter === 'OVERDUE' ? '' : 'OVERDUE')}
+          />
+          <StatCard
+            title={t.collectionRate}
+            value={`${formatNumber(collectionRate, language)}%`}
+            subtitle={isEn ? 'Collected vs Total Billed' : 'মোট বিলের বিপরীতে আদায়'}
+            icon={Percent}
+            badge={collectionRate >= 90 ? {
+              text: isEn ? 'On Track' : 'সঠিক পথে',
+              variant: 'success',
+            } : {
+              text: isEn ? 'Attention' : 'মনোযোগ প্রয়োজন',
+              variant: 'warning',
+            }}
+          />
+        </div>
+      )}
 
       {/* Filter Bar - Month/Year/Status/Property selectors */}
       <div className="flex flex-wrap items-center gap-3 bg-white p-3 rounded-[10px] border border-[#E5E7EB] shadow-none">
@@ -210,7 +293,7 @@ export default function MonthlyRentsPage() {
 
         {/* Default / Previous Month Indicator */}
         {selectedYear === defaultPeriod.year && selectedMonth === defaultPeriod.month && (
-          <span className="text-[11px] bg-[#F3FAF5] text-[#2DC2BD] font-semibold px-2.5 py-1 rounded-full border border-[#CDE4DA]">
+          <span className="text-[11px] bg-[#E8F3EF] text-[#12664F] font-semibold px-2.5 py-1 rounded-full border border-[#CDE4DA]">
             {t.previousMonth}
           </span>
         )}
