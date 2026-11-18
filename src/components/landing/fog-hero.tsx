@@ -266,6 +266,7 @@ export function FogHero({ isBn, onToggleLocale, onContact }: FogHeroProps) {
 
       <div className={styles.tilt} />
       <canvas ref={canvasRef} className={styles.fog} aria-hidden="true" />
+      <div className={styles.seam} aria-hidden="true" />
 
       <div className={styles.ui}>
         <header className={styles.bar}>

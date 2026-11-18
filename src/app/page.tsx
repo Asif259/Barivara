@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -11,9 +11,6 @@ import {
   FileText,
   MessageSquare,
   CheckCircle2,
-  Zap,
-  ShieldAlert,
-  FileSpreadsheet,
   ChevronLeft,
   ChevronRight,
   MapPin,
@@ -22,6 +19,7 @@ import {
   X,
   ShieldCheck,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import {
   PRODUCT_MODULES,
   STATS,
@@ -29,65 +27,96 @@ import {
   TESTIMONIALS,
   ARTICLES,
 } from '@/components/landing/landing-data';
-import {
-  ProductModuleItem,
-  SupportedLocale,
-} from '@/components/landing/landing-types';
+import { ProductModuleItem, SupportedLocale } from '@/components/landing/landing-types';
 import { FogHero } from '@/components/landing/fog-hero';
-import { toast } from 'sonner';
+import { SmoothScroll } from '@/components/landing/smooth-scroll';
+import { LandingDialog } from '@/components/landing/landing-dialog';
+import s from '@/components/landing/landing.module.css';
+
+const STEP_ICONS = {
+  building: Building2,
+  users: Users,
+  invoice: FileText,
+  whatsapp: MessageSquare,
+} as const;
+
+/** Bento placement for the five product modules: one wide card, then a row of four. */
+const MODULE_LAYOUT = [
+  { span: 'md:col-span-2', aspect: 'aspect-[16/8]' },
+  { span: '', aspect: 'aspect-[4/3]' },
+  { span: '', aspect: 'aspect-[4/3]' },
+  { span: '', aspect: 'aspect-[4/3]' },
+  { span: 'md:col-span-2 lg:col-span-1', aspect: 'aspect-[4/3]' },
+];
+
+function SectionHeading({
+  id,
+  eyebrow,
+  title,
+  muted,
+  align = 'center',
+}: {
+  id?: string;
+  eyebrow: string;
+  title: string;
+  muted?: string;
+  align?: 'center' | 'left';
+}) {
+  const center = align === 'center';
+  return (
+    <div className={`${s.reveal} ${center ? 'mx-auto text-center' : ''} max-w-3xl`}>
+      <span className={s.eyebrow}>{eyebrow}</span>
+      <h2 id={id} className={`${s.heading} mt-5`}>
+        {title}
+        {muted && (
+          <>
+            {' '}
+            <i>{muted}</i>
+          </>
+        )}
+      </h2>
+    </div>
+  );
+}
 
 export default function LandingPage() {
   const [locale, setLocale] = useState<SupportedLocale>('en');
   const isBn = locale === 'bn';
 
-  // Modal states
-  const [quickViewModule, setQuickViewModule] = useState<ProductModuleItem | null>(null);
+  // Dialogs. The module stays set after closing so content remains during the exit animation.
+  const [activeModule, setActiveModule] = useState<ProductModuleItem>(PRODUCT_MODULES[0]);
+  const [isModuleOpen, setIsModuleOpen] = useState(false);
   const [isConsultationOpen, setIsConsultationOpen] = useState(false);
 
-  // Testimonial pagination state
   const [testimonialIndex, setTestimonialIndex] = useState(0);
 
-  // Consultation form state
   const [consultName, setConsultName] = useState('');
   const [consultPhone, setConsultPhone] = useState('');
   const [consultUnits, setConsultUnits] = useState('1–5');
   const [consultLocation, setConsultLocation] = useState('Dhaka');
 
-  // Newsletter state
   const [footerEmail, setFooterEmail] = useState('');
   const [isFooterSubscribed, setIsFooterSubscribed] = useState(false);
-
-  // Floating toast state
-  const [floatingToast, setFloatingToast] = useState<{ message: string; visible: boolean }>({
-    message: '',
-    visible: false,
-  });
-
-  const showToastNotification = useCallback((msg: string) => {
-    setFloatingToast({ message: msg, visible: true });
-    setTimeout(() => {
-      setFloatingToast((prev) => ({ ...prev, visible: false }));
-    }, 3200);
-
-    toast(msg, {
-      style: {
-        background: '#16171a',
-        color: '#ffffff',
-        border: '1px solid #10B981',
-      },
-    });
-  }, []);
 
   const toggleLocale = useCallback(() => {
     setLocale((prev) => (prev === 'en' ? 'bn' : 'en'));
   }, []);
 
+  const openConsultation = useCallback(() => setIsConsultationOpen(true), []);
+  const closeConsultation = useCallback(() => setIsConsultationOpen(false), []);
+  const closeModule = useCallback(() => setIsModuleOpen(false), []);
+
+  const openModule = (module: ProductModuleItem) => {
+    setActiveModule(module);
+    setIsModuleOpen(true);
+  };
+
   const handleConsultationSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!consultName || !consultPhone) return;
-    showToastNotification(
-      locale === 'bn'
-        ? `ধন্যবাদ ${consultName}, আপনার ডেমো অনুরোধ গৃহীত হয়েছে।`
+    toast.success(
+      isBn
+        ? `ধন্যবাদ ${consultName}, আপনার ডেমো অনুরোধ গৃহীত হয়েছে।`
         : `Thank you, ${consultName}. Our onboarding team will call you.`
     );
     setConsultName('');
@@ -99,610 +128,94 @@ export default function LandingPage() {
     e.preventDefault();
     if (!footerEmail || !footerEmail.includes('@')) return;
     setIsFooterSubscribed(true);
-    showToastNotification(
-      locale === 'bn' ? 'সফলভাবে সাবস্ক্রাইব করা হয়েছে।' : 'Subscribed to BariVara Dispatch.'
-    );
+    toast.success(isBn ? 'সফলভাবে সাবস্ক্রাইব করা হয়েছে।' : 'Subscribed to BariVara Dispatch.');
   };
-
-  // Keyboard navigation & body scroll lock for modals
-  useEffect(() => {
-    if (!isConsultationOpen && !quickViewModule) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setIsConsultationOpen(false);
-        setQuickViewModule(null);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = originalOverflow;
-    };
-  }, [isConsultationOpen, quickViewModule]);
 
   const totalTestimonials = TESTIMONIALS.length;
-  const currentTestimonial = TESTIMONIALS[testimonialIndex] || TESTIMONIALS[0];
+  const testimonial = TESTIMONIALS[testimonialIndex] ?? TESTIMONIALS[0];
+  const prevTestimonial = () =>
+    setTestimonialIndex((i) => (i === 0 ? totalTestimonials - 1 : i - 1));
+  const nextTestimonial = () =>
+    setTestimonialIndex((i) => (i === totalTestimonials - 1 ? 0 : i + 1));
 
-  const handlePrevTestimonial = () => {
-    setTestimonialIndex((prev) => (prev === 0 ? totalTestimonials - 1 : prev - 1));
-  };
-
-  const handleNextTestimonial = () => {
-    setTestimonialIndex((prev) => (prev === totalTestimonials - 1 ? 0 : prev + 1));
-  };
-
-  const [card1, card2, card3, card4, card5] = PRODUCT_MODULES;
+  const m = activeModule;
 
   return (
-    <div className="bg-[#111214] min-h-screen text-white font-sans antialiased">
-      {/* ─────────────────────────────────────────────────────────────
-          MAIN PAGE FRAME (Dignified Obsidian Container)
-      ───────────────────────────────────────────────────────────── */}
-      <div className="page-frame min-h-screen relative overflow-hidden">
-        
+    <div className={`${s.page} ${isBn ? s.bn : ''} min-h-screen font-sans antialiased`}>
+      <SmoothScroll />
 
+      <FogHero isBn={isBn} onToggleLocale={toggleLocale} onContact={openConsultation} />
+
+      <main>
         {/* ─────────────────────────────────────────────────────────────
-            1–2. NAVIGATION + HERO (Morning / Night fog scene)
+            FEATURES — bento of the five product modules
         ───────────────────────────────────────────────────────────── */}
-        <FogHero
-          isBn={isBn}
-          onToggleLocale={toggleLocale}
-          onContact={() => setIsConsultationOpen(true)}
-        />
+        <section
+          id="properties"
+          aria-labelledby="features-title"
+          className="scroll-mt-6 px-4 sm:px-8 pt-20 sm:pt-28 pb-20 sm:pb-28 max-w-7xl mx-auto"
+        >
+          <SectionHeading
+            id="features-title"
+            eyebrow={isBn ? 'কোর ফিচার ও মডিউল' : 'Core features'}
+            title={isBn ? 'কাগজের খাতার বদলে' : 'Everything your building needs,'}
+            muted={isBn ? 'একটি শান্ত, গোছানো জায়গা' : 'in one calm place'}
+          />
 
-        {/* ─────────────────────────────────────────────────────────────
-            3. CORE MODULES & FEATURES BENTO GRID
-        ───────────────────────────────────────────────────────────── */}
-        <section id="properties" className="py-16 sm:py-24 px-4 sm:px-8 lg:px-14 max-w-6xl mx-auto">
-          {/* Section Heading */}
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-[#10B981] mb-2 font-semibold">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" />
-              <span>{isBn ? 'কোর ফিচার ও ব্যবস্থাপনা মডিউল' : 'Core Features & Modules'}</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white">
-              {isBn ? 'কাগজের খাতার ঝামেলাহীন পূর্ণাঙ্গ সমাধান' : 'Complete Digital Management for Landlords'}
-            </h2>
-          </div>
-
-          {/* 12-Column Staggered Asymmetric Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            
-            {/* LEFT + CENTER 8 COLUMNS */}
-            <div className="lg:col-span-8 flex flex-col gap-8">
-              
-              {/* TOP SUB-ROW: Card 1 (Wider Left) + Card 2 (Compact Center) */}
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-                
-                {/* CARD 1: Top-Left Medium-Wide (WhatsApp Receipts) */}
-                {card1 && (
-                  <article
-                    onClick={() => setQuickViewModule(card1)}
-                    className="prop-card md:col-span-7 group cursor-pointer"
-                  >
-                    <div className="relative overflow-hidden rounded-sm bg-[#1c1d21] aspect-[16/10] mb-3 border border-white/10 group-hover:border-[#10B981]/50 transition-colors">
-                      <Image
-                        src={card1.imageUrl}
-                        alt={card1.title}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 45vw"
-                        className="prop-img object-cover object-top transition duration-500"
-                      />
-                      <span className="absolute top-3 left-3 bg-[#111214]/85 backdrop-blur-sm text-[10px] uppercase tracking-wider px-2.5 py-1 rounded text-[#10B981] border border-white/10">
-                        {isBn ? card1.badgeBn : card1.badge}
-                      </span>
-                      <div className="absolute bottom-3 left-3 right-3 bg-[#111214]/90 backdrop-blur-md px-3 py-1.5 rounded border border-white/10 text-[11px] text-gray-200 flex items-center gap-2">
-                        <MessageSquare className="w-3.5 h-3.5 text-[#10B981] shrink-0" />
-                        <span className="truncate">{isBn ? card1.sampleUiSnippetBn : card1.sampleUiSnippetEn}</span>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <h3 className="text-sm font-semibold text-white group-hover:text-[#10B981] transition">
-                        {isBn ? card1.titleBn : card1.title}
-                      </h3>
-                      <div className="flex flex-wrap items-center gap-3 text-[11px] text-gray-400">
-                        {(isBn ? card1.specsBn : card1.specs).slice(0, 3).map((spec, i) => (
-                          <span key={i} className="flex items-center gap-1">
-                            <CheckCircle2 className="w-3 h-3 text-[#10B981]" />
-                            {spec}
-                          </span>
-                        ))}
-                      </div>
-                      <div className="pt-2 border-t border-white/10 flex items-center justify-between">
-                        <span className="text-sm font-bold text-[#10B981] tabular-nums">
-                          {isBn ? card1.highlightMetricBn : card1.highlightMetric}
-                        </span>
-                        <button
-                          aria-label={`View ${card1.title}`}
-                          className="arrow-btn w-7 h-7 bg-[#12664F] hover:bg-[#10B981] hover:text-[#111214] text-white flex items-center justify-center rounded-sm transition border border-[#10B981]/30"
-                        >
-                          <ArrowUpRight className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  </article>
-                )}
-
-                {/* CARD 2: Top-Center Square (Sub-Meter Math) */}
-                {card2 && (
-                  <article
-                    onClick={() => setQuickViewModule(card2)}
-                    className="prop-card md:col-span-5 md:mt-8 group cursor-pointer"
-                  >
-                    <div className="relative overflow-hidden rounded-sm bg-[#1c1d21] aspect-[4/3] mb-3 border border-white/10 group-hover:border-[#10B981]/50 transition-colors">
-                      <Image
-                        src={card2.imageUrl}
-                        alt={card2.title}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 30vw"
-                        className="prop-img object-cover object-top transition duration-500"
-                      />
-                      <span className="absolute top-3 left-3 bg-[#111214]/85 backdrop-blur-sm text-[10px] uppercase tracking-wider px-2.5 py-1 rounded text-gray-200 border border-white/10">
-                        {isBn ? card2.badgeBn : card2.badge}
-                      </span>
-                      <div className="absolute bottom-3 left-3 right-3 bg-[#111214]/90 backdrop-blur-md px-3 py-1.5 rounded border border-white/10 text-[11px] text-gray-200 flex items-center gap-2">
-                        <Zap className="w-3.5 h-3.5 text-[#10B981] shrink-0" />
-                        <span className="truncate">{isBn ? 'ডেসকো/ডিপিডিসি হিসাব' : 'Sub-Meter Math'}</span>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <h3 className="text-sm font-semibold text-white group-hover:text-[#10B981] transition">
-                        {isBn ? card2.titleBn : card2.title}
-                      </h3>
-                      <div className="flex flex-wrap items-center gap-2 text-[11px] text-gray-400">
-                        {(isBn ? card2.specsBn : card2.specs).slice(0, 2).map((spec, i) => (
-                          <span key={i} className="flex items-center gap-1">
-                            <CheckCircle2 className="w-3 h-3 text-[#10B981]" />
-                            {spec}
-                          </span>
-                        ))}
-                      </div>
-                      <div className="pt-2 border-t border-white/10 flex items-center justify-between">
-                        <span className="text-sm font-bold text-[#10B981] tabular-nums">
-                          {isBn ? card2.highlightMetricBn : card2.highlightMetric}
-                        </span>
-                        <button
-                          aria-label={`View ${card2.title}`}
-                          className="arrow-btn w-7 h-7 bg-[#12664F] hover:bg-[#10B981] hover:text-[#111214] text-white flex items-center justify-center rounded-sm transition border border-[#10B981]/30"
-                        >
-                          <ArrowUpRight className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  </article>
-                )}
-
-              </div>
-
-              {/* BOTTOM SUB-ROW: Card 4 (Compact Left) + Card 5 (Wider Center) */}
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-                
-                {/* CARD 4: Bottom-Left Compact (bKash/Nagad Reconciliation) */}
-                {card4 && (
-                  <article
-                    onClick={() => setQuickViewModule(card4)}
-                    className="prop-card md:col-span-5 md:mt-6 group cursor-pointer"
-                  >
-                    <div className="relative overflow-hidden rounded-sm bg-[#1c1d21] aspect-[4/3] mb-3 border border-white/10 group-hover:border-[#10B981]/50 transition-colors">
-                      <Image
-                        src={card4.imageUrl}
-                        alt={card4.title}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 30vw"
-                        className="prop-img object-cover object-top transition duration-500"
-                      />
-                      <span className="absolute top-3 left-3 bg-[#111214]/85 backdrop-blur-sm text-[10px] uppercase tracking-wider px-2.5 py-1 rounded text-gray-200 border border-white/10">
-                        {isBn ? card4.badgeBn : card4.badge}
-                      </span>
-                      <div className="absolute bottom-3 left-3 right-3 bg-[#111214]/90 backdrop-blur-md px-3 py-1.5 rounded border border-white/10 text-[11px] text-gray-200 flex items-center gap-2">
-                        <FileSpreadsheet className="w-3.5 h-3.5 text-[#10B981] shrink-0" />
-                        <span className="truncate">{isBn ? 'বিকাশ ও নগদ TrxID' : 'bKash TrxID Logger'}</span>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <h3 className="text-sm font-semibold text-white group-hover:text-[#10B981] transition">
-                        {isBn ? card4.titleBn : card4.title}
-                      </h3>
-                      <div className="flex flex-wrap items-center gap-2 text-[11px] text-gray-400">
-                        {(isBn ? card4.specsBn : card4.specs).slice(0, 2).map((spec, i) => (
-                          <span key={i} className="flex items-center gap-1">
-                            <CheckCircle2 className="w-3 h-3 text-[#10B981]" />
-                            {spec}
-                          </span>
-                        ))}
-                      </div>
-                      <div className="pt-2 border-t border-white/10 flex items-center justify-between">
-                        <span className="text-sm font-bold text-[#10B981] tabular-nums">
-                          {isBn ? card4.highlightMetricBn : card4.highlightMetric}
-                        </span>
-                        <button
-                          aria-label={`View ${card4.title}`}
-                          className="arrow-btn w-7 h-7 bg-[#12664F] hover:bg-[#10B981] hover:text-[#111214] text-white flex items-center justify-center rounded-sm transition border border-[#10B981]/30"
-                        >
-                          <ArrowUpRight className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  </article>
-                )}
-
-                {/* CARD 5: Bottom-Center Wide (Income-Expense Khata) */}
-                {card5 && (
-                  <article
-                    onClick={() => setQuickViewModule(card5)}
-                    className="prop-card md:col-span-7 group cursor-pointer"
-                  >
-                    <div className="relative overflow-hidden rounded-sm bg-[#1c1d21] aspect-[16/10] mb-3 border border-white/10 group-hover:border-[#10B981]/50 transition-colors">
-                      <Image
-                        src={card5.imageUrl}
-                        alt={card5.title}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 45vw"
-                        className="prop-img object-cover object-top transition duration-500"
-                      />
-                      <span className="absolute top-3 left-3 bg-[#111214]/85 backdrop-blur-sm text-[10px] uppercase tracking-wider px-2.5 py-1 rounded text-gray-200 border border-white/10">
-                        {isBn ? card5.badgeBn : card5.badge}
-                      </span>
-                      <div className="absolute bottom-3 left-3 right-3 bg-[#111214]/90 backdrop-blur-md px-3 py-1.5 rounded border border-white/10 text-[11px] text-gray-200 flex items-center gap-2">
-                        <FileSpreadsheet className="w-3.5 h-3.5 text-[#10B981] shrink-0" />
-                        <span className="truncate">{isBn ? card5.sampleUiSnippetBn : card5.sampleUiSnippetEn}</span>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <h3 className="text-sm font-semibold text-white group-hover:text-[#10B981] transition">
-                        {isBn ? card5.titleBn : card5.title}
-                      </h3>
-                      <div className="flex flex-wrap items-center gap-3 text-[11px] text-gray-400">
-                        {(isBn ? card5.specsBn : card5.specs).slice(0, 3).map((spec, i) => (
-                          <span key={i} className="flex items-center gap-1">
-                            <CheckCircle2 className="w-3 h-3 text-[#10B981]" />
-                            {spec}
-                          </span>
-                        ))}
-                      </div>
-                      <div className="pt-2 border-t border-white/10 flex items-center justify-between">
-                        <span className="text-sm font-bold text-[#10B981] tabular-nums">
-                          {isBn ? card5.highlightMetricBn : card5.highlightMetric}
-                        </span>
-                        <button
-                          aria-label={`View ${card5.title}`}
-                          className="arrow-btn w-7 h-7 bg-[#12664F] hover:bg-[#10B981] hover:text-[#111214] text-white flex items-center justify-center rounded-sm transition border border-[#10B981]/30"
-                        >
-                          <ArrowUpRight className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  </article>
-                )}
-
-              </div>
-            </div>
-
-            {/* RIGHT 4 COLUMNS: CARD 3 (Tall Vertical Showcase Card - DMP Police Form) */}
-            {card3 && (
-              <article
-                onClick={() => setQuickViewModule(card3)}
-                className="prop-card lg:col-span-4 lg:-mt-4 group cursor-pointer"
-              >
-                <div className="relative overflow-hidden rounded-sm bg-[#1c1d21] aspect-[3/4.3] mb-3 border border-white/10 group-hover:border-[#10B981]/50 transition-colors">
-                  <Image
-                    src={card3.imageUrl}
-                    alt={card3.title}
-                    fill
-                    sizes="(max-width: 1024px) 100vw, 33vw"
-                    className="prop-img object-cover object-top transition duration-500"
-                  />
-                  <span className="absolute top-3 left-3 bg-[#111214]/85 backdrop-blur-sm text-[10px] uppercase tracking-wider px-2.5 py-1 rounded text-[#10B981] border border-white/10">
-                    {isBn ? card3.badgeBn : card3.badge}
-                  </span>
-                  <div className="absolute bottom-3 left-3 right-3 bg-[#111214]/90 backdrop-blur-md px-3 py-2 rounded border border-white/10 text-[11px] text-gray-200 flex items-center gap-2">
-                    <ShieldAlert className="w-4 h-4 text-[#10B981] shrink-0" />
-                    <span className="truncate">{isBn ? 'ডিএমপি ভাড়াটিয়া তথ্য ফরম' : 'DMP Police Form Export'}</span>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-sm font-semibold text-white group-hover:text-[#10B981] transition">
-                    {isBn ? card3.titleBn : card3.title}
-                  </h3>
-                  <div className="flex flex-col gap-1.5 text-[11px] text-gray-400">
-                    {(isBn ? card3.specsBn : card3.specs).map((spec, i) => (
-                      <span key={i} className="flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#10B981]" />
-                        {spec}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="pt-2 border-t border-white/10 flex items-center justify-between">
-                    <span className="text-sm font-bold text-[#10B981] tabular-nums">
-                      {isBn ? card3.highlightMetricBn : card3.highlightMetric}
-                    </span>
-                    <button
-                      aria-label={`View ${card3.title}`}
-                      className="arrow-btn w-7 h-7 bg-[#12664F] hover:bg-[#10B981] hover:text-[#111214] text-white flex items-center justify-center rounded-sm transition border border-[#10B981]/30"
-                    >
-                      <ArrowUpRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              </article>
-            )}
-
-          </div>
-        </section>
-
-        {/* ─────────────────────────────────────────────────────────────
-            4. FOUR OVERLAPPING CIRCULAR STATS BADGES
-        ───────────────────────────────────────────────────────────── */}
-        <section className="py-8 sm:py-12 px-4 overflow-hidden">
-          <div className="max-w-6xl mx-auto grid grid-cols-2 md:flex md:items-center md:justify-center gap-4 md:gap-0">
-            {STATS.map((stat, idx) => (
-              <div
-                key={idx}
-                className="stat-circle w-full aspect-square max-w-[260px] mx-auto md:mx-0 rounded-full bg-[#1c1d21]/90 border border-white/10 flex flex-col items-center justify-center text-center p-6 hover:border-[#10B981]/50 transition duration-300 shadow-xl"
-              >
-                <span className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight tabular-nums">
-                  {isBn ? stat.valueBn : stat.value}
-                </span>
-                <span className="text-[11px] text-[#10B981] mt-1.5 uppercase tracking-wider font-semibold">
-                  {isBn ? stat.labelBn : stat.labelEn}
-                </span>
-                <span className="text-[10px] text-gray-400 mt-1 max-w-[150px] leading-tight">
-                  {isBn ? stat.sublabelBn : stat.sublabelEn}
-                </span>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ─────────────────────────────────────────────────────────────
-            5. "A CALM, ORDERLY PATH" VERTICAL TIMELINE
-        ───────────────────────────────────────────────────────────── */}
-        <section id="process" className="py-16 sm:py-24 px-4 sm:px-8 max-w-3xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-14">
-            <div className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-[#10B981] mb-2 font-semibold">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" />
-              <span>{isBn ? 'সহজ ৪-ধাপের প্রক্রিয়া' : 'How It Works'}</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-snug">
-              {isBn ? (
-                <>কাগজের খাতার ঝামেলাহীন শান্ত ও সুশৃঙ্খল<br />ডিজিটাল ভাড়া ব্যবস্থাপনা</>
-              ) : (
-                <>A calm, orderly path to<br />paperless property management</>
-              )}
-            </h2>
-          </div>
-
-          {/* Vertical Stack of 4 Circular Steps */}
-          <div className="space-y-8 sm:space-y-10 max-w-xl mx-auto">
-            {PROCESS_STEPS.map((step, idx) => (
-              <div
-                key={idx}
-                className="flex flex-col sm:flex-row items-center gap-6 sm:gap-8 text-center sm:text-left group"
-              >
-                {/* Step Visual Node */}
-                {step.iconType === 'users' && step.imageBadgeUrl ? (
-                  <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden border-2 border-[#10B981]/50 shrink-0 shadow-lg">
-                    <Image
-                      src={step.imageBadgeUrl}
-                      alt={isBn ? step.titleBn : step.titleEn}
-                      width={128}
-                      height={128}
-                      className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
-                    />
-                  </div>
-                ) : (
-                  <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-[#1f2126] border border-white/10 flex items-center justify-center shrink-0 group-hover:border-[#10B981] transition">
-                    {step.iconType === 'building' && (
-                      <Building2 className="w-9 h-9 text-[#10B981]" />
-                    )}
-                    {step.iconType === 'users' && (
-                      <Users className="w-9 h-9 text-[#10B981]" />
-                    )}
-                    {step.iconType === 'invoice' && (
-                      <FileText className="w-9 h-9 text-[#10B981]" />
-                    )}
-                    {step.iconType === 'whatsapp' && (
-                      <MessageSquare className="w-9 h-9 text-[#10B981]" />
-                    )}
-                  </div>
-                )}
-
-                <div>
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-white mb-1.5">
-                    {isBn ? step.titleBn : step.titleEn}
-                  </h3>
-                  <p className="text-xs text-gray-400 leading-relaxed max-w-xs sm:max-w-md">
-                    {isBn ? step.descBn : step.descEn}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ─────────────────────────────────────────────────────────────
-            6. BRAND DIVIDER BANNER WITH CENTRAL EMERALD EMBLEM
-        ───────────────────────────────────────────────────────────── */}
-        <div className="relative w-full border-y border-white/10 bg-[#1a1c20] py-3.5 overflow-hidden select-none">
-          <div className="max-w-7xl mx-auto px-4 flex items-center justify-between text-[10px] tracking-wider uppercase text-gray-400 font-semibold">
-            <span className="hidden sm:inline">{isBn ? 'বাড়ি ও ফ্ল্যাট' : 'Residential Flats'}</span>
-            <span>{isBn ? 'ভাড়াটিয়া এনআইডি' : 'Tenant NID Vault'}</span>
-            <span className="hidden md:inline">{isBn ? 'স্বয়ংক্রিয় মাসিক বিল' : 'Sub-Meter Billing'}</span>
-            
-            {/* Center Emerald Emblem */}
-            <div className="relative mx-4 px-5 py-1.5 bg-[#12664F] text-[#10B981] border border-[#10B981]/40 rounded-sm shadow-md flex items-center justify-center gap-2">
-              <Building2 className="w-4 h-4 text-[#10B981]" />
-              <span className="text-[11px] font-bold text-white tracking-widest">BARIVARA</span>
-            </div>
-
-            <span className="hidden md:inline">{isBn ? 'হোয়াটসঅ্যাপ রসিদ' : 'WhatsApp Receipts'}</span>
-            <span>{isBn ? 'বিকাশ ও নগদ TrxID' : 'bKash TrxID Logging'}</span>
-            <span className="hidden sm:inline">{isBn ? 'আয়কর সিএসভি রিপোর্ট' : 'Tax-Ready CSV Khata'}</span>
-          </div>
-        </div>
-
-        {/* ─────────────────────────────────────────────────────────────
-            7. "TRUSTED BY HOMEOWNERS & LANDLORDS" TESTIMONIALS
-        ───────────────────────────────────────────────────────────── */}
-        <section id="testimonials" className="py-16 sm:py-24 px-4 sm:px-8 lg:px-16 max-w-6xl mx-auto">
-          {/* Heading */}
-          <div className="text-center mb-14">
-            <div className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-[#10B981] mb-2 font-semibold">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" />
-              <span>{isBn ? 'বাস্তব অভিজ্ঞতা ও মূল্যায়ন' : 'Landlord Stories'}</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-snug">
-              {isBn ? (
-                <>সারা দেশের বাড়িওয়ালা ও প্রপার্টি মালিকদের<br />নির্ভরযোগ্য সঙ্গী</>
-              ) : (
-                <>Trusted by homeowners &amp; landlords<br />across Bangladesh</>
-              )}
-            </h2>
-          </div>
-
-          {/* 2-Column Split Layout */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 items-center">
-            
-            {/* Left Portrait with Subtle Architectural Offset Backdrop */}
-            <div className="md:col-span-5 relative">
-              <div className="relative mx-auto max-w-xs">
-                {/* Subtle dark decorative offset block */}
-                <div className="absolute -left-4 -bottom-4 w-full h-full bg-[#1c1d21] border border-white/10 -z-10 rounded-sm" />
-                
-                <div className="overflow-hidden rounded-sm border border-white/15 bg-[#1c1d21] aspect-[4/4.6]">
-                  <Image
-                    src={currentTestimonial.imageUrl}
-                    alt={isBn ? currentTestimonial.nameBn : currentTestimonial.name}
-                    width={400}
-                    height={460}
-                    className="w-full h-full object-cover object-top transition duration-500"
-                  />
-                </div>
-
-                <div className="mt-4">
-                  <h3 className="text-base font-bold text-white">
-                    {isBn ? currentTestimonial.nameBn : currentTestimonial.name}
-                  </h3>
-                  <p className="text-xs text-gray-400">
-                    {isBn ? currentTestimonial.roleBn : currentTestimonial.role} • {currentTestimonial.location}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Quote Content & Interactive Controls */}
-            <div className="md:col-span-7 flex flex-col justify-between space-y-6">
-              {/* Opening Quote Icon */}
-              <div className="text-4xl sm:text-5xl font-serif text-white/80 leading-none select-none">“</div>
-
-              <div>
-                <h4 className="text-lg sm:text-xl font-bold text-white mb-3">
-                  {isBn ? currentTestimonial.headlineBn : currentTestimonial.headlineEn}
-                </h4>
-                <p className="text-xs sm:text-sm text-gray-300 leading-relaxed min-h-[80px]">
-                  &quot;{isBn ? currentTestimonial.quoteBn : currentTestimonial.quoteEn}&quot;
-                </p>
-              </div>
-
-              {/* Closing Quote Icon Aligned Right */}
-              <div className="text-4xl sm:text-5xl font-serif text-white/80 leading-none text-right select-none">”</div>
-
-              {/* Controls & Pagination Row */}
-              <div className="pt-4 border-t border-white/10 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={handlePrevTestimonial}
-                    aria-label="Previous Testimonial"
-                    className="w-9 h-9 rounded-sm bg-[#1c1d21] hover:bg-[#24262b] border border-white/15 text-gray-300 flex items-center justify-center transition"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={handleNextTestimonial}
-                    aria-label="Next Testimonial"
-                    className="w-9 h-9 rounded-sm bg-[#12664F] hover:bg-[#0E513F] text-white flex items-center justify-center font-bold transition border border-[#10B981]/40"
-                  >
-                    <ChevronRight className="w-4 h-4 text-[#10B981]" />
-                  </button>
-                </div>
-
-                <div className="flex items-center gap-3 text-xs text-gray-400 font-mono">
-                  <span className="text-[#10B981] font-bold">
-                    {String(testimonialIndex + 1).padStart(2, '0')}
-                  </span>
-                  <div className="w-12 h-[1px] bg-white/20" />
-                  <span>{String(totalTestimonials).padStart(2, '0')}</span>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </section>
-
-        {/* ─────────────────────────────────────────────────────────────
-            8. "INSIGHTS & GUIDES" 3-COLUMN EDITORIAL SECTION
-        ───────────────────────────────────────────────────────────── */}
-        <section id="blog" className="py-16 sm:py-24 px-4 sm:px-8 lg:px-14 max-w-6xl mx-auto">
-          <div className="text-center mb-14">
-            <div className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-[#10B981] mb-2 font-semibold">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" />
-              <span>{isBn ? 'সহায়িকা ও প্রপার্টি গাইড' : 'Landlord Guides & Insights'}</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white">
-              {isBn ? 'বাড়িওয়ালাদের জন্য গুরুত্বপূর্ণ ব্লগ ও পরামর্শ' : 'Essential Guides for Property Owners'}
-            </h2>
-          </div>
-
-          {/* 3 Staggered Blog Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-7 items-start">
-            {ARTICLES.map((article, idx) => {
-              const isSecond = idx === 1;
-              const aspectClass = idx === 0 ? 'aspect-[4/3.4]' : idx === 1 ? 'aspect-[4/3]' : 'aspect-[4/2.9]';
-
+          <div className="mt-14 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+            {PRODUCT_MODULES.map((module, idx) => {
+              const layout = MODULE_LAYOUT[idx] ?? MODULE_LAYOUT[1];
               return (
                 <article
-                  key={article.id}
-                  onClick={() =>
-                    showToastNotification(
-                      locale === 'bn' ? `সহায়িকা: ${article.titleBn}` : `Reading: "${article.titleEn}"`
-                    )
-                  }
-                  className={`group cursor-pointer ${isSecond ? 'md:mt-6' : ''}`}
+                  key={module.id}
+                  className={`${s.card} ${s.glass} ${s.reveal} ${layout.span} rounded-[22px] p-3 sm:p-4 flex flex-col`}
                 >
-                  <div className={`relative overflow-hidden rounded-sm ${aspectClass} mb-4 border border-white/10 hover:border-[#10B981]/40 transition-colors bg-[#1c1d21]`}>
+                  <div className={`${s.shot} ${layout.aspect}`}>
                     <Image
-                      src={article.imageUrl}
-                      alt={isBn ? article.titleBn : article.titleEn}
+                      src={module.imageUrl}
+                      alt=""
                       fill
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                      className="object-cover group-hover:scale-105 transition duration-500"
+                      sizes={
+                        idx === 0
+                          ? '(min-width: 768px) 840px, 100vw'
+                          : '(min-width: 1024px) 420px, (min-width: 768px) 50vw, 100vw'
+                      }
+                      className="object-cover object-top"
                     />
-                    <span className="absolute top-3 left-3 bg-[#111214]/80 backdrop-blur-sm text-[10px] uppercase tracking-wider px-2 py-0.5 rounded text-[#10B981] border border-white/10 font-medium">
-                      {isBn ? article.categoryBn : article.categoryEn}
+                    <span className="absolute top-3 left-3 z-10 rounded-full bg-[#0b1426]/80 backdrop-blur px-3 py-1 text-[11px] font-medium text-[#a6e8e4] border border-white/10">
+                      {isBn ? module.badgeBn : module.badge}
                     </span>
                   </div>
-                  <h3 className="text-sm font-bold text-white group-hover:text-[#10B981] transition leading-snug mb-2">
-                    {isBn ? article.titleBn : article.titleEn}
-                  </h3>
-                  <p className="text-xs text-gray-400 leading-relaxed mb-4">
-                    {isBn ? article.excerptBn : article.excerptEn}
-                  </p>
-                  <div className="flex items-center gap-2.5 pt-3 border-t border-white/10">
-                    <div className="relative w-6 h-6 rounded-full overflow-hidden shrink-0 border border-white/20">
-                      <Image
-                        src={article.authorAvatar}
-                        alt={article.author}
-                        fill
-                        sizes="24px"
-                        className="object-cover"
-                      />
+
+                  <div className="px-1.5 pt-5 pb-1.5 flex flex-col gap-3 flex-1">
+                    <h3 className="text-[17px] sm:text-lg font-medium leading-snug tracking-[-0.01em]">
+                      <button
+                        type="button"
+                        onClick={() => openModule(module)}
+                        className={`${s.stretch} text-left`}
+                      >
+                        {isBn ? module.titleBn : module.title}
+                      </button>
+                    </h3>
+                    <ul className="flex flex-wrap gap-x-4 gap-y-1.5 text-[13px] text-[var(--muted)]">
+                      {(isBn ? module.specsBn : module.specs).slice(0, 3).map((spec) => (
+                        <li key={spec} className="flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-[var(--teal)]" aria-hidden="true" />
+                          {spec}
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="mt-auto pt-3 border-t border-white/10 flex items-center justify-between">
+                      <span className="text-sm font-medium text-[var(--teal)]">
+                        {isBn ? module.highlightMetricBn : module.highlightMetric}
+                      </span>
+                      <span
+                        aria-hidden="true"
+                        className="w-8 h-8 rounded-full border border-white/15 grid place-items-center text-white/80"
+                      >
+                        <ArrowUpRight className="w-4 h-4" />
+                      </span>
                     </div>
-                    <span className="text-[11px] text-gray-400">
-                      {article.author} • {isBn ? article.readTimeBn : article.readTime}
-                    </span>
                   </div>
                 </article>
               );
@@ -711,445 +224,541 @@ export default function LandingPage() {
         </section>
 
         {/* ─────────────────────────────────────────────────────────────
-            9. CALL TO ACTION SECTION
+            STATS — four figures between hairlines
         ───────────────────────────────────────────────────────────── */}
-        <section id="cta" className="relative overflow-hidden border-y border-white/10 bg-[#16171a]/60">
-          <div className="max-w-6xl mx-auto px-4 sm:px-8 lg:px-14 py-16 sm:py-24 relative z-10 grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
-            
-            <div className="md:col-span-7 space-y-4">
-              <div className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-[#10B981] font-semibold">
-                <ShieldCheck className="w-3.5 h-3.5 text-[#10B981]" />
-                <span>{isBn ? 'কাগজহীন স্মার্ট বাড়ি ব্যবস্থাপনা' : 'Paperless Property Management'}</span>
+        <section aria-label={isBn ? 'এক নজরে' : 'At a glance'} className="border-y border-white/10">
+          <dl className="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4">
+            {STATS.map((stat, idx) => (
+              <div
+                key={stat.labelEn}
+                className={`${s.reveal} px-5 sm:px-8 py-10 sm:py-14 flex flex-col gap-2 border-white/10 ${
+                  idx % 2 === 1 ? 'border-l' : ''
+                } ${idx >= 2 ? 'border-t lg:border-t-0' : ''} ${idx === 2 ? 'lg:border-l' : ''}`}
+              >
+                <dt className="order-2 text-[13px] font-medium text-[var(--teal)]">
+                  {isBn ? stat.labelBn : stat.labelEn}
+                </dt>
+                <dd className="order-1 text-4xl sm:text-5xl font-medium tracking-[-0.03em] tabular-nums">
+                  {isBn ? stat.valueBn : stat.value}
+                </dd>
+                <dd className="order-3 text-[13px] text-[var(--muted)] leading-snug">
+                  {isBn ? stat.sublabelBn : stat.sublabelEn}
+                </dd>
               </div>
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight">
-                {isBn ? (
-                  <>কাগজের খাতার অনিশ্চয়তা ভুলে<br />আজই শুরু করুন বাড়িভাড়া</>
-                ) : (
-                  <>Ready to leave paper khata<br />uncertainty behind?</>
-                )}
-              </h2>
-              <p className="text-xs sm:text-sm text-gray-300 max-w-md leading-relaxed">
-                {isBn
-                  ? '১ থেকে ১৫টি ফ্ল্যাট বা দোকান পরিচালনাকারী বাংলাদেশি বাড়িওয়ালাদের জন্য তৈরি। ১লা তারিখে অটোমেটিক বিল তৈরি করুন, বিকাশে ভাড়া নিয়ে ১-ক্লিকে হোয়াটসঅ্যাপে রসিদ পাঠিয়ে দিন।'
-                  : 'Built specifically for residential and commercial landlords in Bangladesh managing 1–15 flats. Generate automatic rent notices on the 1st, reconcile bKash payments, and dispatch 1-click WhatsApp receipts.'}
-              </p>
-              <div className="pt-2 flex flex-wrap items-center gap-3">
-                <Link
-                  href="/register"
-                  className="px-5 py-2.5 rounded-sm bg-[#12664F] hover:bg-[#0E513F] text-white font-bold text-xs flex items-center gap-2 transition shadow-lg shadow-[#12664F]/30 border border-[#10B981]/40"
-                >
-                  <span>{isBn ? 'বিনামূল্যে শুরু করুন' : 'Get Started'}</span>
-                  <ArrowRight className="w-3.5 h-3.5 text-[#10B981]" />
-                </Link>
-                <button
-                  onClick={() => setIsConsultationOpen(true)}
-                  className="px-5 py-2.5 rounded-sm bg-[#16171a]/90 hover:bg-[#24262b] text-white border border-white/20 font-semibold text-xs transition"
-                >
-                  {isBn ? 'পরামর্শ ও সাপোর্ট' : 'Request Demo'}
-                </button>
-              </div>
-            </div>
+            ))}
+          </dl>
+        </section>
 
-            {/* Architectural Verification Card */}
-            <div className="md:col-span-5 flex justify-center md:justify-end">
-              <div className="w-full max-w-sm rounded-lg border border-white/15 bg-[#16171a]/95 backdrop-blur-md p-6 shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-[#10B981]/10 rounded-full blur-3xl pointer-events-none" />
-                <div className="flex items-center gap-3 pb-4 border-b border-white/10">
-                  <div className="w-10 h-10 rounded bg-[#12664F] flex items-center justify-center text-[#10B981] border border-[#10B981]/40 shrink-0">
-                    <Building2 className="w-5 h-5 text-[#10B981]" />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-white tracking-wide">
-                      {isBn ? 'বাড়িভাড়া ডিজিটাল গ্যারান্টি' : 'BariVara Landlord Guarantee'}
-                    </h4>
-                    <p className="text-[11px] text-gray-400">
-                      {isBn ? '১–১৫ ইউনিটের জন্য শতভাগ স্বচ্ছ' : 'Tailored for 1–15 Units'}
+        {/* ─────────────────────────────────────────────────────────────
+            PROCESS — four steps on one connected track
+        ───────────────────────────────────────────────────────────── */}
+        <section
+          id="process"
+          aria-labelledby="process-title"
+          className="scroll-mt-6 px-4 sm:px-8 py-20 sm:py-28 max-w-7xl mx-auto"
+        >
+          <SectionHeading
+            id="process-title"
+            eyebrow={isBn ? 'সহজ ৪-ধাপ' : 'How it works'}
+            title={isBn ? 'শান্ত, সুশৃঙ্খল পথে' : 'A calm, orderly path to'}
+            muted={isBn ? 'কাগজহীন ভাড়া ব্যবস্থাপনা' : 'paperless rent management'}
+          />
+
+          <div className="relative mt-16">
+            <div className={`${s.track} hidden lg:block`} aria-hidden="true" />
+            <ol className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-12">
+              {PROCESS_STEPS.map((step) => {
+                const Icon = STEP_ICONS[step.iconType];
+                return (
+                  <li key={step.number} className={`${s.reveal} flex flex-col items-center text-center`}>
+                    <div className={s.node}>
+                      <Icon className="w-7 h-7 text-[var(--teal)]" aria-hidden="true" />
+                    </div>
+                    <span className="mt-6 text-xs font-medium tabular-nums text-[var(--muted)]">
+                      {step.number}
+                    </span>
+                    <h3 className="mt-2 text-lg font-medium leading-snug tracking-[-0.01em] max-w-[16rem]">
+                      {isBn ? step.titleBn : step.titleEn}
+                    </h3>
+                    <p className="mt-3 text-sm text-[var(--muted)] leading-relaxed max-w-[18rem]">
+                      {isBn ? step.descBn : step.descEn}
                     </p>
-                  </div>
-                </div>
-
-                <div className="mt-4 space-y-2.5 text-xs text-gray-300">
-                  <div className="flex items-center justify-between py-1 border-b border-white/5">
-                    <span className="text-gray-400">{isBn ? 'হোয়াটসঅ্যাপ রসিদ' : 'WhatsApp Receipts'}</span>
-                    <span className="font-semibold text-[#10B981]">{isBn ? '১-ক্লিকে বিতরণ' : 'Instant (1-Click)'}</span>
-                  </div>
-                  <div className="flex items-center justify-between py-1 border-b border-white/5">
-                    <span className="text-gray-400">{isBn ? 'সাব-মিটার বিল বণ্টন' : 'Sub-Meter Math'}</span>
-                    <span className="font-semibold text-[#10B981]">{isBn ? 'শতভাগ সঠিক' : 'Exact Algorithm'}</span>
-                  </div>
-                  <div className="flex items-center justify-between py-1 border-b border-white/5">
-                    <span className="text-gray-400">{isBn ? 'বিকাশ ও নগদ ট্র্যাকিং' : 'bKash & Nagad TrxID'}</span>
-                    <span className="font-semibold text-[#10B981]">{isBn ? 'স্বয়ংক্রিয় জের' : 'Auto Rollover'}</span>
-                  </div>
-                  <div className="flex items-center justify-between py-1">
-                    <span className="text-gray-400">{isBn ? 'প্ল্যাটফর্ম চার্জ' : 'Platform Fee'}</span>
-                    <span className="font-semibold text-white">{isBn ? '৳০ ফ্রি ট্রায়াল' : '৳0 Free Trial'}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
+                  </li>
+                );
+              })}
+            </ol>
           </div>
         </section>
 
         {/* ─────────────────────────────────────────────────────────────
-            10. FOOTER
+            TESTIMONIALS
         ───────────────────────────────────────────────────────────── */}
-        <footer className="pt-16 pb-10 px-4 sm:px-8 lg:px-14 bg-[#121316] relative">
-          <div className="max-w-6xl mx-auto">
+        <section
+          id="testimonials"
+          aria-labelledby="testimonials-title"
+          className="scroll-mt-6 px-4 sm:px-8 pb-20 sm:pb-28 max-w-7xl mx-auto"
+        >
+          <SectionHeading
+            id="testimonials-title"
+            eyebrow={isBn ? 'বাড়িওয়ালাদের অভিজ্ঞতা' : 'Landlord stories'}
+            title={isBn ? 'সারা দেশের বাড়িওয়ালাদের' : 'Trusted by landlords'}
+            muted={isBn ? 'নির্ভরযোগ্য সঙ্গী' : 'across Bangladesh'}
+          />
 
-            {/* Centered Large Logo + BARIVARA Wordmark */}
-            <div className="flex flex-col items-center text-center mb-14">
-              <img src="/logo.png" alt="BariVara" className="w-12 h-12 mb-3 object-contain" />
-              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-[0.22em] text-white">
-                BARIVARA
-              </h2>
-              <p className="text-[11px] text-gray-400 max-w-md mt-2 leading-relaxed">
-                {isBn
-                  ? 'বাংলাদেশের বাড়িওয়ালা ও প্রপার্টি মালিকদের জন্য আধুনিক, নির্ভরযোগ্য ও স্মার্ট ডিজিটাল ভাড়া ব্যবস্থাপনা প্ল্যাটফর্ম।'
-                  : 'Modern, reliable digital property management and rent ledger platform built for residential and commercial landlords in Bangladesh.'}
-              </p>
+          <div
+            className={`${s.glass} ${s.reveal} mt-14 rounded-[28px] p-4 sm:p-6 lg:p-8 grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-12 items-center`}
+          >
+            <div className="md:col-span-5">
+              <div className="relative aspect-[4/4.4] rounded-[18px] overflow-hidden border border-white/10 bg-[#111c31]">
+                <Image
+                  key={testimonial.id}
+                  src={testimonial.imageUrl}
+                  alt={isBn ? testimonial.nameBn : testimonial.name}
+                  fill
+                  sizes="(min-width: 768px) 40vw, 100vw"
+                  className="object-cover object-top"
+                />
+                <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#0b1426]/90 to-transparent" />
+                <span className="absolute bottom-4 left-4 rounded-full bg-[#0b1426]/80 backdrop-blur px-3 py-1 text-xs font-medium text-[#a6e8e4] border border-white/10">
+                  {testimonial.unitsCount}
+                </span>
+              </div>
             </div>
 
-            {/* 3-Column Footer Links & Newsletter */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-10 pb-12 border-b border-white/10 text-xs">
-
-              {/* Column 1: Menu */}
-              <div className="lg:col-span-3 space-y-2.5">
-                <h3 className="text-white font-bold uppercase tracking-wider text-[11px] mb-3">
-                  {isBn ? 'মেন্যু' : 'Menu'}
-                </h3>
-                <ul className="space-y-2 text-gray-400">
-                  <li>
-                    <a href="#hero" className="hover:text-[#10B981] flex items-center gap-1.5 transition">
-                      <span className="text-[#10B981]">↗</span> {isBn ? 'মূল পাতা' : 'Home'}
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#process" className="hover:text-[#10B981] flex items-center gap-1.5 transition">
-                      <span className="text-[#10B981]">↗</span> {isBn ? 'কাজের পদ্ধতি' : 'How It Works'}
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#properties" className="hover:text-[#10B981] flex items-center gap-1.5 transition">
-                      <span className="text-[#10B981]">↗</span> {isBn ? 'কোর ফিচারসমূহ' : 'Features'}
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#testimonials" className="hover:text-[#10B981] flex items-center gap-1.5 transition">
-                      <span className="text-[#10B981]">↗</span> {isBn ? 'বাড়িওয়ালাদের মতামত' : 'Landlord Stories'}
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#blog" className="hover:text-[#10B981] flex items-center gap-1.5 transition">
-                      <span className="text-[#10B981]">↗</span> {isBn ? 'সহায়িকা ও ব্লগ' : 'Guides & Blog'}
-                    </a>
-                  </li>
-                </ul>
-              </div>
-
-              {/* Column 2: Office Address */}
-              <div className="lg:col-span-5 space-y-3">
-                <h3 className="text-white font-bold uppercase tracking-wider text-[11px] mb-3">
-                  {isBn ? 'যোগাযোগ ও প্রধান কার্যালয়' : 'Office Address'}
-                </h3>
-                <p className="text-gray-400 flex items-start gap-2">
-                  <MapPin className="w-4 h-4 text-[#10B981] shrink-0 mt-0.5" />
-                  <span>Gulshan Centre Point, Road 90, Gulshan-2, Dhaka 1212, Bangladesh</span>
-                </p>
-                <p className="text-gray-400 flex items-center gap-2">
-                  <Phone className="w-4 h-4 text-[#10B981] shrink-0" />
-                  <span>+880 1700-000000 / +880 2-9880000</span>
-                </p>
-                <p className="text-gray-400 flex items-center gap-2">
-                  <Mail className="w-4 h-4 text-[#10B981] shrink-0" />
-                  <span>support@barivara.app</span>
-                </p>
-              </div>
-
-              {/* Column 3: Subscribe Newsletter */}
-              <div className="lg:col-span-4 space-y-3">
-                <h3 className="text-white font-bold uppercase tracking-wider text-[11px] mb-3">
-                  {isBn ? 'নিউজলেটার সাবস্ক্রিপশন' : 'Subscribe Newsletter'}
-                </h3>
-                <p className="text-gray-400 text-[11px] leading-relaxed">
-                  {isBn
-                    ? 'বাড়ি ব্যবস্থাপনা ও আইনি পরামর্শের নিয়মিত আপডেট পেতে সাবস্ক্রাইব করুন।'
-                    : 'Receive monthly landlord tax guides, tenancy law updates, and rental management insights directly in your inbox.'}
-                </p>
-
-                {isFooterSubscribed ? (
-                  <p className="text-[11px] text-[#10B981] py-2">
-                    {isBn ? '✓ সফলভাবে সাবস্ক্রাইব করা হয়েছে' : '✓ Subscribed to BariVara Dispatch.'}
+            <div className="md:col-span-7 flex flex-col gap-8">
+              <figure aria-live="polite" className="flex flex-col gap-5">
+                <blockquote className="flex flex-col gap-5">
+                  <p className="text-2xl sm:text-3xl font-medium leading-snug tracking-[-0.02em] text-balance">
+                    {isBn ? testimonial.headlineBn : testimonial.headlineEn}
                   </p>
-                ) : (
-                  <form onSubmit={handleNewsletterSubmit} className="flex items-center mt-2">
-                    <input
-                      type="email"
-                      required
-                      value={footerEmail}
-                      onChange={(e) => setFooterEmail(e.target.value)}
-                      placeholder={isBn ? 'আপনার ইমেইল...' : 'Enter your email...'}
-                      className="w-full bg-[#1c1d21] border border-white/15 rounded-l-sm px-3.5 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#10B981]"
-                    />
-                    <button
-                      type="submit"
-                      aria-label="Subscribe"
-                      className="px-3.5 py-2.5 bg-[#12664F] hover:bg-[#0E513F] text-white font-bold rounded-r-sm transition border border-[#10B981]/40"
-                    >
-                      <ArrowUpRight className="w-4 h-4 text-[#10B981]" />
-                    </button>
-                  </form>
-                )}
-              </div>
-
-            </div>
-
-            {/* Bottom Copyright & Legal Row */}
-            <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-[11px] text-gray-500 gap-4">
-              <p>© 2026 BARIVARA. All rights reserved.</p>
-              <div className="flex items-center gap-6">
-                <a
-                  href="#hero"
-                  onClick={() => showToastNotification(isBn ? 'গোপনীয়তা নীতি' : 'Privacy Policy')}
-                  className="hover:text-gray-300 transition"
-                >
-                  {isBn ? 'গোপনীয়তা' : 'Privacy'}
-                </a>
-                <a
-                  href="#hero"
-                  onClick={() => showToastNotification(isBn ? 'শর্তাবলী' : 'Terms of Service')}
-                  className="hover:text-gray-300 transition"
-                >
-                  {isBn ? 'শর্তাবলী' : 'Terms'}
-                </a>
-                <a
-                  href="#hero"
-                  onClick={() => showToastNotification(isBn ? 'নিরাপত্তা ব্যবস্থা' : 'Security Overview')}
-                  className="hover:text-gray-300 transition"
-                >
-                  {isBn ? 'নিরাপত্তা' : 'Security'}
-                </a>
-              </div>
-            </div>
-
-          </div>
-        </footer>
-
-      </div>
-
-      {/* ─────────────────────────────────────────────────────────────
-          11. PROPERTY / MODULE QUICK-VIEW MODAL
-      ───────────────────────────────────────────────────────────── */}
-      {quickViewModule && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-200"
-          onClick={() => setQuickViewModule(null)}
-        >
-          <div
-            className="modal-enter bg-[#16171a] border border-white/15 rounded-md max-w-2xl w-full overflow-hidden shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Image Header */}
-            <div className="relative h-64 sm:h-80 bg-[#1c1d21]">
-              <Image
-                src={quickViewModule.imageUrl}
-                alt={quickViewModule.title}
-                fill
-                sizes="(max-width: 768px) 100vw, 680px"
-                className="object-cover object-top"
-              />
-              <button
-                onClick={() => setQuickViewModule(null)}
-                aria-label="Close dialog"
-                className="btn-press absolute top-4 right-4 w-9 h-9 rounded-full bg-[#111214]/80 text-white hover:bg-[#12664F] hover:text-white flex items-center justify-center transition shadow-md border border-white/10"
-              >
-                <X className="w-4 h-4" />
-              </button>
-              <span className="absolute bottom-4 left-4 bg-[#111214]/90 text-[#10B981] text-xs font-semibold px-3 py-1 rounded border border-[#10B981]/30">
-                {isBn ? quickViewModule.badgeBn : quickViewModule.badge}
-              </span>
-            </div>
-
-            {/* Modal Content */}
-            <div className="p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold text-white">
-                  {isBn ? quickViewModule.titleBn : quickViewModule.title}
-                </h3>
-                <span className="text-xl font-extrabold text-[#10B981] tabular-nums">
-                  {isBn ? quickViewModule.highlightMetricBn : quickViewModule.highlightMetric}
-                </span>
-              </div>
-
-              <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
-                {isBn ? quickViewModule.descriptionBn : quickViewModule.descriptionEn}
-              </p>
-
-              {/* Live Preview Box */}
-              <div className="bg-[#111214] p-3 rounded border border-white/10 text-xs font-mono text-gray-200">
-                <span className="text-xs font-medium text-gray-400 block mb-1">
-                  {isBn ? 'সিস্টেম আউটপুট প্রিভিউ' : 'Live Output Preview'}
-                </span>
-                <span className="text-[#10B981] font-semibold">
-                  {isBn ? quickViewModule.sampleUiSnippetBn : quickViewModule.sampleUiSnippetEn}
-                </span>
-              </div>
-
-              {/* Specs Bar */}
-              <div className="flex flex-wrap items-center gap-4 text-xs text-gray-400 py-3 border-y border-white/10">
-                {(isBn ? quickViewModule.specsBn : quickViewModule.specs).map((spec, i) => (
-                  <span key={i} className="flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#10B981]" />
-                    <span>{spec}</span>
+                  <p className="text-[15px] text-[var(--soft)]/80 leading-relaxed">
+                    {isBn ? testimonial.quoteBn : testimonial.quoteEn}
+                  </p>
+                </blockquote>
+                <figcaption>
+                  <span className="block font-medium">{isBn ? testimonial.nameBn : testimonial.name}</span>
+                  <span className="block text-sm text-[var(--muted)]">
+                    {isBn ? testimonial.roleBn : testimonial.role} · {testimonial.location}
                   </span>
-                ))}
-              </div>
+                </figcaption>
+              </figure>
 
-              {/* Actions */}
-              <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-                <button
-                  onClick={() => setQuickViewModule(null)}
-                  className="px-4 py-2.5 rounded bg-[#1c1d21] hover:bg-[#24262b] border border-white/15 text-xs font-semibold text-white transition"
-                >
-                  {isBn ? 'বন্ধ করুন' : 'Close'}
-                </button>
-                <Link
-                  href="/register"
-                  className="px-5 py-2.5 rounded bg-[#12664F] hover:bg-[#0E513F] text-white font-bold text-xs transition flex items-center gap-2 border border-[#10B981]/40 shadow-sm"
-                >
-                  <span>{isBn ? 'ব্যবহার শুরু করুন' : 'Activate Module'}</span>
-                  <ArrowRight className="w-3.5 h-3.5 text-[#10B981]" />
-                </Link>
+              <div className="pt-6 border-t border-white/10 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={prevTestimonial}
+                    aria-label={isBn ? 'আগের মতামত' : 'Previous testimonial'}
+                    className={s.iconBtn}
+                  >
+                    <ChevronLeft className="w-5 h-5" aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={nextTestimonial}
+                    aria-label={isBn ? 'পরের মতামত' : 'Next testimonial'}
+                    className={s.iconBtn}
+                  >
+                    <ChevronRight className="w-5 h-5" aria-hidden="true" />
+                  </button>
+                </div>
+                <div className="flex items-center gap-3 text-sm tabular-nums text-[var(--muted)]">
+                  <span className="text-white">{String(testimonialIndex + 1).padStart(2, '0')}</span>
+                  <span className="w-10 h-px bg-white/20" aria-hidden="true" />
+                  <span>{String(totalTestimonials).padStart(2, '0')}</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        </section>
 
-      {/* ─────────────────────────────────────────────────────────────
-          12. CONSULTATION / INQUIRY MODAL
-      ───────────────────────────────────────────────────────────── */}
-      {isConsultationOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-200"
-          onClick={() => setIsConsultationOpen(false)}
+        {/* ─────────────────────────────────────────────────────────────
+            GUIDES
+        ───────────────────────────────────────────────────────────── */}
+        <section
+          id="blog"
+          aria-labelledby="guides-title"
+          className="scroll-mt-6 px-4 sm:px-8 pb-20 sm:pb-28 max-w-7xl mx-auto"
         >
-          <div
-            className="modal-enter bg-[#16171a] border border-white/15 rounded-md max-w-md w-full p-6 space-y-4 shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-white">
-                {isBn ? 'বাড়িওয়ালাদের জন্য পরামর্শ ও ডেমো' : 'Request Landlord Demo & Setup'}
-              </h3>
-              <button
-                onClick={() => setIsConsultationOpen(false)}
-                aria-label="Close modal"
-                className="text-gray-400 hover:text-white"
+          <SectionHeading
+            id="guides-title"
+            align="left"
+            eyebrow={isBn ? 'সহায়িকা ও গাইড' : 'Guides & insights'}
+            title={isBn ? 'বাড়িওয়ালাদের জন্য' : 'Essential reading'}
+            muted={isBn ? 'জরুরি পরামর্শ' : 'for property owners'}
+          />
+
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-5">
+            {ARTICLES.map((article) => (
+              <article
+                key={article.id}
+                className={`${s.card} ${s.glass} ${s.reveal} rounded-[22px] p-3 flex flex-col`}
               >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <p className="text-xs text-gray-400">
-              {isBn
-                ? 'আপনার বাড়ি বা ফ্ল্যাটের তথ্য দিন। আমাদের প্রতিনিধি সরাসরি আপনার সাথে যোগাযোগ করে সম্পূর্ণ বিনামূল্যে সিস্টেম সেটআপে সহায়তা করবে।'
-                : 'Leave your details below and our team will guide you through system setup and WhatsApp receipt dispatch.'}
-            </p>
-
-            <form onSubmit={handleConsultationSubmit} className="space-y-3 text-xs">
-              <div>
-                <label htmlFor="consult-name" className="block text-gray-300 mb-1 font-medium">
-                  {isBn ? 'আপনার পূর্ণ নাম' : 'Full Name'} *
-                </label>
-                <input
-                  id="consult-name"
-                  type="text"
-                  required
-                  value={consultName}
-                  onChange={(e) => setConsultName(e.target.value)}
-                  placeholder={isBn ? 'প্রকৌশলী রফিকুল ইসলাম' : 'Rafiqul Islam'}
-                  className="w-full bg-[#1c1d21] border border-white/15 rounded px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-[#10B981]"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="consult-phone" className="block text-gray-300 mb-1 font-medium">
-                  {isBn ? 'মোবাইল নম্বর (হোয়াটসঅ্যাপ)' : 'Mobile Phone (WhatsApp)'} *
-                </label>
-                <input
-                  id="consult-phone"
-                  type="tel"
-                  required
-                  value={consultPhone}
-                  onChange={(e) => setConsultPhone(e.target.value)}
-                  placeholder="+880 1700-000000"
-                  className="w-full bg-[#1c1d21] border border-white/15 rounded px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-[#10B981]"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label htmlFor="consult-units" className="block text-gray-300 mb-1 font-medium">
-                    {isBn ? 'ফ্ল্যাট / ইউনিট সংখ্যা' : 'Units Count'}
-                  </label>
-                  <select
-                    id="consult-units"
-                    value={consultUnits}
-                    onChange={(e) => setConsultUnits(e.target.value)}
-                    className="w-full bg-[#1c1d21] border border-white/15 rounded px-3 py-2 text-white focus:outline-none focus:border-[#10B981] cursor-pointer"
-                  >
-                    <option value="1–5">1–5 Flats</option>
-                    <option value="6–10">6–10 Flats</option>
-                    <option value="11–15+">11–15+ Flats</option>
-                  </select>
+                <div className={`${s.shot} aspect-[4/3]`}>
+                  <Image
+                    src={article.imageUrl}
+                    alt=""
+                    fill
+                    sizes="(min-width: 768px) 33vw, 100vw"
+                    className="object-cover"
+                  />
+                  <span className="absolute top-3 left-3 z-10 rounded-full bg-[#0b1426]/80 backdrop-blur px-3 py-1 text-[11px] font-medium text-[#a6e8e4] border border-white/10">
+                    {isBn ? article.categoryBn : article.categoryEn}
+                  </span>
                 </div>
-
-                <div>
-                  <label htmlFor="consult-location" className="block text-gray-300 mb-1 font-medium">
-                    {isBn ? 'এলাকা' : 'Location'}
-                  </label>
-                  <select
-                    id="consult-location"
-                    value={consultLocation}
-                    onChange={(e) => setConsultLocation(e.target.value)}
-                    className="w-full bg-[#1c1d21] border border-white/15 rounded px-3 py-2 text-white focus:outline-none focus:border-[#10B981] cursor-pointer"
-                  >
-                    <option value="Dhaka">Dhaka</option>
-                    <option value="Chittagong">Chittagong</option>
-                    <option value="Sylhet">Sylhet</option>
-                    <option value="Other">Other District</option>
-                  </select>
+                <div className="px-2 pt-5 pb-2 flex flex-col gap-3 flex-1">
+                  <h3 className="text-[17px] font-medium leading-snug tracking-[-0.01em]">
+                    <button
+                      type="button"
+                      className={`${s.stretch} text-left`}
+                      onClick={() =>
+                        toast(isBn ? `শীঘ্রই আসছে: ${article.titleBn}` : `Coming soon: “${article.titleEn}”`)
+                      }
+                    >
+                      {isBn ? article.titleBn : article.titleEn}
+                    </button>
+                  </h3>
+                  <p className="text-sm text-[var(--muted)] leading-relaxed">
+                    {isBn ? article.excerptBn : article.excerptEn}
+                  </p>
+                  <div className="mt-auto pt-4 border-t border-white/10 flex items-center gap-2.5">
+                    <span className="relative w-7 h-7 rounded-full overflow-hidden border border-white/20 shrink-0">
+                      <Image src={article.authorAvatar} alt="" fill sizes="28px" className="object-cover" />
+                    </span>
+                    <span className="text-xs text-[var(--muted)]">
+                      {article.author} · {isBn ? article.readTimeBn : article.readTime}
+                    </span>
+                  </div>
                 </div>
-              </div>
-
-              <button
-                type="submit"
-                className="w-full py-2.5 bg-[#12664F] hover:bg-[#0E513F] text-white font-bold rounded transition mt-2 shadow-lg shadow-[#12664F]/30 border border-[#10B981]/40"
-              >
-                {isBn ? 'অনুরোধ পাঠান →' : 'Request Landlord Demo →'}
-              </button>
-            </form>
+              </article>
+            ))}
           </div>
-        </div>
-      )}
+        </section>
+
+        {/* ─────────────────────────────────────────────────────────────
+            CTA — the hero's night scene in a panel
+        ───────────────────────────────────────────────────────────── */}
+        <section id="cta" aria-labelledby="cta-title" className="scroll-mt-6 px-4 sm:px-8 pb-20 sm:pb-28">
+          <div className={`${s.scene} ${s.reveal} max-w-7xl mx-auto`}>
+            {/* eslint-disable-next-line @next/next/no-img-element -- local decorative backdrop, blurred */}
+            <img src="/hero/sky-night.webp" alt="" loading="lazy" />
+            <div className="px-6 sm:px-12 lg:px-16 py-16 sm:py-20 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+              <div className="lg:col-span-7 flex flex-col gap-6">
+                <span className={`${s.eyebrow} self-start`}>
+                  {isBn ? 'কাগজহীন বাড়ি ব্যবস্থাপনা' : 'Paperless property management'}
+                </span>
+                <h2 id="cta-title" className={s.heading}>
+                  {isBn ? 'কাগজের খাতার অনিশ্চয়তা ভুলে' : 'Ready to leave paper khata'}{' '}
+                  <i className="!text-[#c9d3e3]">{isBn ? 'আজই শুরু করুন' : 'behind?'}</i>
+                </h2>
+                <p className="text-[15px] text-[var(--soft)] leading-relaxed max-w-xl">
+                  {isBn
+                    ? '১ থেকে ১৫টি ফ্ল্যাট বা দোকান পরিচালনাকারী বাংলাদেশি বাড়িওয়ালাদের জন্য তৈরি। ১লা তারিখে অটোমেটিক বিল তৈরি করুন, বিকাশে ভাড়া নিয়ে ১-ক্লিকে হোয়াটসঅ্যাপে রসিদ পাঠিয়ে দিন।'
+                    : 'Built for landlords in Bangladesh managing 1–15 flats. Generate rent notices on the 1st, reconcile bKash payments, and send WhatsApp receipts in one click.'}
+                </p>
+                <div className="flex flex-wrap items-center gap-3 pt-2">
+                  <Link href="/register" className={`${s.pill} ${s.pillLight}`}>
+                    {isBn ? 'বিনামূল্যে শুরু করুন' : 'Get started free'}
+                    <ArrowRight className="w-4 h-4" aria-hidden="true" />
+                  </Link>
+                  <button type="button" onClick={openConsultation} className={`${s.pill} ${s.pillGlass}`}>
+                    {isBn ? 'ডেমোর অনুরোধ' : 'Request a demo'}
+                  </button>
+                </div>
+              </div>
+
+              <div className="lg:col-span-5">
+                <div className={`${s.glass} rounded-[22px] p-6 !bg-[#0b1426]/45`}>
+                  <div className="flex items-center gap-3 pb-5 border-b border-white/10">
+                    <span className="w-10 h-10 rounded-full grid place-items-center bg-[#2dc2bd]/15 border border-[#2dc2bd]/30">
+                      <ShieldCheck className="w-5 h-5 text-[var(--teal)]" aria-hidden="true" />
+                    </span>
+                    <div>
+                      <h3 className="font-medium">
+                        {isBn ? 'বাড়িভাড়া গ্যারান্টি' : 'The BariVara guarantee'}
+                      </h3>
+                      <p className="text-xs text-[var(--muted)]">
+                        {isBn ? '১–১৫ ইউনিটের জন্য' : 'Tailored for 1–15 units'}
+                      </p>
+                    </div>
+                  </div>
+                  <dl className="mt-2 text-sm">
+                    {[
+                      [isBn ? 'হোয়াটসঅ্যাপ রসিদ' : 'WhatsApp receipts', isBn ? '১-ক্লিকে' : 'Instant, 1 click'],
+                      [isBn ? 'সাব-মিটার বিল বণ্টন' : 'Sub-meter math', isBn ? 'শতভাগ সঠিক' : 'Exact split'],
+                      [isBn ? 'বিকাশ ও নগদ ট্র্যাকিং' : 'bKash & Nagad TrxID', isBn ? 'স্বয়ংক্রিয় জের' : 'Auto rollover'],
+                      [isBn ? 'প্ল্যাটফর্ম চার্জ' : 'Platform fee', isBn ? '৳০ ফ্রি ট্রায়াল' : '৳0 free trial'],
+                    ].map(([label, value]) => (
+                      <div
+                        key={label}
+                        className="flex items-center justify-between gap-4 py-3 border-b border-white/5 last:border-0"
+                      >
+                        <dt className="text-[var(--soft)]/75">{label}</dt>
+                        <dd className="font-medium text-[#a6e8e4] text-right">{value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
 
       {/* ─────────────────────────────────────────────────────────────
-          13. FLOATING TOAST NOTIFICATION
+          FOOTER
       ───────────────────────────────────────────────────────────── */}
-      <div
-        id="toast"
-        className={`fixed bottom-5 right-5 z-50 bg-[#16171a] border border-[#10B981] text-white text-xs px-4 py-3 rounded shadow-2xl flex items-center gap-2.5 transition-[opacity,transform] duration-300 ${floatingToast.visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
-          }`}
+      <footer className="border-t border-white/10 bg-[#070d1a] px-4 sm:px-8 pt-16 pb-10">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-10 pb-12 border-b border-white/10 text-sm">
+            <div className="lg:col-span-4 flex flex-col gap-4">
+              <Link href="#hero" className={`${s.focusRing} flex items-center gap-2.5 self-start rounded`}>
+                {/* eslint-disable-next-line @next/next/no-img-element -- small local logo */}
+                <img src="/logo.png" alt="" className="w-9 h-9 object-contain" />
+                <span className="font-bold tracking-[0.16em]">BARIVARA</span>
+              </Link>
+              <p className="text-[var(--muted)] leading-relaxed max-w-xs">
+                {isBn
+                  ? 'বাংলাদেশের বাড়িওয়ালাদের জন্য আধুনিক ও নির্ভরযোগ্য ডিজিটাল ভাড়া ব্যবস্থাপনা।'
+                  : 'Modern, reliable rent management and ledger platform for landlords in Bangladesh.'}
+              </p>
+            </div>
+
+            <nav aria-label={isBn ? 'ফুটার মেন্যু' : 'Footer'} className="lg:col-span-2">
+              <h3 className="text-xs font-medium text-white/60 mb-4">{isBn ? 'মেন্যু' : 'Menu'}</h3>
+              <ul className="flex flex-col gap-2.5 text-[var(--soft)]">
+                {[
+                  ['#process', isBn ? 'কাজের পদ্ধতি' : 'How it works'],
+                  ['#properties', isBn ? 'ফিচারসমূহ' : 'Features'],
+                  ['#testimonials', isBn ? 'মতামত' : 'Reviews'],
+                  ['#blog', isBn ? 'গাইড' : 'Guides'],
+                ].map(([href, label]) => (
+                  <li key={href}>
+                    <a href={href} className={`${s.focusRing} rounded hover:text-white transition-colors`}>
+                      {label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+
+            <div className="lg:col-span-3">
+              <h3 className="text-xs font-medium text-white/60 mb-4">{isBn ? 'যোগাযোগ' : 'Contact'}</h3>
+              <address className="not-italic flex flex-col gap-3 text-[var(--soft)]">
+                <span className="flex items-start gap-2.5">
+                  <MapPin className="w-4 h-4 text-[var(--teal)] shrink-0 mt-0.5" aria-hidden="true" />
+                  Gulshan Centre Point, Road 90, Gulshan-2, Dhaka 1212
+                </span>
+                <span className="flex items-center gap-2.5">
+                  <Phone className="w-4 h-4 text-[var(--teal)] shrink-0" aria-hidden="true" />
+                  +880 1700-000000
+                </span>
+                <span className="flex items-center gap-2.5">
+                  <Mail className="w-4 h-4 text-[var(--teal)] shrink-0" aria-hidden="true" />
+                  support@barivara.app
+                </span>
+              </address>
+            </div>
+
+            <div className="lg:col-span-3">
+              <h3 id="newsletter-title" className="text-xs font-medium text-white/60 mb-4">
+                {isBn ? 'নিউজলেটার' : 'Newsletter'}
+              </h3>
+              <p className="text-[var(--muted)] leading-relaxed mb-4">
+                {isBn
+                  ? 'বাড়ি ব্যবস্থাপনা ও আইনি পরামর্শের মাসিক আপডেট।'
+                  : 'Monthly landlord tax guides and tenancy law updates.'}
+              </p>
+              {isFooterSubscribed ? (
+                <p role="status" className="text-[#a6e8e4]">
+                  {isBn ? '✓ সাবস্ক্রাইব করা হয়েছে' : '✓ You’re subscribed.'}
+                </p>
+              ) : (
+                <form onSubmit={handleNewsletterSubmit} aria-labelledby="newsletter-title" className="flex gap-2">
+                  <input
+                    type="email"
+                    required
+                    autoComplete="email"
+                    value={footerEmail}
+                    onChange={(e) => setFooterEmail(e.target.value)}
+                    placeholder={isBn ? 'আপনার ইমেইল' : 'you@example.com'}
+                    aria-label={isBn ? 'ইমেইল' : 'Email address'}
+                    className={`${s.field} !rounded-full`}
+                  />
+                  <button
+                    type="submit"
+                    aria-label={isBn ? 'সাবস্ক্রাইব' : 'Subscribe'}
+                    className={`${s.iconBtn} shrink-0 !bg-white !text-[#0d1117] !border-white`}
+                  >
+                    <ArrowUpRight className="w-4 h-4" aria-hidden="true" />
+                  </button>
+                </form>
+              )}
+            </div>
+          </div>
+
+          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[var(--muted)]">
+            <p>© 2026 BariVara. {isBn ? 'সর্বস্বত্ব সংরক্ষিত।' : 'All rights reserved.'}</p>
+            <p>{isBn ? 'ঢাকায় তৈরি' : 'Made in Dhaka'}</p>
+          </div>
+        </div>
+      </footer>
+
+      {/* ─────────────────────────────────────────────────────────────
+          MODULE DETAILS DIALOG
+      ───────────────────────────────────────────────────────────── */}
+      <LandingDialog open={isModuleOpen} onClose={closeModule} labelledBy="module-dialog-title">
+        <div className="relative aspect-[16/9] bg-[#111c31]">
+          <Image src={m.imageUrl} alt="" fill sizes="680px" className="object-cover object-top" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0f1b33] via-transparent to-transparent" />
+          <button
+            type="button"
+            onClick={closeModule}
+            aria-label={isBn ? 'বন্ধ করুন' : 'Close'}
+            className={`${s.iconBtn} absolute top-4 right-4 !bg-[#0b1426]/70 backdrop-blur`}
+          >
+            <X className="w-4 h-4" aria-hidden="true" />
+          </button>
+        </div>
+        <div className="p-6 sm:p-8 flex flex-col gap-5">
+          <div className="flex flex-col gap-2">
+            <span className="text-xs font-medium text-[var(--teal)]">{isBn ? m.badgeBn : m.badge}</span>
+            <h2 id="module-dialog-title" className="text-2xl font-medium leading-snug tracking-[-0.02em]">
+              {isBn ? m.titleBn : m.title}
+            </h2>
+          </div>
+          <p className="text-[15px] text-[var(--soft)]/85 leading-relaxed">
+            {isBn ? m.descriptionBn : m.descriptionEn}
+          </p>
+          <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-2.5 text-sm text-[var(--soft)]">
+            {(isBn ? m.featuresBn : m.features).map((feature) => (
+              <li key={feature} className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-[var(--teal)] shrink-0 mt-0.5" aria-hidden="true" />
+                {feature}
+              </li>
+            ))}
+          </ul>
+          <div className="rounded-xl border border-white/10 bg-[#0b1426] px-4 py-3 text-sm">
+            <span className="block text-xs text-[var(--muted)] mb-1">
+              {isBn ? 'নমুনা আউটপুট' : 'Sample output'}
+            </span>
+            <span className="font-mono text-[13px] text-[#a6e8e4]">
+              {isBn ? m.sampleUiSnippetBn : m.sampleUiSnippetEn}
+            </span>
+          </div>
+          <div className="flex flex-wrap items-center justify-end gap-3 pt-2">
+            <button type="button" onClick={closeModule} className={`${s.pill} ${s.pillGlass}`}>
+              {isBn ? 'বন্ধ করুন' : 'Close'}
+            </button>
+            <Link href="/register" className={`${s.pill} ${s.pillLight}`}>
+              {isBn ? m.ctaTextBn : m.ctaTextEn}
+              <ArrowRight className="w-4 h-4" aria-hidden="true" />
+            </Link>
+          </div>
+        </div>
+      </LandingDialog>
+
+      {/* ─────────────────────────────────────────────────────────────
+          CONSULTATION DIALOG
+      ───────────────────────────────────────────────────────────── */}
+      <LandingDialog
+        open={isConsultationOpen}
+        onClose={closeConsultation}
+        labelledBy="consult-dialog-title"
+        narrow
       >
-        <span className="w-2 h-2 rounded-full bg-[#10B981]" />
-        <span>{floatingToast.message}</span>
-      </div>
+        <div className="p-6 sm:p-8 flex flex-col gap-5">
+          <div className="flex items-start justify-between gap-4">
+            <h2 id="consult-dialog-title" className="text-xl font-medium leading-snug tracking-[-0.015em]">
+              {isBn ? 'ডেমো ও সেটআপের অনুরোধ' : 'Request a demo & setup'}
+            </h2>
+            <button
+              type="button"
+              onClick={closeConsultation}
+              aria-label={isBn ? 'বন্ধ করুন' : 'Close'}
+              className={`${s.iconBtn} !w-9 !h-9 shrink-0`}
+            >
+              <X className="w-4 h-4" aria-hidden="true" />
+            </button>
+          </div>
+          <p className="text-sm text-[var(--muted)] leading-relaxed">
+            {isBn
+              ? 'আপনার তথ্য দিন। আমাদের প্রতিনিধি যোগাযোগ করে বিনামূল্যে সেটআপে সহায়তা করবে।'
+              : 'Leave your details and our team will call to set up your building and WhatsApp receipts.'}
+          </p>
+
+          <form onSubmit={handleConsultationSubmit} className="flex flex-col gap-4 text-sm">
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="consult-name" className="text-[var(--soft)]">
+                {isBn ? 'পূর্ণ নাম' : 'Full name'}
+              </label>
+              <input
+                id="consult-name"
+                type="text"
+                required
+                data-autofocus
+                autoComplete="name"
+                value={consultName}
+                onChange={(e) => setConsultName(e.target.value)}
+                placeholder={isBn ? 'রফিকুল ইসলাম' : 'Rafiqul Islam'}
+                className={s.field}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="consult-phone" className="text-[var(--soft)]">
+                {isBn ? 'মোবাইল নম্বর (হোয়াটসঅ্যাপ)' : 'Mobile (WhatsApp)'}
+              </label>
+              <input
+                id="consult-phone"
+                type="tel"
+                required
+                autoComplete="tel"
+                value={consultPhone}
+                onChange={(e) => setConsultPhone(e.target.value)}
+                placeholder="+880 1700-000000"
+                className={s.field}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="consult-units" className="text-[var(--soft)]">
+                  {isBn ? 'ইউনিট সংখ্যা' : 'Units'}
+                </label>
+                <select
+                  id="consult-units"
+                  value={consultUnits}
+                  onChange={(e) => setConsultUnits(e.target.value)}
+                  className={s.field}
+                >
+                  <option value="1–5">{isBn ? '১–৫টি ফ্ল্যাট' : '1–5 flats'}</option>
+                  <option value="6–10">{isBn ? '৬–১০টি ফ্ল্যাট' : '6–10 flats'}</option>
+                  <option value="11–15+">{isBn ? '১১–১৫+ ফ্ল্যাট' : '11–15+ flats'}</option>
+                </select>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="consult-location" className="text-[var(--soft)]">
+                  {isBn ? 'এলাকা' : 'Location'}
+                </label>
+                <select
+                  id="consult-location"
+                  value={consultLocation}
+                  onChange={(e) => setConsultLocation(e.target.value)}
+                  className={s.field}
+                >
+                  <option value="Dhaka">{isBn ? 'ঢাকা' : 'Dhaka'}</option>
+                  <option value="Chittagong">{isBn ? 'চট্টগ্রাম' : 'Chittagong'}</option>
+                  <option value="Sylhet">{isBn ? 'সিলেট' : 'Sylhet'}</option>
+                  <option value="Other">{isBn ? 'অন্যান্য জেলা' : 'Other district'}</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" className={`${s.pill} ${s.pillTeal} mt-2 w-full`}>
+              {isBn ? 'অনুরোধ পাঠান' : 'Request demo'}
+              <ArrowRight className="w-4 h-4" aria-hidden="true" />
+            </button>
+          </form>
+        </div>
+      </LandingDialog>
     </div>
   );
 }
