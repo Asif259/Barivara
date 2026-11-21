@@ -11,7 +11,7 @@
   --color-hero-muted: #b8ccc3;
   --color-hero-mint: #7ff0c2;
   --color-hero-mint-light: #a1f4d2;
-  --color-hero-emerald: #2DC2BD;
+  --color-hero-emerald: #12664F;
   --color-hero-emerald-dark: #0e513e;
   --color-hero-voucher-border: #d8d0ba;
 }
@@ -47,7 +47,7 @@
     --ring: 161 70% 24%;
 
     --radius: 0.5rem;
-    --brand-primary: #2DC2BD;
+    --brand-primary: #12664F;
     --brand-secondary: #307473;
     --brand-accent: #2dc2bd;
     --surface: #ffffff;
@@ -278,7 +278,7 @@ body {
   --bv-panel: #0b241c;
   --bv-line: rgba(255, 255, 255, 0.09);
   --bv-line-strong: rgba(255, 255, 255, 0.16);
-  --bv-emerald: #2DC2BD;
+  --bv-emerald: #12664F;
   --bv-emerald-deep: #0b4436;
   --bv-mint: #7ff0c2;
   --bv-teal: #2dc2bd;

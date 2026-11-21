@@ -6,7 +6,7 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          emerald: '#2DC2BD',
+          emerald: '#12664F',
           teal: '#307473',
           cyan: '#2DC2BD',
           ice: '#C6D4FF',
