@@ -7,11 +7,11 @@
   ],
   "scripts": {
     "dev": "turbo run dev",
-    "build": "npm install --include=dev && npm --prefix apps/api run build && rm -rf ./dist && cp -r apps/api/dist ./dist",
+    "build": "npm install --include=dev && npm --prefix apps/api run build && rm -rf ./dist && cp -r apps/api/dist ./dist && cp apps/api/prisma/schema.prisma dist/schema.prisma && mv dist/src/main.js dist/src/app.js && cp scripts/boot.js dist/src/main.js",
     "lint": "turbo run lint",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",
-    "start": "node start.js",
+    "start": "node dist/src/main.js",
     "start:prod": "node dist/src/main.js",
     "prisma:deploy": "npx prisma migrate deploy --schema=apps/api/prisma/schema.prisma",
     "prisma:generate": "npx prisma generate --schema=apps/api/prisma/schema.prisma",
