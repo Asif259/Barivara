@@ -1,0 +1,90 @@
+import * as dns from 'dns';
+import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { ValidationPipe, Logger } from '@nestjs/common';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { ConfigService } from '@nestjs/config';
+import helmet from 'helmet';
+import { AppModule } from './app.module';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { createCorsOptions } from './config/cors.config';
+
+// Force DNS resolution to prefer IPv4 first.
+// Prevents ENETUNREACH errors on cloud container platforms (like Render) that lack outbound IPv6 routing.
+try {
+  dns.setDefaultResultOrder('ipv4first');
+} catch {
+  // Ignore in environments where not supported
+}
+
+async function bootstrap() {
+  const logger = new Logger('Bootstrap');
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  // Resolve config through NestJS DI — eliminates direct process.env usage in bootstrap
+  const configService = app.get(ConfigService);
+  const port = configService.get<number>('port') ?? 3000;
+  const nodeEnv = configService.get<string>('nodeEnv') ?? 'development';
+  const frontendUrl = configService.get<string>('frontendUrl');
+
+  // Trust the configured number of proxy hops so req.ip (and therefore the
+  // throttler and audit logs) reflect the real client, not the proxy.
+  const trustProxy = configService.get<number>('trustProxy') ?? 0;
+  if (trustProxy > 0) {
+    app.set('trust proxy', trustProxy);
+  }
+
+  // Security Headers
+  app.use(helmet());
+
+  // Global Prefix
+  app.setGlobalPrefix('api/v1');
+
+  app.enableCors(createCorsOptions(nodeEnv, frontendUrl));
+
+  // Global Validation & Transformation
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+      forbidNonWhitelisted: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+    }),
+  );
+
+  // Global Filters & Interceptors
+  app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalInterceptors(
+    new LoggingInterceptor(),
+    new TransformInterceptor(),
+  );
+
+  // Swagger / OpenAPI — only in non-production environments
+  if (nodeEnv !== 'production') {
+    const config = new DocumentBuilder()
+      .setTitle('BariVara API (বাড়িভাড়া)')
+      .setDescription(
+        'Bangla-first rental & property rent management backend REST API powering Web and Mobile applications.',
+      )
+      .setVersion('1.0.0')
+      .addBearerAuth()
+      .build();
+
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api/docs', app, document, {
+      swaggerOptions: {
+        persistAuthorization: true,
+      },
+    });
+    logger.log(`Swagger documentation available at /api/docs`);
+  }
+
+  await app.listen(port, '0.0.0.0');
+  logger.log(`🚀 BariVara Backend running on http://localhost:${port}/api/v1`);
+}
+
+bootstrap();
