@@ -1,0 +1,21 @@
+{
+  "run_id": "run-001",
+  "repo": "Barivara",
+  "target": "/Users/ashrafulasif/My projects/Barivara",
+  "source_ref": "workspace-current",
+  "profile": "full-audit",
+  "scope_paths": ["barivara-api/", "barivara-web/"],
+  "budget": null,
+  "execution_policy": "source-review-only",
+  "run_status": "completed",
+  "started_at": "2025-07-16T00:00:00Z",
+  "completed_at": "2025-07-16T00:00:00Z",
+  "shared_file_owners": {
+    "run-metadata.json": "parent",
+    "architecture.md": "parent",
+    "findings.json": "parent",
+    "FINDINGS-DETAIL.md": "parent",
+    "NEEDS-VALIDATION.md": "parent",
+    "REPORT.md": "parent"
+  }
+}

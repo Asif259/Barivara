@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "rifaths-gadget",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "5178", "--directory", "rifaths-gadget"],
+      "port": 5178
+    },
+    {
+      "name": "rifaths-gadget-react",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "/Users/ashrafulasif/My projects/Rifath's-Gadget", "run", "dev"],
+      "port": 5273
+    }
+  ]
+}

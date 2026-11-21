@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rifath's Gadget · রিফারবিশড ল্যাপটপ</title>
+<meta name="description" content="Rifath's Gadget finds refurbished laptops to order in Bangladesh. Tell us your budget and use; we suggest a spec, search, check the laptop before buying it, and you pay at handover.">
+<meta name="theme-color" content="#ECE8DD">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wdth,wght@75..125,300..800&family=Archivo:wdth,wght@62..125,300..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- cobalt line-art laptop used on every cover -->
+    <symbol id="lap" viewBox="0 0 220 150">
+      <clipPath id="scr"><path d="M58 18 L176 28 L168 96 L48 86 Z"/></clipPath>
+      <path d="M50 10 L184 21 L174 102 L38 92 Z" class="la-fill"/>
+      <path d="M58 18 L176 28 L168 96 L48 86 Z" class="la-screen"/>
+      <g clip-path="url(#scr)" class="la-hatch">
+        <path d="M40 40 L110 10 M40 56 L140 14 M40 72 L170 18 M40 88 L180 34 M60 96 L180 50 M90 98 L180 66 M120 100 L180 82"/>
+      </g>
+      <path d="M38 92 L174 102 L206 126 L14 116 Z" class="la-fill"/>
+      <path d="M14 116 L206 126 L206 131 L14 121 Z" class="la-edge"/>
+      <path d="M52 98 L162 106 M47 102 L168 110 M42 106 L174 114 M37 110 L180 118" class="la-keys"/>
+      <path d="M92 117 L130 119.5 L134 123 L90 120.5 Z" class="la-pad"/>
+    </symbol>
+  </defs>
+</svg>
+
+<header class="top" id="top">
+  <a class="brand" href="#hero" aria-label="Rifath's Gadget">
+    <span class="brand-name">Rifath's Gadget</span>
+    <span class="brand-rule" aria-hidden="true"></span>
+    <span class="brand-sub" data-i18n="brand.sub"></span>
+  </a>
+  <nav class="links" aria-label="Main">
+    <a href="#hunt" data-i18n="nav.hunt"></a>
+    <a href="#bench" data-i18n="nav.bench"></a>
+    <a href="#terms" data-i18n="nav.terms"></a>
+    <a href="#faq" data-i18n="nav.faq"></a>
+  </nav>
+  <div class="top-right">
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-lang="bn">বাং</button><span aria-hidden="true">/</span><button type="button" data-lang="en">EN</button>
+    </div>
+    <a class="top-wa wa-link" href="#" target="_blank" rel="noopener">WhatsApp ↗</a>
+  </div>
+</header>
+
+<main>
+
+<!-- 01 HERO: the budget shelf -->
+<section class="hero" id="hero">
+  <div class="halftone ht-left" aria-hidden="true">খোঁজ</div>
+  <div class="halftone ht-right" aria-hidden="true">যাচাই</div>
+
+  <div class="hero-head">
+    <h1 class="hero-title"><span class="mask"><span data-i18n="hero.t1"></span></span> <span class="mask"><span data-i18n="hero.t2"></span></span></h1>
+    <p class="hero-sub" data-i18n="hero.sub"></p>
+  </div>
+
+  <div class="uses" role="radiogroup" aria-label="Use">
+    <button type="button" role="radio" data-use="all" aria-checked="true" data-i18n="use.all"></button>
+    <button type="button" role="radio" data-use="study" aria-checked="false" data-i18n="use.study"></button>
+    <button type="button" role="radio" data-use="code" aria-checked="false" data-i18n="use.code"></button>
+    <button type="button" role="radio" data-use="creative" aria-checked="false" data-i18n="use.creative"></button>
+    <button type="button" role="radio" data-use="gaming" aria-checked="false" data-i18n="use.gaming"></button>
+  </div>
+
+  <div class="shelf-wrap">
+    <div class="shelf" id="shelf" aria-roledescription="carousel" aria-label="Example laptops by budget"></div>
+    <div class="shelf-floor" aria-hidden="true"></div>
+  </div>
+
+  <div class="feature" aria-live="polite">
+    <button type="button" class="arrow" id="prev" aria-label="Previous laptop">←</button>
+    <div class="feature-mid">
+      <h2 class="feature-name" id="fName"></h2>
+      <p class="feature-meta"><span id="fUse"></span> · <span id="fSpec"></span></p>
+      <p class="feature-budget"><span data-i18n="hero.approx"></span> <b id="fBudget"></b></p>
+    </div>
+    <button type="button" class="arrow" id="next" aria-label="Next laptop">→</button>
+  </div>
+  <div class="feature-cta">
+    <a class="btn" id="askLike" href="#" target="_blank" rel="noopener"><span data-i18n="hero.ask"></span> ↗</a>
+    <p class="caption" data-i18n="hero.caption"></p>
+  </div>
+
+  <div class="ruler" id="ruler" role="slider" tabindex="0" aria-label="Budget" aria-valuemin="25000" aria-valuemax="160000">
+    <div class="ruler-ticks" id="rulerTicks" aria-hidden="true"></div>
+    <div class="ruler-dot" id="rulerDot" aria-hidden="true"><span id="rulerVal"></span></div>
+  </div>
+</section>
+
+<!-- 02 STATEMENT -->
+<section class="statement" id="statement">
+  <span class="idx">02 / 07</span>
+  <p class="big-para reveal" data-i18n="st.para"></p>
+  <dl class="figures">
+    <div class="fig reveal"><dt class="fig-n">0</dt><dd data-i18n="st.f1"></dd></div>
+    <div class="fig reveal"><dt class="fig-n" data-i18n="st.f2n"></dt><dd data-i18n="st.f2"></dd></div>
+    <div class="fig reveal"><dt class="fig-n" data-i18n="st.f3n"></dt><dd data-i18n="st.f3"></dd></div>
+    <div class="fig reveal"><dt class="fig-n" data-i18n="st.f4n"></dt><dd data-i18n="st.f4"></dd></div>
+  </dl>
+</section>
+
+<!-- 03 THE HUNT: timeline -->
+<section class="hunt" id="hunt">
+  <div class="hunt-pin">
+    <div class="hunt-head">
+      <span class="idx">03 / 07</span>
+      <p class="label" data-i18n="hunt.label"></p>
+      <h2 class="h2" data-i18n="hunt.title"></h2>
+    </div>
+    <div class="hunt-viewport">
+      <div class="hunt-track" id="huntTrack">
+        <div class="hunt-line" aria-hidden="true"><i id="huntFill"></i></div>
+        <ol class="stops" id="stops">
+          <li class="stop"><span class="when" data-i18n="d1"></span><span class="node"></span><div class="stop-card"><span class="num">01</span><h3 data-i18n="s1.t"></h3><p data-i18n="s1.d"></p></div></li>
+          <li class="stop"><span class="when" data-i18n="d2"></span><span class="node"></span><div class="stop-card"><span class="num">02</span><h3 data-i18n="s2.t"></h3><p data-i18n="s2.d"></p></div></li>
+          <li class="stop"><span class="when" data-i18n="d3"></span><span class="node"></span><div class="stop-card"><span class="num">03</span><h3 data-i18n="s3.t"></h3><p data-i18n="s3.d"></p></div></li>
+          <li class="stop"><span class="when" data-i18n="d4"></span><span class="node"></span><div class="stop-card"><span class="num">04</span><h3 data-i18n="s4.t"></h3><p data-i18n="s4.d"></p></div></li>
+          <li class="stop"><span class="when" data-i18n="d5"></span><span class="node"></span><div class="stop-card"><span class="num">05</span><h3 data-i18n="s5.t"></h3><p data-i18n="s5.d"></p></div></li>
+          <li class="stop"><span class="when" data-i18n="d6"></span><span class="node"></span><div class="stop-card"><span class="num">06</span><h3 data-i18n="s6.t"></h3><p data-i18n="s6.d"></p></div></li>
+          <li class="stop"><span class="when" data-i18n="d7"></span><span class="node"></span><div class="stop-card"><span class="num">07</span><h3 data-i18n="s7.t"></h3><p data-i18n="s7.d"></p></div></li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 04 INSPECTION BENCH -->
+<section class="bench" id="bench">
+  <div class="bench-pin">
+    <div class="hud">
+      <div class="hud-top">
+        <div class="hud-id"><span class="hud-badge">RG</span><div><b data-i18n="bench.title"></b><small data-i18n="bench.sample"></small></div></div>
+        <div class="hud-cell"><small data-i18n="bench.stage"></small><b id="hudStage">—</b></div>
+        <div class="hud-cell"><small data-i18n="bench.progress"></small><span class="hud-bar"><i id="hudBar"></i></span></div>
+        <div class="hud-cell"><small data-i18n="bench.status"></small><b id="hudStatus" class="status"></b></div>
+      </div>
+
+      <div class="hud-body">
+        <ul class="checks checks-l">
+          <li class="chk" data-k="0"><span class="sq"></span><div><b data-i18n="c1.t"></b><p data-i18n="c1.d"></p></div><span class="read" data-pass="c1.r"></span></li>
+          <li class="chk" data-k="1"><span class="sq"></span><div><b data-i18n="c2.t"></b><p data-i18n="c2.d"></p></div><span class="read" data-pass="c2.r"></span></li>
+          <li class="chk" data-k="2"><span class="sq"></span><div><b data-i18n="c3.t"></b><p data-i18n="c3.d"></p></div><span class="read" data-pass="c3.r"></span></li>
+        </ul>
+
+        <div class="rig">
+          <svg id="rig" viewBox="-330 -480 660 630" role="img" aria-label="Exploded laptop drawing"></svg>
+        </div>
+
+        <ul class="checks checks-r">
+          <li class="chk" data-k="3"><span class="sq"></span><div><b data-i18n="c4.t"></b><p data-i18n="c4.d"></p></div><span class="read" data-pass="c4.r"></span></li>
+          <li class="chk" data-k="4"><span class="sq"></span><div><b data-i18n="c5.t"></b><p data-i18n="c5.d"></p></div><span class="read" data-pass="c5.r"></span></li>
+          <li class="stamp-slot"><span class="stamp" id="stamp" data-i18n="bench.pass"></span></li>
+        </ul>
+      </div>
+
+      <div class="hud-foot">
+        <span class="hud-foot-k" data-i18n="bench.footk"></span>
+        <p data-i18n="bench.foot"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 TERMS: receipt -->
+<section class="terms" id="terms">
+  <div class="terms-copy">
+    <span class="idx">05 / 07</span>
+    <p class="label" data-i18n="terms.label"></p>
+    <h2 class="h2 reveal" data-i18n="terms.title"></h2>
+    <p class="body reveal" data-i18n="terms.lead"></p>
+  </div>
+  <div class="printer">
+    <div class="slot" aria-hidden="true"></div>
+    <div class="slip" id="slip">
+      <p class="slip-head">RIFATH'S GADGET</p>
+      <p class="slip-sub" data-i18n="slip.sub"></p>
+      <p class="slip-date"><span data-i18n="slip.date"></span> <span id="slipDate"></span></p>
+      <hr>
+      <ul class="slip-rows">
+        <li><span data-i18n="r1.k"></span><i></i><b data-i18n="r1.v"></b></li>
+        <li><span data-i18n="r2.k"></span><i></i><b data-i18n="r2.v"></b></li>
+        <li><span data-i18n="r3.k"></span><i></i><b data-i18n="r3.v"></b></li>
+        <li><span data-i18n="r4.k"></span><i></i><b data-i18n="r4.v"></b></li>
+        <li><span data-i18n="r5.k"></span><i></i><b data-i18n="r5.v"></b></li>
+        <li><span data-i18n="r6.k"></span><i></i><b data-i18n="r6.v"></b></li>
+      </ul>
+      <hr class="dbl">
+      <p class="slip-total"><span data-i18n="r7.k"></span><b data-i18n="r7.v"></b></p>
+      <p class="slip-thanks" data-i18n="slip.thanks"></p>
+      <div class="barcode" aria-hidden="true"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 06 FAQ -->
+<section class="faq" id="faq">
+  <div class="faq-head">
+    <span class="idx">06 / 07</span>
+    <p class="label" data-i18n="faq.label"></p>
+    <h2 class="h2" data-i18n="faq.title"></h2>
+  </div>
+  <div class="faq-list">
+    <details class="qa"><summary><span class="qn">01</span><span data-i18n="q1"></span><i aria-hidden="true"></i></summary><p data-i18n="a1"></p></details>
+    <details class="qa"><summary><span class="qn">02</span><span data-i18n="q2"></span><i aria-hidden="true"></i></summary><p data-i18n="a2"></p></details>
+    <details class="qa"><summary><span class="qn">03</span><span data-i18n="q3"></span><i aria-hidden="true"></i></summary><p data-i18n="a3"></p></details>
+    <details class="qa"><summary><span class="qn">04</span><span data-i18n="q4"></span><i aria-hidden="true"></i></summary><p data-i18n="a4"></p></details>
+    <details class="qa"><summary><span class="qn">05</span><span data-i18n="q5"></span><i aria-hidden="true"></i></summary><p data-i18n="a5"></p></details>
+  </div>
+</section>
+
+<!-- 07 CONTACT -->
+<section class="contact" id="contact">
+  <div class="contact-in">
+    <span class="idx">07 / 07</span>
+    <p class="label" data-i18n="ct.label"></p>
+    <a class="phone" href="tel:+8801888888888">+880 1888‑888888</a>
+    <p class="contact-lead" data-i18n="ct.lead"></p>
+    <ul class="contact-links">
+      <li><a class="wa-link" href="#" target="_blank" rel="noopener"><small>01</small>WhatsApp ↗</a></li>
+      <li><a href="tel:+8801888888888"><small>02</small><span data-i18n="ct.call"></span> ↗</a></li>
+      <li><a href="mailto:rifathbibhabib25@gmail.com"><small>03</small>rifathbibhabib25@gmail.com ↗</a></li>
+      <li><a href="https://www.facebook.com/share/1FjxVQJ4RP/" target="_blank" rel="noopener"><small>04</small>Facebook ↗</a></li>
+    </ul>
+  </div>
+  <div class="wordmark" aria-hidden="true">RIFATH'S GADGET</div>
+  <footer class="foot">
+    <span>© <span id="yr">2026</span> Rifath's Gadget</span>
+    <span data-i18n="foot.tag"></span>
+  </footer>
+</section>
+</main>
+
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
