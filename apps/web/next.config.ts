@@ -1,0 +1,66 @@
+import type { NextConfig } from "next";
+
+const apiOrigin = process.env.NEXT_PUBLIC_API_URL
+  ? (() => {
+      try {
+        return new URL(process.env.NEXT_PUBLIC_API_URL).origin;
+      } catch {
+        return "";
+      }
+    })()
+  : "";
+
+const isDev = process.env.NODE_ENV === "development";
+
+const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**.supabase.co",
+      },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+    ],
+  },
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
+          },
+          {
+            key: "Content-Security-Policy",
+            value: [
+              "default-src 'self'",
+              `script-src 'self' ${isDev ? "'unsafe-eval'" : ""} 'unsafe-inline'`.trim().replace(/\s+/g, " "),
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              "style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              "img-src 'self' data: blob: https://*.supabase.co https://images.unsplash.com",
+              "font-src 'self' data: https://fonts.gstatic.com",
+              `connect-src 'self' data: blob: https://*.supabase.co ${apiOrigin ? apiOrigin : "http://localhost:4000 http://127.0.0.1:4000 https://*.onrender.com"} ws: wss:`.trim(),
+              "object-src 'none'",
+              "frame-ancestors 'none'",
+              "form-action 'self'",
+              "base-uri 'self'",
+            ].join("; "),
+          },
+        ],
+      },
+    ];
+  },
+};
+
+if (process.env.ENABLE_SOURCE_MAPS === "true") {
+  nextConfig.productionBrowserSourceMaps = true;
+}
+
+export default nextConfig;

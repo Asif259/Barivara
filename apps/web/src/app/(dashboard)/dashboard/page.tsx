@@ -1,0 +1,585 @@
+'use client';
+
+import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { apiClient } from '@/lib/api';
+import { useLanguageStore } from '@/stores/language-store';
+import { useTranslation } from '@/lib/translations';
+import { DashboardOverview, MonthlyRent, Property, ApiResponse } from '@/lib/types';
+import { formatCurrency, formatNumber, formatBnDate } from '@/lib/utils';
+import { StatCard } from '@/components/ui/stat-card';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell, TableSkeleton } from '@/components/ui/table';
+import {
+  ResponsiveTableContainer,
+  MobileDataRow,
+  MobileTableSkeleton,
+  CompactStatus,
+} from '@/components/ui/responsive-table';
+import {
+  BottomSheet,
+  BottomSheetContent,
+  BottomSheetHeader,
+  BottomSheetTitle,
+  BottomSheetDescription,
+  BottomSheetFooter,
+  DetailItem,
+} from '@/components/ui/bottom-sheet';
+import { CollectPaymentDialog } from '@/components/payments/collect-payment-dialog';
+import {
+  Building2,
+  Home,
+  Users,
+  Percent,
+  Wallet,
+  CheckCircle2,
+  AlertCircle,
+  TrendingUp,
+  DollarSign,
+  Receipt,
+  ArrowUpRight,
+  Filter,
+} from 'lucide-react';
+import Link from 'next/link';
+
+export default function DashboardPage() {
+  const { language } = useLanguageStore();
+  const t = useTranslation(language);
+  const isEn = language === 'en';
+
+  const [selectedPropertyId, setSelectedPropertyId] = useState<string>('');
+  const [selectedRentForPayment, setSelectedRentForPayment] = useState<MonthlyRent | null>(null);
+  const [detailRent, setDetailRent] = useState<MonthlyRent | null>(null);
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
+
+  // 1. Fetch Properties for the filter dropdown
+  const { data: propertiesData } = useQuery({
+    queryKey: ['properties-list-filter'],
+    queryFn: async () => {
+      const res = await apiClient.get<ApiResponse<Property[]>>('/properties?limit=100');
+      return res.data?.data || [];
+    },
+  });
+
+  // 2. Fetch Dashboard Overview Stats
+  const {
+    data: overviewData,
+    isLoading: isOverviewLoading,
+    refetch: refetchOverview,
+  } = useQuery({
+    queryKey: ['dashboard-overview', selectedPropertyId],
+    queryFn: async () => {
+      const queryParam = selectedPropertyId ? `?propertyId=${selectedPropertyId}` : '';
+      const res = await apiClient.get<ApiResponse<DashboardOverview>>(`/dashboard/overview${queryParam}`);
+      return res.data?.data;
+    },
+  });
+
+  // 3. Fetch Outstanding Rents
+  const {
+    data: outstandingRents,
+    isLoading: isOutstandingLoading,
+    refetch: refetchOutstanding,
+  } = useQuery({
+    queryKey: ['outstanding-rents', selectedPropertyId],
+    queryFn: async () => {
+      const queryParam = selectedPropertyId ? `?propertyId=${selectedPropertyId}&limit=10` : '?limit=10';
+      const res = await apiClient.get<ApiResponse<MonthlyRent[]>>(`/monthly-rents/outstanding${queryParam}`);
+      return res.data?.data || [];
+    },
+  });
+
+  const handleOpenPayment = (rent: MonthlyRent) => {
+    setSelectedRentForPayment(rent);
+    setPaymentDialogOpen(true);
+  };
+
+  const handlePaymentSuccess = () => {
+    refetchOverview();
+    refetchOutstanding();
+  };
+
+  const currentMonth = overviewData?.currentMonth;
+  const collectionRate = currentMonth?.collectionRate || 0;
+  const outstandingCount =
+    (currentMonth?.pendingCount || 0) + (currentMonth?.overdueCount || 0) + (currentMonth?.partialCount || 0);
+
+  return (
+    <div className="space-y-10 pb-8">
+      <div className="flex flex-col gap-5 border-b border-[#E5E7EB] pb-6 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <p className="mb-2 text-xs font-medium uppercase tracking-[0.14em] text-[#6B7280]">BariVara</p>
+          <h1 className="text-[30px] font-semibold leading-tight tracking-tight text-[#171717]">{t.dashboard}</h1>
+          <p className="mt-2 max-w-2xl text-sm text-[#6B7280]">
+            {isEn
+              ? 'A clear view of your properties, occupancy, and rent collection.'
+              : 'আপনার বাড়ি, ভাড়াটিয়া এবং ভাড়া আদায়ের সংক্ষিপ্ত সারাংশ।'}
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <label className="flex h-10 items-center gap-2 rounded-lg border border-[#E5E7EB] bg-white px-3 text-sm text-[#6B7280] focus-within:border-[#10B981] focus-within:ring-2 focus-within:ring-[#10B981]/10">
+            <Filter className="h-4 w-4 text-[#9CA3AF]" />
+            <span className="sr-only">{isEn ? 'Filter by property' : 'বাড়ি দিয়ে ফিল্টার করুন'}</span>
+            <select
+              value={selectedPropertyId}
+              onChange={(e) => setSelectedPropertyId(e.target.value)}
+              className="min-w-[150px] bg-transparent text-sm font-medium text-[#374151] outline-none"
+            >
+              <option value="">{isEn ? 'All properties' : 'সকল বাড়ি'}</option>
+              {propertiesData?.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <Link href="/rents">
+            <Button size="sm" className="h-10 w-full gap-1.5 px-4 sm:w-auto">
+              <Receipt className="h-4 w-4" />
+              {t.generateRent}
+            </Button>
+          </Link>
+        </div>
+      </div>
+
+      <section aria-labelledby="portfolio-overview-heading">
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <h2 id="portfolio-overview-heading" className="text-[17px] font-semibold text-[#171717]">
+              {isEn ? 'Portfolio overview' : 'সম্পত্তির সারাংশ'}
+            </h2>
+            <p className="mt-1 text-[13px] text-[#6B7280]">
+              {isEn ? 'Current operating snapshot' : 'বর্তমান পরিচালনামূলক অবস্থা'}
+            </p>
+          </div>
+        </div>
+
+        {isOverviewLoading ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Card key={i} className="rounded-[10px] border-[#E5E7EB] p-5 shadow-none">
+                <div className="space-y-3">
+                  <Skeleton className="h-3.5 w-24" />
+                  <Skeleton className="h-7 w-20" />
+                  <Skeleton className="h-3 w-32" />
+                </div>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <StatCard
+              title={t.properties}
+              value={formatNumber(overviewData?.totalProperties || 0, language)}
+              subtitle={isEn ? 'Registered properties' : 'মোট নিবন্ধিত বাড়ি'}
+              icon={Building2}
+              href="/properties"
+            />
+            <StatCard
+              title={t.units}
+              value={formatNumber(overviewData?.totalUnits || 0, language)}
+              subtitle={`${formatNumber(overviewData?.occupiedUnits || 0, language)} ${t.occupied} · ${formatNumber(overviewData?.vacantUnits || 0, language)} ${t.vacant}`}
+              icon={Home}
+              badge={(overviewData?.vacantUnits || 0) > 0 ? {
+                text: `${formatNumber(overviewData?.vacantUnits || 0, language)} ${t.vacant}`,
+                variant: 'warning',
+              } : {
+                text: isEn ? '100% Filled' : '১০০% পূর্ণ',
+                variant: 'success',
+              }}
+              href="/properties"
+            />
+            <StatCard
+              title={t.tenants}
+              value={formatNumber(overviewData?.totalTenants || 0, language)}
+              subtitle={isEn ? 'Active tenants' : 'সক্রিয় ভাড়াটিয়া'}
+              icon={Users}
+              href="/tenants"
+            />
+            <StatCard
+              title={t.occupancyRate}
+              value={`${formatNumber(overviewData?.occupancyRate || 0, language)}%`}
+              subtitle={isEn ? 'Units occupied' : 'ভাড়া হওয়ার হার'}
+              icon={Percent}
+              badge={(overviewData?.occupancyRate || 0) >= 90 ? {
+                text: isEn ? 'Optimal' : 'অনুকূল',
+                variant: 'success',
+              } : (overviewData?.occupancyRate || 0) >= 70 ? {
+                text: isEn ? 'Moderate' : 'মাঝারি',
+                variant: 'info',
+              } : {
+                text: isEn ? 'Low' : 'কম',
+                variant: 'warning',
+              }}
+              href="/properties"
+            />
+          </div>
+        )}
+      </section>
+
+      <section aria-labelledby="collection-heading">
+        <div className="mb-4">
+          <h2 id="collection-heading" className="text-[17px] font-semibold text-[#171717]">
+            {isEn ? 'Collection overview' : 'ভাড়া আদায়ের সারাংশ'}
+          </h2>
+          <p className="mt-1 text-[13px] text-[#6B7280]">
+            {isEn ? 'Monthly financial performance at a glance' : 'চলতি মাসের আর্থিক অগ্রগতি'}
+          </p>
+        </div>
+
+        {isOverviewLoading ? (
+          <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+            <Skeleton className="h-52 rounded-[10px]" />
+            <Skeleton className="h-52 rounded-[10px]" />
+          </div>
+        ) : (
+          <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+            <Card className="rounded-[10px] border-[#E5E7EB] shadow-none">
+              <CardHeader className="border-b border-[#F3F4F6] pb-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <CardTitle className="text-[17px]">{isEn ? 'Monthly rent' : 'মাসিক ভাড়া'}</CardTitle>
+                    <CardDescription className="mt-1">
+                      {currentMonth?.month
+                        ? new Date(currentMonth.year, currentMonth.month - 1).toLocaleString(isEn ? 'en-US' : 'bn-BD', { month: 'long', year: 'numeric' })
+                        : (isEn ? 'Current billing period' : 'চলতি বিলিং সময়')}
+                    </CardDescription>
+                  </div>
+                  <DollarSign className="h-4 w-4 text-[#12664F]" />
+                </div>
+              </CardHeader>
+              <CardContent className="grid gap-6 pt-5 sm:grid-cols-3">
+                <FinancialFigure label={isEn ? 'Expected' : 'প্রত্যাশিত'} value={formatCurrency(currentMonth?.expected || 0, language)} />
+                <FinancialFigure label={isEn ? 'Collected' : 'আদায়কৃত'} value={formatCurrency(currentMonth?.collected || 0, language)} accent />
+                <FinancialFigure label={isEn ? 'Outstanding' : 'বকেয়া'} value={formatCurrency(currentMonth?.outstanding || 0, language)} danger />
+              </CardContent>
+            </Card>
+
+            <Card className="rounded-[10px] border-[#E5E7EB] shadow-none">
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <CardTitle className="text-[17px]">{t.collectionRate}</CardTitle>
+                    <CardDescription className="mt-1">{isEn ? 'Collected vs expected' : 'আদায়ের অগ্রগতি'}</CardDescription>
+                  </div>
+                  <TrendingUp className="h-4 w-4 text-[#10B981]" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-end justify-between gap-4">
+                  <span className="text-4xl font-semibold tracking-tight text-[#171717] tabular-nums">{formatNumber(collectionRate, language)}%</span>
+                  <span className="pb-1 text-xs text-[#6B7280] tabular-nums">{formatNumber(currentMonth?.paidCount || 0, language)} {isEn ? 'fully paid' : 'সম্পূর্ণ পরিশোধিত'}</span>
+                </div>
+                <div className="mt-5 h-2 overflow-hidden rounded-full bg-[#E8F3EF]">
+                  <div className="h-full rounded-full bg-[#10B981] transition-all" style={{ width: `${Math.min(Math.max(collectionRate, 0), 100)}%` }} />
+                </div>
+                <div className="mt-3 flex items-center justify-between text-xs text-[#6B7280]">
+                  <span>{isEn ? 'Collection progress' : 'আদায়ের অগ্রগতি'}</span>
+                  <span>{formatNumber(outstandingCount, language)} {isEn ? 'pending' : 'বকেয়া'}</span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Action Alert Banner for Overdue / Pending items */}
+        {outstandingCount > 0 && (
+          <div className="mt-4 flex flex-col gap-3 rounded-[10px] border border-amber-200 bg-amber-50/60 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-700">
+                <AlertCircle className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-amber-900">
+                  {formatNumber(outstandingCount, language)} {isEn ? 'unpaid or overdue invoices require attention' : 'টি অপরিশোধিত বা বকেয়া রসিদে মনোযোগ প্রয়োজন'}
+                </p>
+                <p className="text-xs text-amber-700">
+                  {isEn
+                    ? `Total outstanding due: ${formatCurrency(currentMonth?.outstanding || 0, language)}`
+                    : `মোট বকেয়া টাকার পরিমাণ: ${formatCurrency(currentMonth?.outstanding || 0, language)}`}
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/rents?status=OVERDUE"
+              className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-amber-600 px-3.5 py-2 text-xs font-medium text-white transition-colors hover:bg-amber-700 shrink-0"
+            >
+              <span>{isEn ? 'Review Invoices & Send Notices' : 'বকেয়া রসিদ দেখুন ও নোটিশ পাঠান'}</span>
+              <ArrowUpRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+        )}
+      </section>
+
+      <section aria-labelledby="outstanding-heading">
+        <Card className="rounded-[10px] border-[#E5E7EB] shadow-none">
+          <CardHeader className="flex flex-col gap-3 border-b border-[#F3F4F6] pb-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 text-[#B45309]" />
+                <CardTitle id="outstanding-heading" className="text-[17px]">
+                  {isEn ? 'Outstanding rent' : 'বকেয়া ভাড়া'}
+                </CardTitle>
+              </div>
+              <CardDescription className="mt-1">
+                {isEn ? 'Invoices that need attention' : 'যেসব বিলের জন্য পদক্ষেপ প্রয়োজন'}
+              </CardDescription>
+            </div>
+            <Link href="/rents" className="inline-flex items-center gap-1 text-sm font-medium text-[#12664F] hover:text-[#0E513F]">
+              {isEn ? 'View all rents' : 'সকল ভাড়া দেখুন'} <ArrowUpRight className="h-4 w-4" />
+            </Link>
+          </CardHeader>
+          <CardContent className="p-0 pt-0">
+            {isOutstandingLoading ? (
+              <ResponsiveTableContainer className="border-0 rounded-none">
+                <div className="hidden md:block overflow-x-auto">
+                  <Table className="min-w-[850px]">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="min-w-[200px]">{t.tenantName}</TableHead>
+                        <TableHead className="min-w-[120px]">{t.unitNumber}</TableHead>
+                        <TableHead align="left" className="min-w-[95px]">{isEn ? 'Month / Year' : 'মাস ও সাল'}</TableHead>
+                        <TableHead align="right" className="min-w-[100px]">{t.total}</TableHead>
+                        <TableHead align="right" className="min-w-[95px]">{t.paid}</TableHead>
+                        <TableHead align="right" className="min-w-[95px]">{t.remaining}</TableHead>
+                        <TableHead align="center" className="min-w-[95px]">{t.status}</TableHead>
+                        <TableHead align="right" className="min-w-[120px]">{t.actions}</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableSkeleton columns={8} rows={4} />
+                    </TableBody>
+                  </Table>
+                </div>
+                <div className="block md:hidden">
+                  <MobileTableSkeleton rows={4} />
+                </div>
+              </ResponsiveTableContainer>
+            ) : outstandingRents && outstandingRents.length > 0 ? (
+              <ResponsiveTableContainer className="border-0 rounded-none">
+                {/* Desktop Tabular View */}
+                <div className="hidden md:block overflow-x-auto">
+                  <Table className="min-w-[850px]">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="min-w-[200px]">{t.tenantName}</TableHead>
+                        <TableHead className="min-w-[120px]">{t.unitNumber}</TableHead>
+                        <TableHead align="left" className="min-w-[95px]">{isEn ? 'Month / Year' : 'মাস ও সাল'}</TableHead>
+                        <TableHead align="right" className="min-w-[100px]">{t.total}</TableHead>
+                        <TableHead align="right" className="min-w-[95px]">{t.paid}</TableHead>
+                        <TableHead align="right" className="min-w-[95px]">{t.remaining}</TableHead>
+                        <TableHead align="center" className="min-w-[95px]">{t.status}</TableHead>
+                        <TableHead align="right" className="min-w-[120px]">{t.actions}</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {outstandingRents.map((rent) => (
+                        <TableRow key={rent.id}>
+                          <TableCell className="min-w-[200px]">
+                            <div className="min-w-0 max-w-[180px]">
+                              <span className="font-semibold text-[#0F172A] block truncate" title={rent.agreement?.tenant?.name || 'Tenant'}>
+                                {rent.agreement?.tenant?.name || 'Tenant'}
+                              </span>
+                              <span className="block text-xs font-normal text-[#64748B] truncate" title={rent.agreement?.tenant?.phone || ''}>
+                                {rent.agreement?.tenant?.phone || '—'}
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="min-w-[120px]">
+                            <div className="min-w-0">
+                              <span className="font-semibold text-[#1E293B] block">
+                                {rent.agreement?.unit?.unitNumber || '—'}
+                              </span>
+                              <span className="block text-xs text-[#64748B] truncate max-w-[120px]" title={rent.agreement?.unit?.property?.name || ''}>
+                                {rent.agreement?.unit?.property?.name || '—'}
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell align="left" className="text-xs text-[#64748B] whitespace-nowrap">
+                            {rent.month}/{rent.year}
+                          </TableCell>
+                          <TableCell align="right" className="font-semibold text-[#0F172A] whitespace-nowrap">
+                            {formatCurrency(rent.totalAmount, language)}
+                          </TableCell>
+                          <TableCell align="right" className="font-medium text-[#059669] whitespace-nowrap">
+                            {formatCurrency(rent.paidAmount, language)}
+                          </TableCell>
+                          <TableCell align="right" className="font-semibold text-[#DC2626] whitespace-nowrap">
+                            {formatCurrency(rent.remainingAmount, language)}
+                          </TableCell>
+                          <TableCell align="center">
+                            <StatusBadge status={rent.status} lang={language} />
+                          </TableCell>
+                          <TableCell align="right">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleOpenPayment(rent)}
+                              className="h-8 gap-1.5 whitespace-nowrap text-xs px-2.5 text-[#334155] hover:text-[#059669] hover:bg-[#F0FDF4]"
+                            >
+                              <Wallet className="h-3.5 w-3.5 text-[#059669]" />
+                              <span>{isEn ? 'Collect' : 'আদায়'}</span>
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                {/* Mobile 2-Line Rows */}
+                <div className="block md:hidden divide-y divide-[#F1F5F9]">
+                  {outstandingRents.map((rent) => {
+                    const statusLabel =
+                      rent.status === 'PAID' ? (isEn ? 'Paid' : 'পরিশোধিত') :
+                        rent.status === 'PARTIAL' ? (isEn ? 'Partial' : 'আংশিক') :
+                          rent.status === 'OVERDUE' ? (isEn ? 'Overdue' : 'বকেয়া') : (isEn ? 'Pending' : 'অপেক্ষমাণ');
+                    const statusVariant =
+                      rent.status === 'PAID' ? 'success' :
+                        rent.status === 'PARTIAL' ? 'warning' :
+                          rent.status === 'OVERDUE' ? 'danger' : 'neutral';
+
+                    return (
+                      <MobileDataRow
+                        key={rent.id}
+                        onClick={() => setDetailRent(rent)}
+                        showChevron
+                        identity={
+                          <div className="min-w-0">
+                            <span className="font-semibold text-sm text-[#0F172A] truncate block">
+                              {rent.agreement?.tenant?.name || 'Tenant'}
+                            </span>
+                          </div>
+                        }
+                        value={formatCurrency(rent.remainingAmount, language)}
+                        stateAndDetail={
+                          <>
+                            <CompactStatus label={statusLabel} variant={statusVariant} />
+                            <span className="text-slate-300">·</span>
+                            <span>Unit {rent.agreement?.unit?.unitNumber || '—'}</span>
+                            <span className="text-slate-300">·</span>
+                            <span>{rent.month}/{rent.year}</span>
+                          </>
+                        }
+                        action={
+                          <Button
+                            size="sm"
+                            variant="default"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenPayment(rent);
+                            }}
+                            className="h-8 min-h-[40px] px-2.5 text-xs bg-[#059669] hover:bg-[#047857] gap-1"
+                          >
+                            <Wallet className="w-3.5 h-3.5" />
+                            <span>{isEn ? 'Collect' : 'আদায়'}</span>
+                          </Button>
+                        }
+                      />
+                    );
+                  })}
+                </div>
+              </ResponsiveTableContainer>
+            ) : (
+              <div className="p-5">
+                <EmptyState
+                  icon={CheckCircle2}
+                  title={isEn ? 'No outstanding rents' : 'কোনো বকেয়া ভাড়া নেই'}
+                  description={isEn ? 'All rent invoices for the current period have been fully collected.' : 'চলতি সময়ের সকল ফ্ল্যাটের ভাড়া শতভাগ আদায় সম্পন্ন হয়েছে।'}
+                />
+              </div>
+            )}
+          </CardContent>
+
+          {/* Row Details Bottom Sheet on Mobile */}
+          <BottomSheet open={!!detailRent} onOpenChange={(open) => !open && setDetailRent(null)}>
+            {detailRent && (
+              <BottomSheetContent>
+                <BottomSheetHeader>
+                  <BottomSheetTitle>
+                    {detailRent.agreement?.tenant?.name || 'Tenant'}
+                  </BottomSheetTitle>
+                  <BottomSheetDescription>
+                    {detailRent.agreement?.unit?.property?.name ? `${detailRent.agreement.unit.property.name} · ` : ''}
+                    Unit {detailRent.agreement?.unit?.unitNumber || '—'}
+                  </BottomSheetDescription>
+                </BottomSheetHeader>
+
+                <div className="py-2">
+                  <DetailItem
+                    label={isEn ? 'Billing Period' : 'ভাড়ার মাস'}
+                    value={`${detailRent.month}/${detailRent.year}`}
+                  />
+                  <DetailItem
+                    label={isEn ? 'Total Rent' : 'মোট ভাড়া'}
+                    value={formatCurrency(detailRent.totalAmount, language)}
+                    isNumeric
+                  />
+                  <DetailItem
+                    label={isEn ? 'Paid Amount' : 'পরিশোধিত'}
+                    value={formatCurrency(detailRent.paidAmount, language)}
+                    isNumeric
+                  />
+                  <DetailItem
+                    label={isEn ? 'Remaining Due' : 'বকেয়া'}
+                    value={formatCurrency(detailRent.remainingAmount, language)}
+                    isNumeric
+                    highlight
+                  />
+                  {detailRent.dueDate && (
+                    <DetailItem
+                      label={isEn ? 'Due Date' : 'পরিশোধের তারিখ'}
+                      value={formatBnDate(detailRent.dueDate, language)}
+                    />
+                  )}
+                  <DetailItem
+                    label={isEn ? 'Status' : 'অবস্থা'}
+                    value={<StatusBadge status={detailRent.status} lang={language} />}
+                  />
+                  {detailRent.agreement?.tenant?.phone && (
+                    <DetailItem
+                      label={isEn ? 'Phone' : 'ফোন'}
+                      value={detailRent.agreement.tenant.phone}
+                    />
+                  )}
+                </div>
+
+                <BottomSheetFooter>
+                  <Button
+                    onClick={() => {
+                      const r = detailRent;
+                      setDetailRent(null);
+                      handleOpenPayment(r);
+                    }}
+                    className="w-full sm:w-auto bg-[#059669] hover:bg-[#047857] min-h-[44px]"
+                  >
+                    <Wallet className="w-4 h-4 mr-2" />
+                    {isEn ? 'Collect Payment' : 'ভাড়া আদায় করুন'}
+                  </Button>
+                </BottomSheetFooter>
+              </BottomSheetContent>
+            )}
+          </BottomSheet>
+        </Card>
+      </section>
+
+      <CollectPaymentDialog rent={selectedRentForPayment} open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen} onSuccess={handlePaymentSuccess} />
+    </div>
+  );
+}
+
+function FinancialFigure({ label, value, accent = false, danger = false }: { label: string; value: string; accent?: boolean; danger?: boolean }) {
+  return (
+    <div>
+      <p className="text-[13px] text-[#6B7280]">{label}</p>
+      <p className={`mt-2 text-xl font-semibold tracking-tight tabular-nums ${danger ? 'text-[#DC2626]' : accent ? 'text-[#15803D]' : 'text-[#171717]'}`}>
+        {value}
+      </p>
+    </div>
+  );
+}

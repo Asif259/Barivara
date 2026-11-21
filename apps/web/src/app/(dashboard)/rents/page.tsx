@@ -1,0 +1,813 @@
+'use client';
+
+import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { apiClient } from '@/lib/api';
+import { useLanguageStore } from '@/stores/language-store';
+import { useTranslation } from '@/lib/translations';
+import { MonthlyRent, Property, ApiResponse, Payment } from '@/lib/types';
+import { formatCurrency, formatNumber, formatBnDate, getDefaultRentPeriod } from '@/lib/utils';
+import { PageHeader } from '@/components/ui/page-header';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { StatCard } from '@/components/ui/stat-card';
+import { EmptyState } from '@/components/ui/empty-state';
+import { StatusBadge } from '@/components/ui/status-badge';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+  TableSkeleton,
+} from '@/components/ui/table';
+import {
+  MobileDataRow,
+  MobileTableSkeleton,
+  CompactStatus,
+  ResponsiveTableContainer,
+} from '@/components/ui/responsive-table';
+import {
+  BottomSheet,
+  BottomSheetContent,
+  BottomSheetHeader,
+  BottomSheetTitle,
+  BottomSheetDescription,
+  BottomSheetFooter,
+  DetailItem,
+} from '@/components/ui/bottom-sheet';
+import { CollectPaymentDialog } from '@/components/payments/collect-payment-dialog';
+import { PaymentReceiptDialog } from '@/components/payments/payment-receipt-dialog';
+import { GenerateRentDialog } from '@/components/rents/generate-rent-dialog';
+import { RentNoticeDialog } from '@/components/rents/rent-notice-dialog';
+import { GenerateRentNoticesDialog } from '@/components/rents/generate-rent-notices-dialog';
+import { TenantAvatar } from '@/components/ui/tenant-avatar';
+import {
+  Receipt,
+  Wallet,
+  Sparkles,
+  Search,
+  User,
+  FileText,
+  AlertCircle,
+  Percent,
+  CheckCircle2,
+} from 'lucide-react';
+
+export default function MonthlyRentsPage() {
+  const { language } = useLanguageStore();
+  const t = useTranslation(language);
+  const isEn = language === 'en';
+
+  const defaultPeriod = getDefaultRentPeriod();
+  const [selectedYear, setSelectedYear] = useState<number>(defaultPeriod.year);
+  const [selectedMonth, setSelectedMonth] = useState<number>(defaultPeriod.month);
+  const [statusFilter, setStatusFilter] = useState<string>('');
+  const [propertyFilter, setPropertyFilter] = useState<string>('');
+  const [search, setSearch] = useState('');
+
+  const [generateDialogOpen, setGenerateDialogOpen] = useState(false);
+  const [noticesDialogOpen, setNoticesDialogOpen] = useState(false);
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
+  const [noticeDialogOpen, setNoticeDialogOpen] = useState(false);
+  const [receiptDialogOpen, setReceiptDialogOpen] = useState(false);
+  const [selectedRent, setSelectedRent] = useState<MonthlyRent | null>(null);
+  const [selectedNoticeRent, setSelectedNoticeRent] = useState<MonthlyRent | null>(null);
+  const [selectedReceiptPayment, setSelectedReceiptPayment] = useState<Payment | null>(null);
+  const [loadingReceiptRentId, setLoadingReceiptRentId] = useState<string | null>(null);
+  const [detailRent, setDetailRent] = useState<MonthlyRent | null>(null);
+
+  // 1. Fetch Properties for dropdown
+  const { data: properties } = useQuery({
+    queryKey: ['properties-rents-filter'],
+    queryFn: async () => {
+      const res = await apiClient.get<ApiResponse<Property[]>>('/properties?limit=100');
+      return res.data?.data || [];
+    },
+  });
+
+  // 2. Fetch Monthly Rents
+  const {
+    data: rents,
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ['monthly-rents-list', selectedYear, selectedMonth, statusFilter, propertyFilter, search],
+    queryFn: async () => {
+      let url = `/monthly-rents?year=${selectedYear}&month=${selectedMonth}&limit=100`;
+      if (statusFilter) url += `&status=${statusFilter}`;
+      if (propertyFilter) url += `&propertyId=${propertyFilter}`;
+      if (search) url += `&search=${encodeURIComponent(search)}`;
+      const res = await apiClient.get<ApiResponse<MonthlyRent[]>>(url);
+      return res.data?.data || [];
+    },
+  });
+
+  const handleOpenPayment = (rent: MonthlyRent) => {
+    setSelectedRent(rent);
+    setPaymentDialogOpen(true);
+  };
+
+  const handleOpenNotice = (rent: MonthlyRent) => {
+    setSelectedNoticeRent(rent);
+    setNoticeDialogOpen(true);
+  };
+
+  const handleOpenReceipt = async (rent: MonthlyRent) => {
+    let payment = rent.payments && rent.payments.length > 0 ? rent.payments[0] : null;
+
+    if (!payment) {
+      try {
+        setLoadingReceiptRentId(rent.id);
+        const res = await apiClient.get<ApiResponse<Payment[]>>(`/payments?monthlyRentId=${rent.id}&limit=1`);
+        if (res.data?.data && res.data.data.length > 0) {
+          payment = res.data.data[0];
+        }
+      } catch (err) {
+        console.warn('Failed to fetch payment for receipt:', err);
+      } finally {
+        setLoadingReceiptRentId(null);
+      }
+    }
+
+    const paymentForReceipt: Payment = payment
+      ? {
+        ...payment,
+        monthlyRent: rent,
+        owner: payment.owner || rent.agreement?.unit?.property?.owner,
+      }
+      : {
+        id: rent.id,
+        monthlyRentId: rent.id,
+        amount: Number(rent.paidAmount) || Number(rent.totalAmount) || 0,
+        paymentMethod: 'CASH',
+        paymentDate: rent.paidDate || rent.updatedAt || rent.createdAt,
+        status: 'COMPLETED',
+        createdAt: rent.createdAt,
+        updatedAt: rent.updatedAt,
+        monthlyRent: rent,
+        owner: rent.agreement?.unit?.property?.owner,
+      };
+
+    setSelectedReceiptPayment(paymentForReceipt);
+    setReceiptDialogOpen(true);
+  };
+
+  // Aggregated tactical KPI stats
+  const totalBilled = rents?.reduce((acc, r) => acc + (Number(r.totalAmount) || 0), 0) || 0;
+  const totalCollected = rents?.reduce((acc, r) => acc + (Number(r.paidAmount) || 0), 0) || 0;
+  const totalDue = rents?.reduce((acc, r) => {
+    const due = Number(r.remainingAmount ?? ((Number(r.totalAmount) || 0) - (Number(r.paidAmount) || 0)));
+    return acc + Math.max(0, due);
+  }, 0) || 0;
+  const collectionRate = totalBilled > 0 ? Math.round((totalCollected / totalBilled) * 100) : 0;
+  const paidCount = rents?.filter((r) => r.status === 'PAID').length || 0;
+  const pendingOrOverdueCount = rents?.filter((r) => r.status === 'PENDING' || r.status === 'OVERDUE' || r.status === 'PARTIAL').length || 0;
+
+  return (
+    <div className="space-y-8 pb-8">
+      <PageHeader
+        title={t.monthlyRents}
+        description={isEn ? 'Manage rent invoices, due dates, and collections' : 'মাসিক ভাড়ার বিল, বকেয়া এবং ভাড়া আদায় পরিচালনা করুন'}
+        action={
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              onClick={() => setNoticesDialogOpen(true)}
+              variant="outline"
+              className="h-10 gap-2 border-emerald-300 text-emerald-800 hover:bg-emerald-50"
+            >
+              <FileText className="w-4 h-4 text-emerald-600" />
+              {isEn ? 'Rent Notices' : 'ভাড়ার নোটিশ'}
+            </Button>
+            <Button onClick={() => setGenerateDialogOpen(true)} variant="default" className="h-10 gap-2">
+              <Sparkles className="w-4 h-4" />
+              {t.generateMonthlyRent}
+            </Button>
+          </div>
+        }
+      />
+
+      {/* Tactical KPI Summary Banner */}
+      {isLoading ? (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Card key={i} className="rounded-[10px] border-[#E5E7EB] p-5 shadow-none">
+              <div className="space-y-3">
+                <Skeleton className="h-3.5 w-24" />
+                <Skeleton className="h-7 w-20" />
+                <Skeleton className="h-3 w-32" />
+              </div>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <StatCard
+            title={isEn ? 'Total Invoiced' : 'মোট প্রস্তুতকৃত বিল'}
+            value={formatCurrency(totalBilled, language)}
+            subtitle={`${formatNumber(rents?.length || 0, language)} ${isEn ? 'invoices generated' : 'টি বিল জেনারেট করা'}`}
+            icon={Receipt}
+          />
+          <StatCard
+            title={isEn ? 'Realized Collection' : 'আদায়কৃত ভাড়া'}
+            value={formatCurrency(totalCollected, language)}
+            subtitle={`${formatNumber(paidCount, language)} ${isEn ? 'invoices fully paid' : 'টি বিল সম্পূর্ণ পরিশোধ'}`}
+            icon={Wallet}
+            badge={{
+              text: `${formatNumber(collectionRate, language)}%`,
+              variant: collectionRate >= 90 ? 'success' : collectionRate >= 70 ? 'info' : 'warning',
+            }}
+            valueClassName="text-[#15803D]"
+            iconColor="text-[#15803D]"
+            iconBgColor="bg-emerald-50"
+          />
+          <StatCard
+            title={isEn ? 'Outstanding Due' : 'বকেয়া বিলের পরিমাণ'}
+            value={formatCurrency(totalDue, language)}
+            subtitle={`${formatNumber(pendingOrOverdueCount, language)} ${isEn ? 'invoices pending / overdue' : 'টি বিল বকেয়া / মেয়াদোত্তীর্ণ'}`}
+            icon={AlertCircle}
+            iconColor={totalDue > 0 ? 'text-[#DC2626]' : 'text-[#12664F]'}
+            iconBgColor={totalDue > 0 ? 'bg-red-50' : 'bg-[#E8F3EF]'}
+            valueClassName={totalDue > 0 ? 'text-[#DC2626]' : undefined}
+            badge={pendingOrOverdueCount > 0 ? {
+              text: isEn ? 'Action Needed' : 'পদক্ষেপ নিন',
+              variant: 'danger',
+            } : {
+              text: isEn ? 'All Settled' : 'পরিশোধিত',
+              variant: 'success',
+            }}
+            onClick={() => setStatusFilter(statusFilter === 'OVERDUE' ? '' : 'OVERDUE')}
+          />
+          <StatCard
+            title={t.collectionRate}
+            value={`${formatNumber(collectionRate, language)}%`}
+            subtitle={isEn ? 'Collected vs Total Billed' : 'মোট বিলের বিপরীতে আদায়'}
+            icon={Percent}
+            badge={collectionRate >= 90 ? {
+              text: isEn ? 'On Track' : 'সঠিক পথে',
+              variant: 'success',
+            } : {
+              text: isEn ? 'Attention' : 'মনোযোগ প্রয়োজন',
+              variant: 'warning',
+            }}
+          />
+        </div>
+      )}
+
+      {/* Filter Bar - Month/Year/Status/Property selectors */}
+      <div className="flex flex-wrap items-center gap-3 bg-white p-3 rounded-[10px] border border-[#E5E7EB] shadow-none">
+        {/* Month Selector */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-semibold text-[#6B7280]">{isEn ? 'Month:' : 'মাস:'}</span>
+          <select
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(Number(e.target.value))}
+            className="h-9 rounded-lg border border-[#E5E7EB] bg-white px-3 text-xs font-semibold text-[#374151] outline-none"
+          >
+            {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+              <option key={m} value={m}>
+                {new Date(2026, m - 1).toLocaleString(isEn ? 'en-US' : 'bn-BD', { month: 'long' })}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Year Selector */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-semibold text-[#6B7280]">{isEn ? 'Year:' : 'সাল:'}</span>
+          <select
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(Number(e.target.value))}
+            className="h-9 rounded-lg border border-[#E5E7EB] bg-white px-3 text-xs font-semibold text-[#374151] outline-none"
+          >
+            {Array.from(new Set([2024, 2025, 2026, 2027, defaultPeriod.year, selectedYear])).sort((a, b) => a - b).map((y) => (
+              <option key={y} value={y}>
+                {y}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Default / Previous Month Indicator */}
+        {selectedYear === defaultPeriod.year && selectedMonth === defaultPeriod.month && (
+          <span className="text-[11px] bg-[#E8F3EF] text-[#12664F] font-semibold px-2.5 py-1 rounded-full border border-[#CDE4DA]">
+            {t.previousMonth}
+          </span>
+        )}
+
+        {/* Status Selector */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-semibold text-[#6B7280]">{t.status}:</span>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="h-9 rounded-lg border border-[#E5E7EB] bg-white px-3 text-xs font-semibold text-[#374151] outline-none"
+          >
+            <option value="">{t.all}</option>
+            <option value="PENDING">{isEn ? 'Pending' : 'অপেক্ষমান (Pending)'}</option>
+            <option value="PARTIAL">{isEn ? 'Partial' : 'আংশিক (Partial)'}</option>
+            <option value="PAID">{isEn ? 'Paid' : 'পরিশোধিত (Paid)'}</option>
+            <option value="OVERDUE">{isEn ? 'Overdue' : 'মেয়াদোত্তীর্ণ (Overdue)'}</option>
+          </select>
+        </div>
+
+        {/* Property Selector */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-semibold text-[#6B7280]">{t.properties}:</span>
+          <select
+            value={propertyFilter}
+            onChange={(e) => setPropertyFilter(e.target.value)}
+            className="h-9 rounded-lg border border-[#E5E7EB] bg-white px-3 text-xs font-semibold text-[#374151] outline-none max-w-[180px]"
+          >
+            <option value="">{isEn ? 'All Properties' : 'সকল বাড়ি'}</option>
+            {properties?.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Search Bar */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative w-full sm:max-w-sm">
+          <Search className="absolute left-3.5 top-3 h-4 w-4 text-[#9CA3AF]" />
+          <Input placeholder={isEn ? 'Search tenant, unit, or property' : 'ভাড়াটিয়া, ইউনিট বা বাড়ি খুঁজুন'} value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
+        </div>
+        <p className="text-xs text-[#6B7280]">{rents ? `${rents.length} ${isEn ? 'invoices' : 'টি বিল'}` : ''}</p>
+      </div>
+
+      {/* Rents Responsive Table Container */}
+      {isLoading ? (
+        <ResponsiveTableContainer>
+          <div className="hidden md:block">
+            <Table className="min-w-[1020px]">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="min-w-[220px]">{t.tenantName}</TableHead>
+                  <TableHead className="min-w-[110px]">{t.unitNumber}</TableHead>
+                  <TableHead align="right" className="min-w-[100px]">{t.baseRent}</TableHead>
+                  <TableHead align="right" className="min-w-[95px]">{t.serviceFee}</TableHead>
+                  <TableHead align="right" className="min-w-[105px]">{t.total}</TableHead>
+                  <TableHead align="right" className="min-w-[95px]">{t.paid}</TableHead>
+                  <TableHead align="right" className="min-w-[95px]">{t.remaining}</TableHead>
+                  <TableHead align="left" className="min-w-[105px]">{isEn ? 'Due Date' : 'পরিশোধের শেষ তারিখ'}</TableHead>
+                  <TableHead align="center" className="min-w-[100px]">{t.status}</TableHead>
+                  <TableHead align="right" className="min-w-[130px]">{t.actions}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableSkeleton columns={10} rows={5} />
+              </TableBody>
+            </Table>
+          </div>
+          <div className="block md:hidden">
+            <MobileTableSkeleton rows={5} />
+          </div>
+        </ResponsiveTableContainer>
+      ) : rents && rents.length > 0 ? (
+        <ResponsiveTableContainer>
+          {/* Desktop Table View */}
+          <div className="hidden md:block">
+            <Table className="min-w-[1020px]">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="min-w-[220px]">{t.tenantName}</TableHead>
+                  <TableHead className="min-w-[110px]">{t.unitNumber}</TableHead>
+                  <TableHead align="right" className="min-w-[100px]">{t.baseRent}</TableHead>
+                  <TableHead align="right" className="min-w-[95px]">{t.serviceFee}</TableHead>
+                  <TableHead align="right" className="min-w-[105px]">{t.total}</TableHead>
+                  <TableHead align="right" className="min-w-[95px]">{t.paid}</TableHead>
+                  <TableHead align="right" className="min-w-[95px]">{t.remaining}</TableHead>
+                  <TableHead align="left" className="min-w-[105px]">{isEn ? 'Due Date' : 'পরিশোধের শেষ তারিখ'}</TableHead>
+                  <TableHead align="center" className="min-w-[100px]">{t.status}</TableHead>
+                  <TableHead align="right" className="min-w-[130px]">{t.actions}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {rents.map((rent) => (
+                  <TableRow key={rent.id}>
+                    <TableCell className="min-w-[220px]">
+                      <div className="flex items-center gap-2.5">
+                        <TenantAvatar
+                          profilePictureId={rent.agreement?.tenant?.profilePictureId}
+                          name={rent.agreement?.tenant?.name || 'Tenant'}
+                          size="sm"
+                          onClick={() => rent.agreement?.tenant?.id && window.open(`/tenants/${rent.agreement.tenant.id}`, '_blank')}
+                          ariaLabel={isEn ? 'View tenant profile' : 'ভাড়াটিয়ার প্রোফাইল দেখুন'}
+                        />
+                        <div className="min-w-0 max-w-[160px]">
+                          <p className="truncate font-medium text-[#0F172A] text-sm" title={rent.agreement?.tenant?.name || 'Tenant'}>
+                            {rent.agreement?.tenant?.name || 'Tenant'}
+                          </p>
+                          <p className="truncate text-xs text-[#64748B]" title={rent.agreement?.tenant?.phone || ''}>
+                            {rent.agreement?.tenant?.phone || '—'}
+                          </p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="min-w-[110px]">
+                      <div className="min-w-0">
+                        <span className="font-semibold text-[#1E293B] block">
+                          {rent.agreement?.unit?.unitNumber || '—'}
+                        </span>
+                        {(!propertyFilter && (properties?.length || 0) > 1) && rent.agreement?.unit?.property?.name && (
+                          <span className="block text-xs text-[#64748B] truncate max-w-[120px]" title={rent.agreement.unit.property.name}>
+                            {rent.agreement.unit.property.name}
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell align="right" className="text-[#334155] whitespace-nowrap">
+                      {formatCurrency(rent.rent, language)}
+                    </TableCell>
+                    <TableCell align="right" className="text-[#64748B] whitespace-nowrap">
+                      {formatCurrency(rent.serviceFee, language)}
+                    </TableCell>
+                    <TableCell align="right" className="font-semibold text-[#0F172A] whitespace-nowrap">
+                      {formatCurrency(rent.totalAmount, language)}
+                    </TableCell>
+                    <TableCell align="right" className="text-[#059669] font-medium whitespace-nowrap">
+                      {formatCurrency(rent.paidAmount, language)}
+                    </TableCell>
+                    <TableCell align="right" className="text-[#DC2626] font-medium whitespace-nowrap">
+                      {formatCurrency(rent.remainingAmount, language)}
+                    </TableCell>
+                    <TableCell align="left" className="text-xs text-[#64748B] whitespace-nowrap">
+                      {rent.dueDate ? formatBnDate(rent.dueDate, language) : '—'}
+                    </TableCell>
+                    <TableCell align="center">
+                      <StatusBadge status={rent.status} lang={language} />
+                    </TableCell>
+                    <TableCell align="right">
+                      {(() => {
+                        const isPaid = rent.status === 'PAID' || (rent.remainingAmount <= 0 && rent.paidAmount > 0);
+                        const isPartial = rent.status === 'PARTIAL' || (rent.paidAmount > 0 && rent.remainingAmount > 0);
+
+                        return (
+                          <div className="flex items-center justify-end gap-1.5">
+                            {isPaid ? (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleOpenReceipt(rent)}
+                                disabled={loadingReceiptRentId === rent.id}
+                                title={isEn ? 'View Rent Receipt' : 'ভাড়ার রশিদ দেখুন'}
+                                className="h-8 gap-1.5 text-xs px-2.5 rounded-lg border-emerald-200 text-emerald-800 hover:text-emerald-900 hover:bg-emerald-50 cursor-pointer"
+                              >
+                                <Receipt className="w-3.5 h-3.5 text-emerald-600" />
+                                <span>{t.receipt || (isEn ? 'Receipt' : 'রশিদ')}</span>
+                              </Button>
+                            ) : isPartial ? (
+                              <>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleOpenReceipt(rent)}
+                                  disabled={loadingReceiptRentId === rent.id}
+                                  title={isEn ? 'View Rent Receipt' : 'ভাড়ার রশিদ দেখুন'}
+                                  className="h-8 gap-1 text-xs px-2 rounded-lg border-emerald-200 text-emerald-800 hover:text-emerald-900 hover:bg-emerald-50 cursor-pointer"
+                                >
+                                  <Receipt className="w-3.5 h-3.5 text-emerald-600" />
+                                  <span>{t.receipt || (isEn ? 'Receipt' : 'রশিদ')}</span>
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleOpenNotice(rent)}
+                                  title={isEn ? 'View Rent Notice' : 'ভাড়ার নোটিশ দেখুন'}
+                                  className="h-8 w-8 p-0 text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 cursor-pointer"
+                                >
+                                  <FileText className="w-4 h-4" />
+                                </Button>
+                              </>
+                            ) : (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleOpenNotice(rent)}
+                                title={isEn ? 'View Rent Notice' : 'ভাড়ার নোটিশ দেখুন'}
+                                className="h-8 w-8 p-0 text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 cursor-pointer"
+                              >
+                                <FileText className="w-4 h-4" />
+                              </Button>
+                            )}
+                            {rent.status !== 'PAID' && rent.remainingAmount > 0 ? (
+                              <Button
+                                size="sm"
+                                variant="default"
+                                onClick={() => handleOpenPayment(rent)}
+                                className="h-8 gap-1.5 text-xs bg-[#059669] hover:bg-[#047857] px-2.5 cursor-pointer"
+                              >
+                                <Wallet className="w-3.5 h-3.5" />
+                                <span>{t.collectPayment}</span>
+                              </Button>
+                            ) : (
+                              <span className="text-xs font-semibold text-[#059669] inline-flex items-center gap-1 px-1">
+                                {isEn ? 'Completed' : 'সম্পূর্ণ'}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })()}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Mobile 2-Line Row Representation */}
+          <div className="block md:hidden divide-y divide-[#F1F5F9]">
+            {rents.map((rent) => {
+              const statusVariant =
+                rent.status === 'PAID'
+                  ? 'success'
+                  : rent.status === 'OVERDUE'
+                    ? 'danger'
+                    : rent.status === 'PARTIAL'
+                      ? 'warning'
+                      : 'info';
+
+              const statusLabel =
+                rent.status === 'PAID'
+                  ? (isEn ? 'Paid' : 'পরিশোধিত')
+                  : rent.status === 'OVERDUE'
+                    ? (isEn ? 'Overdue' : 'বকেয়া')
+                    : rent.status === 'PARTIAL'
+                      ? (isEn ? 'Partial' : 'আংশিক')
+                      : (isEn ? 'Pending' : 'অপেক্ষমাণ');
+
+              return (
+                <MobileDataRow
+                  key={rent.id}
+                  onClick={() => setDetailRent(rent)}
+                  showChevron
+                  identity={
+                    <div className="flex items-center gap-2">
+                      <TenantAvatar
+                        profilePictureId={rent.agreement?.tenant?.profilePictureId}
+                        name={rent.agreement?.tenant?.name || 'Tenant'}
+                        size="sm"
+                      />
+                      <span className="font-semibold text-sm text-[#0F172A] truncate">
+                        {rent.agreement?.tenant?.name || 'Tenant'}
+                      </span>
+                    </div>
+                  }
+                  value={formatCurrency(rent.remainingAmount > 0 ? rent.remainingAmount : rent.totalAmount, language)}
+                  stateAndDetail={
+                    <>
+                      <CompactStatus label={statusLabel} variant={statusVariant} />
+                      <span className="text-slate-300">·</span>
+                      {rent.agreement?.unit?.unitNumber && (
+                        <span>Unit {rent.agreement.unit.unitNumber}</span>
+                      )}
+                      {rent.dueDate && (
+                        <>
+                          <span className="text-slate-300">·</span>
+                          <span>{isEn ? `Due ${formatBnDate(rent.dueDate, language)}` : `পরিশোধ ${formatBnDate(rent.dueDate, language)}`}</span>
+                        </>
+                      )}
+                    </>
+                  }
+                  action={
+                    rent.status !== 'PAID' && rent.remainingAmount > 0 ? (
+                      <Button
+                        size="sm"
+                        variant="default"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenPayment(rent);
+                        }}
+                        className="h-8 min-h-[40px] px-2.5 text-xs bg-[#059669] hover:bg-[#047857] gap-1"
+                      >
+                        <Wallet className="w-3.5 h-3.5" />
+                        <span>{t.collectPayment}</span>
+                      </Button>
+                    ) : null
+                  }
+                />
+              );
+            })}
+          </div>
+        </ResponsiveTableContainer>
+      ) : (
+        <Card className="rounded-[10px] border-[#E2E8F0] shadow-none">
+          <CardContent className="p-0">
+            <EmptyState
+              icon={Receipt}
+              title={isEn ? 'No Rent Invoices Found' : 'এই মাসের কোনো ভাড়ার বিল তৈরি হয়নি'}
+              description={
+                isEn
+                  ? 'Click "Generate Monthly Invoices" to create bills for all active apartments.'
+                  : '"মাসিক বিল তৈরি করুন" বাটনে ক্লিক করে স্বয়ংক্রিয়ভাবে বিল তৈরি করুন।'
+              }
+              actionLabel={t.generateMonthlyRent}
+              onAction={() => setGenerateDialogOpen(true)}
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Row Details Bottom Sheet on Mobile */}
+      <BottomSheet open={!!detailRent} onOpenChange={(open) => !open && setDetailRent(null)}>
+        {detailRent && (
+          <BottomSheetContent>
+            <BottomSheetHeader>
+              <BottomSheetTitle>
+                {detailRent.agreement?.tenant?.name || 'Tenant'}
+              </BottomSheetTitle>
+              <BottomSheetDescription>
+                {detailRent.agreement?.unit?.property?.name ? `${detailRent.agreement.unit.property.name} · ` : ''}
+                Unit {detailRent.agreement?.unit?.unitNumber || '—'}
+              </BottomSheetDescription>
+            </BottomSheetHeader>
+
+            <div className="py-2">
+              <DetailItem
+                label={isEn ? 'Billing Period' : 'ভাড়ার মাস'}
+                value={new Date(detailRent.year, detailRent.month - 1).toLocaleString(isEn ? 'en-US' : 'bn-BD', { month: 'long', year: 'numeric' })}
+              />
+              <DetailItem
+                label={isEn ? 'Base Rent' : 'মূল ভাড়া'}
+                value={formatCurrency(detailRent.rent, language)}
+                isNumeric
+              />
+              <DetailItem
+                label={isEn ? 'Service Fee' : 'সার্ভিস চার্জ'}
+                value={formatCurrency(detailRent.serviceFee, language)}
+                isNumeric
+              />
+              <DetailItem
+                label={isEn ? 'Total Bill' : 'মোট বিল'}
+                value={formatCurrency(detailRent.totalAmount, language)}
+                isNumeric
+                highlight
+              />
+              <DetailItem
+                label={isEn ? 'Paid Amount' : 'পরিশোধিত'}
+                value={formatCurrency(detailRent.paidAmount, language)}
+                isNumeric
+              />
+              <DetailItem
+                label={isEn ? 'Remaining Due' : 'বকেয়া'}
+                value={formatCurrency(detailRent.remainingAmount, language)}
+                isNumeric
+              />
+              <DetailItem
+                label={isEn ? 'Due Date' : 'পরিশোধের তারিখ'}
+                value={detailRent.dueDate ? formatBnDate(detailRent.dueDate, language) : '—'}
+              />
+              <DetailItem
+                label={isEn ? 'Status' : 'অবস্থা'}
+                value={<StatusBadge status={detailRent.status} lang={language} />}
+              />
+              {detailRent.agreement?.tenant?.phone && (
+                <DetailItem
+                  label={isEn ? 'Phone' : 'ফোন'}
+                  value={detailRent.agreement.tenant.phone}
+                />
+              )}
+            </div>
+
+            <BottomSheetFooter>
+              {(() => {
+                const isPaid = detailRent.status === 'PAID' || (detailRent.remainingAmount <= 0 && detailRent.paidAmount > 0);
+                const isPartial = detailRent.status === 'PARTIAL' || (detailRent.paidAmount > 0 && detailRent.remainingAmount > 0);
+
+                if (isPaid) {
+                  return (
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        const r = detailRent;
+                        setDetailRent(null);
+                        handleOpenReceipt(r);
+                      }}
+                      className="w-full sm:w-auto min-h-[44px] text-emerald-800 border-emerald-200 hover:bg-emerald-50 cursor-pointer"
+                    >
+                      <Receipt className="w-4 h-4 mr-2 text-emerald-600" />
+                      {t.receipt || (isEn ? 'Rent Receipt' : 'ভাড়ার রশিদ')}
+                    </Button>
+                  );
+                }
+
+                if (isPartial) {
+                  return (
+                    <>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          const r = detailRent;
+                          setDetailRent(null);
+                          handleOpenReceipt(r);
+                        }}
+                        className="w-full sm:w-auto min-h-[44px] text-emerald-800 border-emerald-200 hover:bg-emerald-50 cursor-pointer"
+                      >
+                        <Receipt className="w-4 h-4 mr-2 text-emerald-600" />
+                        {t.receipt || (isEn ? 'Rent Receipt' : 'ভাড়ার রশিদ')}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          const r = detailRent;
+                          setDetailRent(null);
+                          handleOpenNotice(r);
+                        }}
+                        className="w-full sm:w-auto min-h-[44px] cursor-pointer"
+                      >
+                        <FileText className="w-4 h-4 mr-2 text-slate-600" />
+                        {isEn ? 'Rent Notice' : 'ভাড়ার নোটিশ'}
+                      </Button>
+                    </>
+                  );
+                }
+
+                return (
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      const r = detailRent;
+                      setDetailRent(null);
+                      handleOpenNotice(r);
+                    }}
+                    className="w-full sm:w-auto min-h-[44px] cursor-pointer"
+                  >
+                    <FileText className="w-4 h-4 mr-2 text-emerald-600" />
+                    {isEn ? 'Rent Notice' : 'ভাড়ার নোটিশ'}
+                  </Button>
+                );
+              })()}
+              {detailRent.status !== 'PAID' && detailRent.remainingAmount > 0 && (
+                <Button
+                  onClick={() => {
+                    const r = detailRent;
+                    setDetailRent(null);
+                    handleOpenPayment(r);
+                  }}
+                  className="w-full sm:w-auto bg-[#059669] hover:bg-[#047857] min-h-[44px]"
+                >
+                  <Wallet className="w-4 h-4 mr-2" />
+                  {t.collectPayment}
+                </Button>
+              )}
+              {detailRent.agreement?.tenant?.id && (
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    window.open(`/tenants/${detailRent.agreement?.tenant?.id}`, '_blank');
+                  }}
+                  className="w-full sm:w-auto min-h-[44px]"
+                >
+                  <User className="w-4 h-4 mr-2" />
+                  {isEn ? 'View Tenant' : 'প্রোফাইল দেখুন'}
+                </Button>
+              )}
+            </BottomSheetFooter>
+          </BottomSheetContent>
+        )}
+      </BottomSheet>
+
+      {/* Generate Rent Modal Dialog */}
+      <GenerateRentDialog
+        open={generateDialogOpen}
+        onOpenChange={setGenerateDialogOpen}
+        onSuccess={refetch}
+      />
+
+      {/* Generate & Send Rent Notices Modal Dialog */}
+      <GenerateRentNoticesDialog
+        open={noticesDialogOpen}
+        onOpenChange={setNoticesDialogOpen}
+      />
+
+      {/* Individual Rent Notice Document Dialog */}
+      <RentNoticeDialog
+        rent={selectedNoticeRent}
+        open={noticeDialogOpen}
+        onOpenChange={setNoticeDialogOpen}
+        onViewReceipt={handleOpenReceipt}
+      />
+
+      {/* Rent Payment Receipt Document Dialog */}
+      <PaymentReceiptDialog
+        payment={selectedReceiptPayment}
+        open={receiptDialogOpen}
+        onOpenChange={setReceiptDialogOpen}
+      />
+
+      {/* Collect Payment Modal Dialog */}
+      <CollectPaymentDialog
+        rent={selectedRent}
+        open={paymentDialogOpen}
+        onOpenChange={setPaymentDialogOpen}
+        onSuccess={refetch}
+      />
+    </div>
+  );
+}
