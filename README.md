@@ -1,15 +1,22 @@
 # BariVara (বাড়িভাড়া)
 
-> **Bangla-First Property & Tenancy Management Platform for Bangladesh**  
-> Streamlining rental management, tenant ledgers, DESCO/WASA utility splits, and verified rent collection for Bangladeshi property owners and landlords.
+> **Bangla-First Property, Rental & Tenancy Management Monorepo for Bangladesh**  
+> An automated, culturally grounded property-tech platform tailored for Bangladeshi residential landlords, homeowners, and property managers. Streamlines rental collection, tenant ledgers, DESCO/WASA utility bill splits, bKash/Nagad reconciliations, and verified A4/WhatsApp rent receipts.
 
 ---
 
 <p align="center">
-  <video src="brag-output/brag.mp4" controls="controls" width="100%" poster="brag-output/brag.jpg">
-    <p>Your browser does not support HTML5 video. <a href="brag-output/brag.mp4">Click here to download or view the demo video.</a></p>
-  </video>
+  <img src="https://img.shields.io/badge/Next.js-16.4.6-black?style=for-the-badge&logo=next.js" alt="Next.js" />
+  <img src="https://img.shields.io/badge/React-19.2.8-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React" />
+  <img src="https://img.shields.io/badge/NestJS-10.4.15-E0234E?style=for-the-badge&logo=nestjs&logoColor=white" alt="NestJS" />
+  <img src="https://img.shields.io/badge/TypeScript-5.7-blue?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/TailwindCSS-v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind" />
+  <img src="https://img.shields.io/badge/Prisma-5.22-2D3748?style=for-the-badge&logo=prisma&logoColor=white" alt="Prisma" />
+  <img src="https://img.shields.io/badge/PostgreSQL-14%2B-336791?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" />
+  <img src="https://img.shields.io/badge/Turborepo-Monorepo-EF4444?style=for-the-badge&logo=turborepo&logoColor=white" alt="Turborepo" />
 </p>
+
+---
 
 <p align="center">
   <a href="brag-output/brag.mp4">
@@ -24,642 +31,430 @@
 ## 📌 Table of Contents
 
 1. [Product Overview](#-product-overview)
-2. [Verified Feature Matrix](#-verified-feature-matrix)
-3. [Technology Stack](#-technology-stack)
-4. [System Architecture](#-system-architecture)
-5. [Repository Structure](#-repository-structure)
+2. [Key Features](#-key-features)
+   - [Landlord & User Features](#landlord--user-features)
+   - [Security & Architecture Features](#security--architecture-features)
+3. [Visual Tour & Screenshots](#-visual-tour--screenshots)
+   - [Public & Onboarding Views](#1-public--onboarding-views)
+   - [Landlord Dashboard & Property Operations](#2-landlord-dashboard--property-operations)
+   - [Tenant Directory & Profiles](#3-tenant-directory--profiles)
+   - [Monthly Billing, Payments & Expense Tracking](#4-monthly-billing-payments--expense-tracking)
+   - [Financial Analytics & Settings](#5-financial-analytics--settings)
+   - [Mobile Experience](#6-mobile-experience)
+4. [Tech Stack](#-tech-stack)
+5. [Monorepo Project Structure](#-monorepo-project-structure)
 6. [Prerequisites](#-prerequisites)
-7. [Installation & Local Setup](#-installation--local-setup)
-8. [Environment Variables](#-environment-variables)
-9. [REST API Documentation](#-rest-api-documentation)
-10. [Database Architecture & Prisma ORM](#-database-architecture--prisma-orm)
-11. [Authentication & Security](#-authentication--security)
-12. [Testing & Quality Assurance](#-testing--quality-assurance)
-13. [Deployment Guide](#-deployment-guide)
-14. [Troubleshooting Guide](#-troubleshooting-guide)
-15. [Contributing](#-contributing)
-16. [License](#-license)
+7. [Getting Started (Installation & Local Setup)](#-getting-started-installation--local-setup)
+8. [Configuration & Environment Variables](#-configuration--environment-variables)
+9. [Available Scripts & Workflows](#-available-scripts--workflows)
+10. [REST API Reference & Swagger](#-rest-api-reference--swagger)
+11. [Deployment Guide](#-deployment-guide)
+12. [Contributing & License](#-contributing--license)
 
 ---
 
 ## 📖 Product Overview
 
-**BariVara (বাড়িভাড়া)** is a modern, culturally grounded property and rental management platform designed specifically for the Bangladeshi rental ecosystem. 
+**BariVara (বাড়িভাড়া)** is engineered to solve the day-to-day operational pain points of Bangladeshi landlords managing 1–15 residential or small commercial rental units. 
 
-In Bangladesh, residential landlords and commercial property owners typically manage tenancy records in physical paper ledgers (*khatas*), perform manual monthly bill apportionment (electricity meters, WASA water, gas, and service charges), track informal mobile financial service (bKash/Nagad) transactions, and issue paper or verbal receipts.
+In Bangladesh, property management traditionally relies on handwritten paper ledgers (*khatas*), manual utility bill calculations (splitting WASA water bills, gas charges, and DESCO/DPDC sub-meter electricity readings), informal cash collections, and unrecorded bKash/Nagad transactions. This creates frequent disputes over rent arrears and utility apportionments.
 
-BariVara transforms this workflow into an automated, transparent, and auditable digital experience while preserving local tenancy conventions:
-- **First-Class Dual Language (বাংলা & English)**: Seamless language toggling across both the user interface and generated documents.
-- **Bangladeshi Taka (৳) Precision Arithmetic**: Financial math computed using PostgreSQL `Decimal(12, 2)` and `Decimal.js` to eliminate JavaScript IEEE-754 floating-point rounding errors.
-- **WhatsApp 1-Click Receipts**: Dynamic generation of formatted payment acknowledgments and rent collection notices with direct `wa.me` links conforming to Bangladesh international phone numbering (`8801...`).
-- **Printable A4 Rent Documents with Landlord Signature**: Client-rendered, high-resolution A4 rent notices and receipts with embedded owner signature snapshots.
+BariVara transforms this workflow into an auditable digital hub while preserving local cultural and operational norms:
+- **First-Class Dual Language (বাংলা & English)**: Native bilingual experience across all interfaces, reports, and notices with a 1-click toggle.
+- **Bangladeshi Taka (৳) Decimal Arithmetic**: Exact financial calculations executed with `Decimal(12, 2)` and `Decimal.js` to eliminate JavaScript floating-point rounding discrepancies.
+- **1-Click WhatsApp Receipts**: Instantly generates formatted rent acknowledgment messages with direct `wa.me` links conforming to Bangladesh international phone numbering (`8801[3-9]...`).
+- **Print-Ready A4 Tenancy Documents**: Client-rendered, high-resolution A4 rent notices and money receipts with embedded owner digital signature snapshots for official records.
+- **Multi-Channel Rent Tracking**: Full support for Cash, Bank Transfer, bKash, Nagad, Rocket, and Debit/Credit cards.
 
 ---
 
-## 🚀 Verified Feature Matrix
+## 🚀 Key Features
 
-Every capability documented below has been verified directly against the implementation in [`barivara-api`](barivara-api) and [`barivara-web`](barivara-web).
+### Landlord & User Features
+- **Multi-Property & Unit Hierarchy**: Manage multiple apartment buildings, individual flats, sublet rooms, parking spaces, and commercial shops with floor-level organization.
+- **Comprehensive Tenant Profiles**: Track tenant contact info, emergency contacts, occupation, permanent address, and National ID (NID) document uploads.
+- **Tenancy Contracts & Rental Agreements**: Establish legally compliant lease terms with monthly base rent, recurring service fees, parking charges, advance security deposits, and contract validity periods.
+- **Automated Monthly Invoicing**: Idempotent monthly billing engine (`POST /api/v1/monthly-rents/generate`) that automatically calculates utilities, extra charges, and handles February leap-year due-date clamping.
+- **Partial Payments & Arrears Tracking**: Record partial rent payments with automatic balance updates and full audit logs.
+- **Operating Expense Ledger**: Log and categorize building maintenance expenses (electricity, gas, water, security, repairs, municipal taxes) with receipt attachments.
+- **Financial Analytics & Export**: Real-time net income vs. expense graphs, occupancy rates, collection efficiency KPIs, and 1-click CSV ledger exports.
+- **Owner Signature Snapshots**: Landlords upload an authorized digital signature that is snapshotted at payment time so historical receipts remain immutable.
 
-### 🟢 Fully Implemented
+### Security & Architecture Features
+- **Stateless JWT Authentication**: Secure access & refresh token rotation with token version revocation support.
+- **Role-Based Access Control (RBAC)**: Enforced authorization guards (`OWNER`, `TENANT`, `ADMIN`) isolating property and tenant records by landlord.
+- **Argon2 Password Hashing**: State-of-the-art password hashing with strict complexity rules.
+- **Audit Logging**: Comprehensive tracking of financial events (`PAYMENT_CREATED`, `PAYMENT_REVERSED`, `RENT_GENERATED`).
+- **Nodemailer SMTP Integration**: Email delivery with 6-digit one-time password (OTP) verification for secure password resets.
+- **Supabase Object Storage**: Presigned upload URLs for tenant NID cards, property photos, and expense receipts.
+- **Security Headers & Throttling**: Hardened with Helmet, rate-limited via NestJS Throttler, and configured with strict Cross-Origin Resource Sharing (CORS).
 
-| Domain | Capability | Implementation Details |
+---
+
+## 📸 Visual Tour & Screenshots
+
+All screenshots below represent the live application running in the local development environment with seeded test data.
+
+### 1. Public & Onboarding Views
+
+| Landing Page (Hero & Value Proposition) | Bilingual Login Screen |
+|:---:|:---:|
+| ![Landing Page](docs/screenshots/01-landing-page.png) | ![Login Page](docs/screenshots/02-login-page.png) |
+| *Hero banner with authentic Bangladeshi architectural themes and bilingual value proposition.* | *Dual-language authentication interface with phone/email identifier support.* |
+
+| Landlord Registration | Mobile Landing View |
+|:---:|:---:|
+| ![Register Page](docs/screenshots/03-register-page.png) | ![Mobile Landing](docs/screenshots/14-mobile-landing.png) |
+| *Streamlined onboarding for individual landlords and homeowners.* | *Responsive mobile landing view optimized for handheld devices (390x844).* |
+
+---
+
+### 2. Landlord Dashboard & Property Operations
+
+| Dashboard Overview & Revenue Analytics | Property & Unit Directory |
+|:---:|:---:|
+| ![Dashboard Overview](docs/screenshots/04-dashboard-overview.png) | ![Properties Management](docs/screenshots/05-properties-management.png) |
+| *Aggregated KPIs: Total rent collected, pending arrears, occupancy rate, and monthly revenue charts.* | *Multi-property building cards showing total floors, unit counts, and vacant units.* |
+
+| Property Detail & Unit Breakdown | Mobile Landlord Dashboard |
+|:---:|:---:|
+| ![Property Details](docs/screenshots/06-property-details.png) | ![Mobile Dashboard](docs/screenshots/15-mobile-dashboard.png) |
+| *Unit-level management: bedrooms, bathrooms, base rent, and occupancy statuses.* | *Handheld mobile dashboard showing quick stats and upcoming collection tasks.* |
+
+---
+
+### 3. Tenant Directory & Profiles
+
+| Tenant Register & Verification Status | Tenant Detail & Active Tenancy Contract |
+|:---:|:---:|
+| ![Tenants Directory](docs/screenshots/07-tenants-directory.png) | ![Tenant Profile](docs/screenshots/08-tenant-profile.png) |
+| *Comprehensive tenant roster with assigned units, contact numbers, and NID verification status.* | *Detailed tenant profile displaying active agreement, emergency contact, and lease dates.* |
+
+---
+
+### 4. Monthly Billing, Payments & Expense Tracking
+
+| Monthly Rent Ledger | Payment History & Receipt Generation |
+|:---:|:---:|
+| ![Rents Ledger](docs/screenshots/09-rents-ledger.png) | ![Payments History](docs/screenshots/10-payments-history.png) |
+| *Automated monthly invoicing table with status badges (পরিশোধিত, বকেয়া, আংশিক).* | *Detailed payment logs across bKash, Nagad, and Cash with 1-click WhatsApp and A4 receipt dispatch.* |
+
+| Property Operating Expense Tracker | Financial Reports & CSV Export |
+|:---:|:---:|
+| ![Expenses Tracker](docs/screenshots/11-expenses-tracker.png) | ![Financial Reports](docs/screenshots/12-financial-reports.png) |
+| *Categorized operating costs (maintenance, utility repairs, building security, cleaners).* | *Monthly income vs expense summary with collection efficiency metrics and CSV export.* |
+
+---
+
+### 5. Financial Analytics & Settings
+
+| Account Settings, Signature & Localization |
+|:---:|
+| ![Settings & Localization](docs/screenshots/13-settings-and-localization.png) |
+| *Profile configuration, digital landlord signature upload, password management, and language preferences.* |
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technologies | Description |
 |---|---|---|
-| **Property Management** | Multi-Property & Floor Hierarchy | Create, update, soft-delete, and view properties with addresses, total floors, and associated metrics. |
-| **Unit Management** | Flat & Commercial Spaces | Manage units by type (`FLAT`, `APARTMENT`, `ROOM`, `SHOP`, `OFFICE`, `PARKING`), status transitions (`VACANT`, `OCCUPIED`, `MAINTENANCE`, `INACTIVE`), base rents, and default fees. Supports bulk unit creation. |
-| **Tenant Records** | Comprehensive Tenant Profiles | Tenant identification with phone index, emergency contact details, permanent address, occupation, and NID card uploads (front & back). |
-| **Rental Agreements** | Tenancy Contracts | Link tenants to specific units with monthly rent, recurring service fees, parking charges, advance security deposits, and contract start/end dates. Prevents overlapping active agreements on the same unit. |
-| **Rent Generation** | Automated Monthly Invoicing | Idempotent monthly billing engine (`POST /api/v1/monthly-rents/generate`) with automatic February due-date clamping (28/29 days) and lazy overdue status updates. |
-| **Rent Collection** | Atomic Payments & Reversals | Record full or partial payments across multiple methods (`CASH`, `BANK`, `BKASH`, `NAGAD`, `ROCKET`, `CARD`). Automatic ledger updates and atomic transaction reversals executed inside `prisma.$transaction`. |
-| **Notices & Receipts** | A4 Document Generation | Generate print-ready and downloadable image/PDF rent notices and money receipts with QR/receipt IDs and landlord signatures using `html2canvas` and `html-to-image`. |
-| **WhatsApp Dispatch** | Direct Messaging Links | Automated creation of localized WhatsApp message texts with validated Bangladesh phone numbers (`8801[3-9]...`) and localized Bangla/English numeral formatting. |
-| **Owner Signature** | Digital Signature Snapshot | Landlords upload their signature in Settings. The signature is stored securely in Supabase Storage and snapshotted onto payments (`ownerSignatureSnapshotId`) so past receipts remain immutable. |
-| **Expense Tracking** | Operating Cost Management | Categorize property expenses (`ELECTRICITY`, `WATER`, `GAS`, `MAINTENANCE`, `REPAIR`, `SECURITY`, `CLEANING`, `SALARY`, `TAX`, `OTHER`) with receipt attachments. |
-| **Financial Reporting** | Income & Expense Ledger | Monthly financial reports, property income breakdowns, and CSV export streaming (`/api/v1/reports/monthly/export?format=csv`). |
-| **Audit Logging** | Activity Auditing | Tracking of administrative, authentication, and financial operations (`PAYMENT_CREATED`, `PAYMENT_REVERSED`, `RENT_GENERATED`). |
-| **Password Recovery** | Email OTP Verification | Request 6-digit password reset OTP sent via Resend API with time-limited verification. |
-
-### 🟡 Partially Implemented / Planned
-
-| Domain | Current Scope | Planned / Future Scope |
-|---|---|---|
-| **MFS Payment Reconciliation** | **Manual TrxID Matching:** Landlords record transaction IDs (e.g. `BKASH-TX-987123`) when logging bKash/Nagad payments. | Direct MFS Payment Gateway (PGW) API webhooks for automated instant settlement. |
-| **Automated Reminders** | **Database Schema & In-App Reminders:** Model `Reminder` exists with channels (`IN_APP`, `SMS`, `EMAIL`, `WHATSAPP`). | Automated cron dispatchers for outbound SMS/WhatsApp gateway webhooks. |
+| **Frontend Framework** | **Next.js 16.4.6** (App Router, Turbopack) | Server & Client Components, responsive layouts, metadata SEO |
+| **UI & Styling** | **React 19.2.8**, **Tailwind CSS v4**, **Radix UI** | Accessible headless UI primitives, Lucide icons, Emil-inspired design tokens |
+| **State & Data Fetching** | **Zustand 5**, **TanStack React Query v5** | Global auth & language persistence, query invalidation, optimistic updates |
+| **Form Handling** | **React Hook Form 7**, **Zod** | Type-safe form validation and runtime schema parsing |
+| **Document Generation** | **html-to-image**, **html2canvas**, **canvas-confetti** | High-DPI A4 receipt rendering, digital signature embedding |
+| **Backend Framework** | **NestJS 10.4.15** (Express Platform) | Modular architecture, controllers, services, guards, interceptors |
+| **Database & ORM** | **PostgreSQL 14+**, **Prisma ORM 5.22.0** | Relational data schema, type-safe queries, transaction isolation, migrations |
+| **Authentication** | **Passport.js**, **JWT**, **Argon2** | Stateless Bearer authentication, refresh token rotation, secure hashing |
+| **Object Storage** | **Supabase Storage** | Secure presigned upload URLs for NID cards, property photos, and receipts |
+| **Email Service** | **Nodemailer (SMTP / Gmail)** | Delivery of 6-digit password reset OTP tokens |
+| **API Documentation** | **Swagger / OpenAPI 3.0** (`@nestjs/swagger`) | Auto-generated interactive API explorer available at `/api/docs` |
+| **Monorepo Tooling** | **Turborepo 2.11**, **npm Workspaces** | Parallel task orchestration, build caching, shared dependencies |
 
 ---
 
-## 🛠️ Technology Stack
-
-### Frontend Application (`barivara-web`)
-
-- **Framework**: Next.js 16.3.4 (App Router, React 19.2.8, Server & Client Components)
-- **Language**: TypeScript 5
-- **Styling**: Tailwind CSS v4, PostCSS, Lucide React icons
-- **UI Components**: Radix UI primitives (`@radix-ui/react-dialog`, `@radix-ui/react-dropdown-menu`, `@radix-ui/react-select`, `@radix-ui/react-tabs`, `@radix-ui/react-popover`), Class Variance Authority (`cva`), `clsx`, `tailwind-merge`
-- **State Management**: Zustand 5 (Auth & Language state persistence)
-- **Data Fetching & Caching**: TanStack React Query v5
-- **Form Validation**: React Hook Form 7 with Zod resolvers
-- **HTTP Client**: Axios 1.20 with request/response interceptors for Bearer auth and language injection
-- **Document & Image Rendering**: `html2canvas`, `html-to-image`, `sonner` toasts
-
-### Backend Application (`barivara-api`)
-
-- **Framework**: NestJS 10.4 (Express platform, Modular architecture)
-- **Language**: TypeScript 5.7
-- **Database & ORM**: PostgreSQL with Prisma ORM 5.22
-- **Precision Math**: `decimal.js` (PostgreSQL `Decimal(12, 2)`)
-- **Authentication**: JWT (`@nestjs/jwt`, `passport-jwt`) with Argon2 password hashing
-- **Security**: Helmet, `@nestjs/throttler` (Rate limiting), Whitelisted class-validator DTOs
-- **File Storage**: Supabase Storage via `@supabase/supabase-js` (presigned direct upload URLs)
-- **Email Service**: Resend SDK (`resend`) for password recovery OTP delivery
-- **Documentation**: OpenAPI 3.0 / Swagger (`@nestjs/swagger`)
-- **Testing**: Jest 29, Supertest 7, `ts-jest`
-
----
-
-## 🏛️ System Architecture
-
-The BariVara system is structured as an API-first multi-client workspace:
-
-```mermaid
-flowchart TD
-    subgraph Clients["Clients"]
-        Web["Web Application\n(Next.js 16 / React 19)\nhttp://localhost:3001"]
-        WhatsApp["WhatsApp Web / App\n(wa.me Direct Dispatch)"]
-    end
-
-    subgraph Backend["NestJS 10 REST API (barivara-api)\nhttp://localhost:3000/api/v1"]
-        Router["Global Prefix & Versioning (/api/v1)"]
-        Guard["Security Pipeline\n(Helmet • Throttler • JWT Guard)"]
-        
-        subgraph Modules["Application Modules"]
-            AuthMod["Auth & Profile Module\n(Argon2 • JWT • Resend OTP)"]
-            PropMod["Properties & Units Module"]
-            TenantMod["Tenants & Agreements Module"]
-            RentMod["Monthly Rent Generation Engine"]
-            PayMod["Payments & Atomic Transactions"]
-            ExpMod["Expenses & Financial Reports"]
-            FilesMod["Files & Media Module"]
-        end
-
-        Prisma["Prisma ORM Client\n(Decimal.js • Transaction Isolation)"]
-    end
-
-    subgraph External["Data & Cloud Infrastructure"]
-        Postgres[("PostgreSQL Database\n(Local Docker or Supabase DB)")]
-        Storage["Supabase Storage Buckets\n(Presigned Uploads & Private Media)"]
-        Resend["Resend Email API\n(Password Reset Delivery)"]
-    end
-
-    Web -->|REST API over Axios\nBearer Auth + Accept-Language| Router
-    Web -.->|Generates 1-click links| WhatsApp
-    Web -->|Direct Upload via Presigned URL| Storage
-
-    Router --> Guard
-    Guard --> Modules
-    Modules --> Prisma
-    Prisma --> Postgres
-    FilesMod --> Storage
-    AuthMod --> Resend
-```
-
-### Architectural Guarantees
-1. **Multi-Tenant Ownership Isolation**: All entity queries filter strictly by the authenticated `userId` / `ownerId` payload. Landlords cannot view, modify, or delete another landlord's data.
-2. **Standardized Response Envelope**:
-   - Success: `{ "success": true, "message": "...", "data": { ... }, "meta": { ... } }`
-   - Error: `{ "success": false, "message": "...", "errorCode": "...", "details": [ ... ] }`
-3. **Fail-Safe Decimal Arithmetic**: All rent calculations (rent, service fees, late fees, remaining dues, and expenses) are calculated using `decimal.js` methods before persisting.
-4. **Cloud-Ready Networking**: Backend includes `dns.setDefaultResultOrder('ipv4first')` in `main.ts` to prevent cloud hosting IPv6 routing stalls (e.g. Render/Supabase connection timeouts).
-
----
-
-## 📂 Repository Structure
+## 📁 Monorepo Project Structure
 
 ```text
-Barivara/                             # Turborepo + npm Workspaces Monorepo
+Barivara/
 ├── apps/
-│   ├── api/                          # NestJS Backend Application (apps/api)
+│   ├── api/                          # Backend REST API (NestJS + Prisma)
 │   │   ├── prisma/
-│   │   │   ├── migrations/           # Database migration history
-│   │   │   ├── schema.prisma         # Primary Prisma data model definitions
-│   │   │   └── seed.ts               # Development test fixtures
+│   │   │   ├── schema.prisma         # PostgreSQL database schema & enums
+│   │   │   └── seed.ts               # Demo data seeder (owner, property, units, tenants, rents)
 │   │   ├── src/
-│   │   │   ├── audit-logs/           # Audit trail of system events
-│   │   │   ├── auth/                 # Authentication, JWT, Argon2, and OTP
-│   │   │   ├── common/               # Filters, interceptors, guards, decorators, errors
-│   │   │   ├── config/               # Configuration loader and env validators
-│   │   │   ├── dashboard/            # Analytics and metric aggregations
-│   │   │   ├── expenses/             # Expense management and categories
-│   │   │   ├── files/                # Supabase storage integration & media records
-│   │   │   ├── health/               # /api/v1/health monitoring endpoint
-│   │   │   ├── monthly-rents/        # Billing generation and due-date logic
-│   │   │   ├── payments/             # Payment processing & atomic reversals
-│   │   │   ├── prisma/               # Global Prisma Service provider
-│   │   │   ├── properties/           # Property CRUD and summaries
-│   │   │   ├── reminders/            # Tenant due notices & reminders
-│   │   │   ├── rental-agreements/    # Agreement life-cycle & conflict checks
-│   │   │   ├── reports/              # Monthly financial reports & CSV streaming
-│   │   │   ├── tenants/              # Tenant records, NID storage
-│   │   │   ├── units/                # Unit management & status lifecycle
-│   │   │   ├── users/                # User profile service
-│   │   │   ├── app.module.ts         # Root application module
-│   │   │   └── main.ts               # Application bootstrap, Swagger, Helmet, CORS
-│   │   ├── docker-compose.yml        # Local PostgreSQL 16 container definition
-│   │   ├── package.json              # Backend dependencies and test scripts
-│   │   └── tsconfig.json             # TypeScript compiler configuration
+│   │   │   ├── audit-logs/           # Financial and administrative audit logging
+│   │   │   ├── auth/                 # JWT authentication, guards, OTP password recovery
+│   │   │   ├── common/               # Filters, interceptors, decimal utilities, error codes
+│   │   │   ├── config/               # Declarative environment variable schema & validation
+│   │   │   ├── dashboard/            # Aggregated analytics and metrics endpoints
+│   │   │   ├── email/                # Nodemailer SMTP email service
+│   │   │   ├── expenses/             # Property operating expenses management
+│   │   │   ├── files/                # Presigned Supabase storage URL generator
+│   │   │   ├── health/               # Terminus health checks (PostgreSQL ping)
+│   │   │   ├── monthly-rents/        # Automated monthly billing engine
+│   │   │   ├── payments/             # Rent collection, reversal, and receipt tracking
+│   │   │   ├── prisma/               # Prisma service singleton
+│   │   │   ├── properties/           # Building property CRUD operations
+│   │   │   ├── reminders/            # Rent overdue and lease expiry reminder engine
+│   │   │   ├── rental-agreements/    # Tenancy contracts and unit allocation
+│   │   │   ├── reports/              # Monthly financial summaries and CSV streaming
+│   │   │   ├── tenants/              # Tenant profiles and NID record management
+│   │   │   └── units/                # Unit configuration (rent, service fees, status)
+│   │   ├── test/                     # Unit and E2E test suites
+│   │   ├── package.json
+│   │   └── tsconfig.json
 │   │
-│   └── web/                          # Next.js Frontend Application (apps/web)
+│   └── web/                          # Frontend Web Application (Next.js 16 + React 19)
+│       ├── public/                   # Static illustrations, logos, and audio assets
 │       ├── src/
 │       │   ├── app/                  # Next.js App Router
-│       │   │   ├── (auth)/           # Login, register, forgot/reset password
-│       │   │   ├── (dashboard)/      # Authenticated landlord workspace
-│       │   │   │   ├── agreements/   # Rental agreements directory
-│       │   │   │   ├── dashboard/    # KPI metrics & quick actions
-│       │   │   │   ├── expenses/     # Property expense logs
-│       │   │   │   ├── payments/     # Payment collection logs & receipts
-│       │   │   │   ├── properties/   # Property & unit management
-│       │   │   │   ├── rents/        # Monthly rent invoicing & batch notices
-│       │   │   │   ├── reports/      # Financial summaries & export
-│       │   │   │   ├── settings/     # Profile & owner signature upload
-│       │   │   │   └── tenants/      # Tenant registry & profiles
-│       │   │   ├── layout.tsx        # Global layout with font & metadata
-│       │   │   └── page.tsx          # Root route redirecting to dashboard
-│       │   ├── components/           # Modular UI, forms, dialogs, documents
-│       │   ├── hooks/                # Reusable React hooks
-│       │   ├── lib/                  # Axios client, types, translations, WhatsApp util
-│       │   └── stores/               # Zustand stores (Auth & Language)
-│       ├── package.json              # Frontend dependencies and Next scripts
-│       └── tsconfig.json             # Frontend TypeScript configuration
+│       │   │   ├── (auth)/           # Login, register, forgot-password, reset-password
+│       │   │   ├── (dashboard)/      # Protected landlord dashboard and management pages
+│       │   │   ├── globals.css       # Global design tokens and emerald theme
+│       │   │   └── page.tsx          # Public marketing landing page
+│       │   ├── components/           # Reusable UI components, modals, sidebar, navigation
+│       │   ├── lib/                  # Axios API client, bilingual i18n dictionaries, types
+│       │   └── stores/               # Zustand persistent auth and language stores
+│       ├── package.json
+│       └── tsconfig.json
 │
-├── package.json                      # Monorepo root workspaces & Turborepo scripts
+├── docs/
+│   └── screenshots/                  # High-resolution screenshots of all views
+├── scripts/                          # Maintenance and utility scripts
+├── .env.example                      # Root environment reference
+├── package.json                      # Monorepo root workspace configuration
 ├── turbo.json                        # Turborepo task pipeline configuration
-├── brag-output/                      # Product launch showcase video & poster
-│   ├── brag.mp4                      # Full 20s launch video
-│   ├── brag.jpg                      # Settled poster thumbnail
-│   ├── brag-plan.md                  # Storyboard and creative angles
-│   └── share-copy.txt                # Social release copy
-│
-├── backend_api_reference.md          # Comprehensive backend endpoint reference
-├── DESIGN.md                         # Design system tokens and UI rationale
-├── PRODUCT.md                        # Product requirements and domain constraints
-└── run.md                            # Development startup command reference
+└── README.md                         # Project documentation
 ```
 
 ---
 
 ## ⚙️ Prerequisites
 
-Before running the project locally, ensure you have the following installed:
+Ensure you have the following runtime environments installed on your machine:
 
-| Requirement | Supported Version | Notes |
-|---|---|---|
-| **Node.js** | `>= 18.0.0 < 23.0.0` | NestJS engine constraint specified in `barivara-api/package.json`. Node 20 LTS recommended. |
-| **npm** | `>= 9.0.0` | Standard package manager used across both sub-projects. |
-| **PostgreSQL** | `15` or `16` | Required for `barivara-api`. Can be run locally via Docker (`docker-compose.yml`) or Supabase. |
-| **Docker & Compose** | Optional | Recommended for zero-setup local PostgreSQL. |
-| **Supabase Project** | Optional for local core | Required if testing file uploads (NID, signature, receipts). |
+- **Node.js**: `v20.x` or `v22.x` (LTS recommended, minimum `>=18.0.0`)
+- **Package Manager**: `npm` `v10.x` or `v11.x`
+- **Database**: **PostgreSQL 14+** (Local PostgreSQL instance or cloud database such as [Supabase](https://supabase.com))
+- **Git**: `v2.30+`
 
 ---
 
-## 💻 Installation & Local Setup
+## 🚀 Getting Started (Installation & Local Setup)
+
+Follow these step-by-step instructions to get the application running locally in under 5 minutes:
 
 ### 1. Clone the Repository
 ```bash
-git clone <repository-url>
+git clone https://github.com/Asif259/Barivara.git
 cd Barivara
 ```
 
-### 2. Configure Backend (`barivara-api`)
-
-#### A. Install Dependencies
+### 2. Install Dependencies
+Install all monorepo workspace dependencies using npm:
 ```bash
-cd barivara-api
 npm install
 ```
 
-#### B. Setup Environment Variables
-Create `.env` from `.env.example`:
+### 3. Configure Environment Variables
+Copy the example environment files for both the backend and frontend:
+
 ```bash
-cp .env.example .env
-```
-Ensure `DATABASE_URL` points to your PostgreSQL instance. For local Docker setup:
-```env
-PORT=3000
-NODE_ENV=development
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/barivara?schema=public"
-JWT_ACCESS_SECRET="your-super-secret-jwt-access-key-min-32-chars-long"
-JWT_REFRESH_SECRET="your-super-secret-jwt-refresh-key-min-32-chars-long"
-FRONTEND_URL="http://localhost:3000,http://localhost:3001,https://barivara-web.vercel.app"
+# Backend environment configuration
+cp apps/api/.env.example apps/api/.env
+
+# Frontend environment configuration
+cp apps/web/.env.example apps/web/.env
 ```
 
-#### C. Start Local PostgreSQL Database (Docker)
+Open `apps/api/.env` and update the required values (especially your PostgreSQL `DATABASE_URL` and `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET`).
+
+### 4. Run Database Migrations & Generate Prisma Client
+Apply the database schema to your PostgreSQL database:
+
 ```bash
-docker-compose up -d
+# Generate the Prisma Client
+npm run prisma:generate
+
+# Deploy migrations to the database
+npm run prisma:deploy
 ```
 
-#### D. Run Database Migrations & Seed Data
+### 5. Seed the Database with Demo Data
+Populate the database with a pre-configured landlord, building, units, tenants, and payment records:
+
 ```bash
-# Push schema or run migrations
-npx prisma migrate dev
-
-# Generate Prisma Client
-npx prisma generate
-
-# Seed initial test data (Admin owner, properties, units, tenants)
-npx prisma db seed
+npm --prefix apps/api run prisma:seed
 ```
 
-#### E. Start Backend Server
+> **Default Seed Credentials:**
+> - **Email**: `owner@barivara.com`
+> - **Password**: `Password123`
+> - **Role**: Property Owner / Landlord
+
+### 6. Launch the Local Development Servers
+Run both the backend API and frontend Next.js app concurrently via Turborepo:
+
 ```bash
-# Development mode with hot reload
-npm run start:dev
+npm run dev
 ```
-The backend API will be running at **`http://localhost:3000/api/v1`**.  
-Interactive Swagger documentation is available at **`http://localhost:3000/api/docs`**.
+
+- **Frontend Application**: [http://localhost:3000](http://localhost:3000)
+- **Backend REST API**: [http://localhost:4000/api/v1](http://localhost:4000/api/v1)
+- **Interactive Swagger Documentation**: [http://localhost:4000/api/docs](http://localhost:4000/api/docs)
+- **API Health Check**: [http://localhost:4000/api/v1/health](http://localhost:4000/api/v1/health)
 
 ---
 
-### 3. Configure Frontend (`barivara-web`)
+## 🔐 Configuration & Environment Variables
 
-Open a new terminal window:
+### Backend Environment Variables (`apps/api/.env`)
 
-#### A. Install Dependencies
-```bash
-cd barivara-web
-npm install
-```
+| Variable | Required | Description | Example / Default |
+|---|:---:|---|---|
+| `NODE_ENV` | Optional | Application runtime environment (`development`, `production`, `test`) | `development` |
+| `PORT` | Optional | Port on which the NestJS backend listens | `4000` |
+| `DATABASE_URL` | **Yes** | PostgreSQL connection string (supports Supabase Transaction Pooler) | `postgresql://postgres:pass@db.supabase.co:5432/postgres?sslmode=require` |
+| `JWT_ACCESS_SECRET` | **Yes** | Signing secret for access tokens (min 32 characters in production) | `your-super-secret-jwt-access-key-min-32-chars-long` |
+| `JWT_REFRESH_SECRET` | **Yes** | Signing secret for refresh tokens (must differ from access secret) | `your-super-secret-jwt-refresh-key-min-32-chars-long` |
+| `JWT_ACCESS_EXPIRES_IN` | Optional | Lifespan of access tokens | `15m` |
+| `JWT_REFRESH_EXPIRES_IN` | Optional | Lifespan of refresh tokens | `7d` |
+| `FRONTEND_URL` | Optional | Allowed CORS origins (comma-separated for multiple URLs) | `http://localhost:3000,https://barivara-web.vercel.app` |
+| `MOBILE_APP_SCHEME` | Optional | Deep link scheme for mobile client | `barivara` |
+| `SUPABASE_URL` | **Yes** | Supabase project URL for object storage | `https://your-project-ref.supabase.co` |
+| `SUPABASE_SERVICE_ROLE_KEY` | **Yes** | Supabase service role key for presigned upload URLs | `eyJhbGciOi...` |
+| `SMTP_HOST` | Optional | SMTP mail server hostname | `smtp.gmail.com` |
+| `SMTP_PORT` | Optional | SMTP mail server port (465 for SSL, 587 for TLS) | `465` |
+| `SMTP_SECURE` | Optional | Set to `"true"` for SSL connections | `true` |
+| `SMTP_USER` | **Yes** | SMTP username / email address | `your-email@gmail.com` |
+| `SMTP_PASS` | **Yes** | SMTP password or 16-character Google App Password | `abcd efgh ijkl mnop` |
+| `SMTP_FROM` | Optional | Formatted sender email string | `BariVara <your-email@gmail.com>` |
+| `TRUST_PROXY` | Optional | Reverse-proxy hops (1 for Vercel/Render/Hostinger) | `1` |
+| `LOG_LEVEL` | Optional | Logging level (`debug`, `info`, `warn`, `error`) | `info` |
+| `MAX_IMAGE_SIZE_MB` | Optional | Maximum allowed upload size for images | `5` |
+| `MAX_DOCUMENT_SIZE_MB` | Optional | Maximum allowed upload size for PDF documents | `10` |
 
-#### B. Setup Environment Variables
-Create `.env.local` from `.env.example`:
-```bash
-cp .env.example .env.local
-```
-Configure the API endpoint:
-```env
-NEXT_PUBLIC_API_URL=http://localhost:3000/api/v1
-NEXT_PUBLIC_SITE_URL=http://localhost:3001
-```
+### Frontend Environment Variables (`apps/web/.env`)
 
-#### C. Start Frontend Development Server
-Since port 3000 is occupied by the API server, run the web application on **port 3001** (as configured in [`run.md`](run.md)):
-```bash
-npm run dev -- -p 3001
-```
-The web dashboard is now accessible at **`http://localhost:3001`**.
-
----
-
-## 🔐 Environment Variables
-
-### Backend Environment Variables (`barivara-api/.env`)
-
-> [!CAUTION]
-> **Server-Side Secrets**: These variables contain private database credentials, JWT keys, and third-party API tokens. They must **NEVER** be committed to public version control or exposed to client-side bundles.
-
-| Variable Name | Required | Default / Example | Purpose |
-|---|---|---|---|
-| `PORT` | No | `3000` | Port on which the NestJS backend listens. |
-| `NODE_ENV` | Yes | `development` | Environment mode (`development`, `production`, `test`). |
-| `DATABASE_URL` | Yes | `postgresql://user:pass@host:5432/barivara?schema=public` | PostgreSQL connection string. |
-| `JWT_ACCESS_SECRET` | Yes | `your-secure-access-secret-32-chars` | Signing key for short-lived access tokens. |
-| `JWT_REFRESH_SECRET` | Yes | `your-secure-refresh-secret-32-chars` | Signing key for long-lived refresh tokens. |
-| `JWT_ACCESS_EXPIRES_IN` | No | `30d` | Expiration time for access tokens. |
-| `JWT_REFRESH_EXPIRES_IN`| No | `60d` | Expiration time for refresh tokens. |
-| `FRONTEND_URL` | Yes | `http://localhost:3001,https://barivara-web.vercel.app` | Comma-separated whitelisted CORS origins. |
-| `SUPABASE_URL` | Optional | `https://your-project.supabase.co` | Supabase project URL for presigned file storage. |
-| `SUPABASE_SERVICE_ROLE_KEY` | Optional | `your-supabase-service-role-key` | Service role key with administrative storage access. |
-| `MAX_IMAGE_SIZE_MB` | No | `5` | Maximum allowed file size for image uploads. |
-| `MAX_DOCUMENT_SIZE_MB` | No | `10` | Maximum allowed file size for document uploads. |
-| `RESEND_API_KEY` | Optional | `re_your_api_key_here` | API key for Resend email delivery (password reset OTP). |
-| `RESEND_FROM` | Optional | `BariVara <onboarding@resend.dev>` | Verified sender email address for Resend. |
-
-### Frontend Environment Variables (`barivara-web/.env.local`)
-
-| Variable Name | Required | Example | Purpose |
-|---|---|---|---|
-| `NEXT_PUBLIC_API_URL` | Yes | `http://localhost:3000/api/v1` | Public REST API base URL accessible by browser clients. |
-| `NEXT_PUBLIC_SITE_URL` | No | `https://barivara-web.vercel.app` | Canonical site origin for SEO metadata and OpenGraph tags. |
+| Variable | Required | Description | Example / Default |
+|---|:---:|---|---|
+| `NEXT_PUBLIC_API_URL` | **Yes** | Full URL of the backend REST API (`/api/v1`) | `http://localhost:4000/api/v1` |
+| `NEXT_PUBLIC_SITE_URL` | Optional | Canonical public site URL for Open Graph and SEO | `https://barivara-web.vercel.app` |
 
 ---
 
-## 📡 REST API Documentation
+## 📜 Available Scripts & Workflows
 
-- **Base Path**: `/api/v1`
-- **Swagger Documentation**: `http://localhost:3000/api/docs` (available in non-production environments)
-- **Authentication**: Bearer Token (`Authorization: Bearer <accessToken>`)
-- **Localization Header**: `Accept-Language: bn` (default) or `Accept-Language: en` (or query param `?lang=en|bn`)
+Run these commands from the root directory of the monorepo:
 
-### Standard Response Structure
+| Command | Description |
+|---|---|
+| `npm run dev` | Starts both `apps/web` (:3000) and `apps/api` (:4000) concurrently using Turborepo. |
+| `npm run build` | Compiles the backend API into `./dist` and prepares production assets. |
+| `npm run typecheck` | Executes TypeScript typecheck (`tsc --noEmit`) across all monorepo workspaces. |
+| `npm run test` | Runs all 24 unit test suites (244 tests) in `apps/api`. |
+| `npm run lint` | Runs ESLint across all workspaces. |
+| `npm run format` | Formats all code using Prettier according to `.prettierrc`. |
+| `npm run prisma:generate` | Generates the latest Prisma Client based on `schema.prisma`. |
+| `npm run prisma:deploy` | Applies pending database migrations in production. |
+| `npm --prefix apps/api run prisma:seed` | Populates the database with default landlord, property, unit, and tenant data. |
 
-#### Success (`200 OK`, `201 Created`)
+---
+
+## 📡 REST API Reference & Swagger
+
+The backend provides a structured, versioned REST API (`/api/v1`) with global input validation and response transformation:
+
 ```json
 {
   "success": true,
-  "message": "সফলভাবে সম্পন্ন হয়েছে",
+  "message": "সফল হয়েছে",
   "data": { ... },
-  "meta": {
-    "total": 24,
-    "page": 1,
-    "limit": 10,
-    "totalPages": 3
-  }
+  "meta": { "page": 1, "limit": 20, "total": 1 }
 }
 ```
 
-#### Error (`400`, `401`, `403`, `404`, `409`, `429`)
-```json
-{
-  "success": false,
-  "message": "অনুরোধটি সঠিক নয়",
-  "errorCode": "VALIDATION_FAILED",
-  "details": ["ফোন নম্বর আবশ্যক"]
-}
-```
+### Core API Endpoints
 
-### Verified API Endpoints
+| Domain | Method | Endpoint | Description |
+|---|---|---|---|
+| **Health** | `GET` | `/api/v1/health` | Service status and PostgreSQL connectivity ping |
+| **Auth** | `POST` | `/api/v1/auth/login` | Authenticate with email/phone & password, returns JWT tokens |
+| | `POST` | `/api/v1/auth/register` | Register a new property owner account |
+| | `POST` | `/api/v1/auth/refresh` | Exchange a valid refresh token for a new access token |
+| | `POST` | `/api/v1/auth/forgot-password` | Request a 6-digit password reset OTP via email |
+| | `POST` | `/api/v1/auth/reset-password` | Verify OTP and set a new password |
+| | `GET` | `/api/v1/auth/me` | Fetch currently authenticated user profile |
+| **Properties** | `GET` | `/api/v1/properties` | List all properties owned by the authenticated landlord |
+| | `POST` | `/api/v1/properties` | Create a new property |
+| | `GET` | `/api/v1/properties/:id` | Retrieve single property with units and floors |
+| | `PATCH` | `/api/v1/properties/:id` | Update property details |
+| | `DELETE` | `/api/v1/properties/:id` | Soft-delete property |
+| **Units** | `GET` | `/api/v1/properties/:propertyId/units` | List units in a property |
+| | `POST` | `/api/v1/properties/:propertyId/units` | Create a new unit |
+| | `POST` | `/api/v1/properties/:propertyId/units/bulk` | Bulk-generate multiple units across floors |
+| **Tenants** | `GET` | `/api/v1/tenants` | List all active and archived tenants |
+| | `POST` | `/api/v1/tenants` | Register a new tenant with emergency contacts and NID |
+| | `GET` | `/api/v1/tenants/:id` | Retrieve tenant profile with active agreement |
+| **Agreements** | `GET` | `/api/v1/rental-agreements` | List rental agreements and lease terms |
+| | `POST` | `/api/v1/rental-agreements` | Create lease linking tenant to a unit |
+| | `POST` | `/api/v1/rental-agreements/:id/terminate` | Terminate an agreement and mark unit vacant |
+| **Monthly Rents** | `GET` | `/api/v1/monthly-rents` | Query monthly rent bills filtered by year, month, and status |
+| | `POST` | `/api/v1/monthly-rents/generate` | Idempotently generate rent bills for an active month |
+| **Payments** | `GET` | `/api/v1/payments` | Query payments with filters for method and date range |
+| | `POST` | `/api/v1/payments` | Record rent payment (Cash, Bank, bKash, Nagad, Rocket) |
+| | `POST` | `/api/v1/payments/:id/reverse` | Atomically reverse a payment and restore balance |
+| **Expenses** | `GET` | `/api/v1/expenses` | List building maintenance and operating expenses |
+| | `POST` | `/api/v1/expenses` | Record a new expense |
+| **Reports** | `GET` | `/api/v1/reports/monthly` | Aggregated monthly financial summary |
+| | `GET` | `/api/v1/reports/monthly/export` | Stream monthly financial report as CSV |
+| **Dashboard** | `GET` | `/api/v1/dashboard/metrics` | Real-time landlord KPIs (revenue, arrears, occupancy) |
+| | `GET` | `/api/v1/dashboard/recent-activity` | Chronological activity feed |
+| **Files** | `POST` | `/api/v1/files/upload-url` | Generate presigned upload URL for Supabase storage |
+| **Audit Logs** | `GET` | `/api/v1/audit-logs` | Retrieve administrative and financial audit trails |
 
-| Category | Method | Endpoint | Description | Auth Required |
-|---|---|---|---|---|
-| **System** | `GET` | `/api/v1/health` | System and PostgreSQL connectivity status | No |
-| **Auth** | `POST` | `/api/v1/auth/register` | Register new landlord account | No (Rate-limited: 10/min) |
-| **Auth** | `POST` | `/api/v1/auth/login` | Login via email or phone | No (Rate-limited: 10/min) |
-| **Auth** | `POST` | `/api/v1/auth/refresh` | Obtain new access token via refresh token | No (Rate-limited: 20/min) |
-| **Auth** | `POST` | `/api/v1/auth/logout` | Invalidate current session | Yes |
-| **Auth** | `GET` | `/api/v1/auth/me` | Fetch authenticated user profile | Yes |
-| **Auth** | `POST` | `/api/v1/auth/change-password` | Update password for active session | Yes |
-| **Auth** | `POST` | `/api/v1/auth/forgot-password` | Request email OTP for password recovery | No (Rate-limited: 5/min) |
-| **Auth** | `POST` | `/api/v1/auth/verify-password-reset-otp` | Validate 6-digit password reset OTP | No (Rate-limited: 10/min) |
-| **Auth** | `POST` | `/api/v1/auth/reset-password` | Reset password using verified OTP | No (Rate-limited: 5/min) |
-| **Properties** | `POST` | `/api/v1/properties` | Create a property | Yes |
-| **Properties** | `GET` | `/api/v1/properties` | List properties (paginated, searchable) | Yes |
-| **Properties** | `GET` | `/api/v1/properties/:id` | Get property details | Yes |
-| **Properties** | `GET` | `/api/v1/properties/:id/summary` | Current month financial & unit occupancy summary | Yes |
-| **Properties** | `PATCH` | `/api/v1/properties/:id` | Update property attributes | Yes |
-| **Properties** | `DELETE` | `/api/v1/properties/:id` | Soft-delete property | Yes |
-| **Units** | `POST` | `/api/v1/properties/:propertyId/units` | Create individual unit under property | Yes |
-| **Units** | `POST` | `/api/v1/properties/:propertyId/units/bulk` | Bulk create multiple units | Yes |
-| **Units** | `GET` | `/api/v1/properties/:propertyId/units` | List all units for a property | Yes |
-| **Units** | `GET` | `/api/v1/units/:id` | Get unit details | Yes |
-| **Units** | `PATCH` | `/api/v1/units/:id` | Update unit status, rent, or specifications | Yes |
-| **Units** | `DELETE` | `/api/v1/units/:id` | Soft-delete unit | Yes |
-| **Tenants** | `POST` | `/api/v1/tenants` | Create tenant record | Yes |
-| **Tenants** | `GET` | `/api/v1/tenants` | List tenants with unit & agreement summaries | Yes |
-| **Tenants** | `GET` | `/api/v1/tenants/:id` | Detailed tenant profile, NID files, and rent ledger | Yes |
-| **Tenants** | `PATCH` | `/api/v1/tenants/:id` | Update tenant details | Yes |
-| **Tenants** | `DELETE` | `/api/v1/tenants/:id` | Soft-delete tenant | Yes |
-| **Agreements** | `POST` | `/api/v1/rental-agreements` | Create tenancy agreement and occupy unit | Yes |
-| **Agreements** | `GET` | `/api/v1/rental-agreements` | List agreements | Yes |
-| **Agreements** | `GET` | `/api/v1/rental-agreements/:id` | Get agreement details | Yes |
-| **Agreements** | `POST` | `/api/v1/rental-agreements/:id/end` | Terminate agreement & release unit to `VACANT` | Yes |
-| **Monthly Rent**| `POST` | `/api/v1/monthly-rents/generate` | Bulk generate rent bills for active agreements | Yes |
-| **Monthly Rent**| `GET` | `/api/v1/monthly-rents` | List monthly rent bills (filters: property, status) | Yes |
-| **Monthly Rent**| `GET` | `/api/v1/monthly-rents/outstanding`| List overdue and unpaid rent bills | Yes |
-| **Monthly Rent**| `GET` | `/api/v1/monthly-rents/:id` | Get single rent bill invoice details | Yes |
-| **Payments** | `POST` | `/api/v1/payments` | Record full/partial rent payment | Yes |
-| **Payments** | `GET` | `/api/v1/payments` | List payment ledger history | Yes |
-| **Payments** | `GET` | `/api/v1/payments/:id` | Get payment receipt with snapshot signature | Yes |
-| **Payments** | `POST` | `/api/v1/payments/:id/reverse` | Reverse a payment atomically inside transaction | Yes |
-| **Expenses** | `POST` | `/api/v1/expenses` | Record property expense | Yes |
-| **Expenses** | `GET` | `/api/v1/expenses` | List categorized expenses | Yes |
-| **Expenses** | `DELETE` | `/api/v1/expenses/:id` | Remove expense record | Yes |
-| **Reports** | `GET` | `/api/v1/reports/monthly` | Monthly income vs expense summary | Yes |
-| **Reports** | `GET` | `/api/v1/reports/monthly/export` | Stream monthly financial ledger as CSV | Yes |
-| **Dashboard** | `GET` | `/api/v1/dashboard/overview` | KPI overview (Occupancy, Expected, Collected) | Yes |
-| **Files** | `POST` | `/api/v1/files/upload-url` | Request signed Supabase upload URL | Yes |
-| **Files** | `POST` | `/api/v1/files/:id/complete` | Mark upload as completed | Yes |
-| **Files** | `GET` | `/api/v1/files/:id/url` | Obtain public or signed time-limited download URL | Yes |
-| **Files** | `DELETE` | `/api/v1/files/:id` | Soft-delete file & remove object from storage | Yes |
+> **Interactive Swagger Documentation**: When running in non-production environments, explore and execute all endpoints at `http://localhost:4000/api/docs`.
 
 ---
 
-## 🗄️ Database Architecture & Prisma ORM
-
-The persistence layer uses PostgreSQL managed through Prisma ORM (`barivara-api/prisma/schema.prisma`).
-
-### Core Data Models
-
-- **`User`**: Property owners and administrators. Holds authentication credentials (`passwordHash`), role, and `signatureFileId`.
-- **`Property`**: Multi-unit buildings with address, floors, owner association, and soft-delete (`deletedAt`).
-- **`Unit`**: Individual flats or commercial spaces belonging to a property. Tracks base rent, default service fees, and occupancy status (`VACANT`, `OCCUPIED`, `MAINTENANCE`, `INACTIVE`).
-- **`Tenant`**: Renters associated with properties. Tracks contact info, occupation, emergency contacts, and NID card media IDs.
-- **`RentalAgreement`**: Legal binding contract between tenant and unit. Enforces `dueDay` (e.g. 5th of each month), monthly rent, deposit, and status (`ACTIVE`, `ENDED`, `CANCELLED`).
-- **`MonthlyRent`**: Monthly rent invoices. Enforces unique constraint `@@unique([agreementId, year, month])` preventing duplicate bill creation. Tracks `rent`, `serviceFee`, `parkingFee`, `extraCharge`, `lateFee`, `discount`, `paidAmount`, `remainingAmount`, and status (`PENDING`, `PARTIAL`, `PAID`, `OVERDUE`).
-- **`Payment`**: Financial records of rent payments. Links to `MonthlyRent`, tracks `amount`, `paymentMethod` (`CASH`, `BANK`, `BKASH`, `NAGAD`, etc.), `transactionId`, `ownerSignatureSnapshotId`, and status (`COMPLETED`, `REVERSED`).
-- **`Expense`**: Operating costs categorized by utility and maintenance types (`ELECTRICITY`, `WATER`, `GAS`, `MAINTENANCE`, `SALARY`, etc.).
-- **`Media`**: File registry tracking uploaded assets (NID images, receipts, landlord signatures) stored in Supabase Storage with status tracking (`PENDING`, `COMPLETED`, `FAILED`).
-- **`AuditLog`**: System and financial audit trail storing actor, action, IP address, user-agent, and metadata changes.
-
-### Migrations & Integrity Protections
-- **Foreign Key Constraints with Cascade / SetNull**: Deleting a property safely cascades to units and agreements; user deletion sets nullable creator references.
-- **Compound Indexes**: Optimized for queries like `[agreementId, year, month]`, `[ownerId]`, `[scheduledAt, status]`, and `[propertyId, expenseDate]`.
-- **Financial Immutability**: Payments are append-only. Payment corrections are performed via an audited reversal workflow (`POST /payments/:id/reverse`) that recalculates the remaining rent balance.
-
----
-
-## 🔒 Authentication & Security
-
-1. **Password Hashing**: Uses modern **Argon2** algorithm with automated salt generation.
-2. **Stateless JWT Tokens**:
-   - Access Token: Short-lived Bearer token signed with `JWT_ACCESS_SECRET`.
-   - Refresh Token: Stored and validated against `JWT_REFRESH_SECRET` for seamless rotation.
-3. **Strict Rate Limiting (`@nestjs/throttler`)**:
-   - Authentication endpoints (`/login`, `/register`) restricted to 10 requests/minute.
-   - Password reset endpoints restricted to 5 requests/minute.
-   - General API endpoints throttled at 120 requests/minute.
-4. **Security Headers**: Configured via **Helmet** to protect against clickjacking, cross-site scripting (XSS), and MIME sniffing.
-5. **CORS Security**: Strictly matches origins against configured `FRONTEND_URL`. In production, regex matching ensures unauthorized third-party domains are rejected.
-6. **Input Sanitization**: Global `ValidationPipe` with `whitelist: true` and `forbidNonWhitelisted: true` strips unexpected payload properties.
-7. **Secure File Uploads**: Client uploads bypass the API server directly to Supabase Storage via short-lived, presigned upload URLs. File mime-types and size limits are verified before completion.
-
----
-
-## 🧪 Testing & Quality Assurance
-
-### Verified Test Results
-
-All test suites and static analysis tools have been executed and verified directly against the codebase:
-
-```bash
-# Backend unit & integration test suite (Jest)
-cd barivara-api
-npm test
-```
-**Status: 23 passed, 23 total suites | 228 passed, 228 total tests**
-
-### Available Quality Commands
-
-#### Backend (`barivara-api`)
-```bash
-# Run unit tests
-npm run test:unit
-
-# Run tests in watch mode
-npm run test:watch
-
-# Check code coverage
-npm run test:cov
-
-# Run End-to-End tests
-npm run test:e2e
-
-# Run TypeScript typecheck without emitting output
-npm run typecheck
-
-# Run ESLint check
-npm run lint:check
-```
-
-#### Frontend (`barivara-web`)
-```bash
-# Run TypeScript compilation check
-npx tsc --noEmit
-
-# Run ESLint check
-npm run lint
-
-# Production build verification
-npm run build
-```
-
----
-
-## 🚀 Deployment Guide
+## 🚢 Deployment Guide
 
 ### Frontend Deployment (Vercel)
+The Next.js frontend (`apps/web`) is deployed on Vercel:
+1. Connect the `Barivara` repository to Vercel.
+2. In **Project Settings** > **General**:
+   - **Root Directory**: `apps/web`
+   - **Framework Preset**: Next.js
+3. In **Environment Variables**, add:
+   - `NEXT_PUBLIC_API_URL`: Your production backend API URL (e.g. `https://palegoldenrod-stingray-758793.hostingersite.com/api/v1`)
+   - `NEXT_PUBLIC_SITE_URL`: `https://barivara-web.vercel.app`
+4. Deploy!
 
-The Next.js frontend is optimized for deployment on Vercel:
-
-1. Connect the GitHub repository to Vercel and set the **Root Directory** to `barivara-web`.
-2. Configure Environment Variables in the Vercel dashboard:
-   ```ini
-   NEXT_PUBLIC_API_URL=https://your-api-domain.com/api/v1
-   NEXT_PUBLIC_SITE_URL=https://your-frontend-domain.com
-   ```
-3. Deploy. Build command defaults to `next build`.
-
-### Backend Deployment (Render / Hostinger VPS / Docker)
-
-The NestJS backend can be deployed to container platforms (such as Render) or standard Linux VPS environments (such as Hostinger):
-
-#### 1. Production Build & Start Commands
-```bash
-cd barivara-api
-npm install --omit=dev
-npx prisma generate
-npm run build
-npm run start:prod
-```
-
-#### 2. Applying Production Migrations
-Always run Prisma deployment migrations in your CI/CD pipeline before starting the production server:
-```bash
-npx prisma migrate deploy
-```
-
-#### 3. Health Check Verification
-After deployment, verify that the application and database connectivity are healthy:
-```bash
-curl -X GET https://your-api-domain.com/api/v1/health
-```
-Expected output:
-```json
-{
-  "message": "সার্ভার সচল রয়েছে",
-  "data": {
-    "status": "ok",
-    "database": "up",
-    "timestamp": "2026-10-19T10:00:00.000Z"
-  }
-}
-```
+### Backend Deployment (Hostinger Managed Node.js / VPS)
+The NestJS backend (`apps/api`) runs via LiteSpeed Node.js (`lsnode.js`):
+1. In Hostinger hPanel > **Deployments** (or Node.js Web App):
+   - **Repository**: `https://github.com/Asif259/Barivara.git`
+   - **Branch**: `main`
+   - **Root Directory**: `/`
+   - **Build Command**: `npm run build`
+   - **Application Startup File**: `dist/src/main.js`
+   - **Node.js Version**: `20.x` or `22.x`
+2. Add all production environment variables from `apps/api/.env.example` into Hostinger's Environment Variables table.
+3. Trigger deployment. The root `npm run build` command installs dependencies with `--include=dev`, compiles the NestJS API, and copies compiled output to `dist/src/main.js`.
 
 ---
 
-## ❓ Troubleshooting Guide
+## 🤝 Contributing & License
 
-### 1. Port Conflict (`EADDRINUSE: port 3000`)
-- **Cause**: Both NestJS and Next.js default to port 3000.
-- **Solution**: Run the backend on port 3000 and start the frontend on port 3001 using:
-  ```bash
-  cd barivara-web && npm run dev -- -p 3001
-  ```
+### Contributing
+Contributions to BariVara are welcome! Please follow these standards:
+1. Fork the repository and create your branch from `main`.
+2. Ensure all 24 unit test suites pass (`npm run test`).
+3. Ensure TypeScript typechecking passes (`npm run typecheck`).
+4. Follow conventional commit messages (`feat:`, `fix:`, `style:`, `docs:`).
 
-### 2. Database Connection Issues (`P1001: Can't reach database server`)
-- **Cause**: PostgreSQL is not running or the connection string is incorrect.
-- **Solution**:
-  - If using Docker, ensure the container is running: `docker-compose ps` (or restart with `docker-compose up -d`).
-  - If using Supabase, ensure you are using port `5432` with `?sslmode=require` or the transaction pooler on port `6543`.
-
-### 3. Prisma Client Generation (`@prisma/client did not initialize yet`)
-- **Cause**: Prisma Client was not re-generated after schema changes.
-- **Solution**:
-  ```bash
-  cd barivara-api
-  npx prisma generate
-  ```
-
-### 4. CORS Errors on Web Dashboard
-- **Cause**: The frontend URL is not included in the backend's whitelisted CORS origins.
-- **Solution**: Check `barivara-api/.env` and ensure `FRONTEND_URL` includes the exact URL and port of your frontend (e.g. `FRONTEND_URL="http://localhost:3001"`).
-
-### 5. Cloud Container IPv6 Timeouts (Render / Cloud VPS)
-- **Cause**: Cloud providers lacking IPv6 outbound routing may stall when attempting to connect to PostgreSQL over IPv6.
-- **Solution**: This has been pre-configured in `barivara-api/src/main.ts` via `dns.setDefaultResultOrder('ipv4first')`. Ensure your cloud environment runs Node.js 18+.
-
----
-
-## 🤝 Contributing
-
-Contributions to BariVara are welcome:
-
-1. Check existing issues or open a discussion before implementing large architectural changes.
-2. Follow standard coding styles:
-   - Run `npm run format` and `npm run lint:check` in `barivara-api`.
-   - Run `npm run lint` and `npx tsc --noEmit` in `barivara-web`.
-3. Ensure all automated tests pass (`npm test` in `barivara-api` must maintain 100% pass rate).
-4. Submit pull requests against the `main` branch.
-
----
-
-## 📄 License
-
-This repository is currently private and proprietary. No open-source license is granted. All rights reserved by the BariVara development team.
+### License
+This project is proprietary and confidential. All rights reserved.  
+Unauthorized copying, modification, distribution, or use of this software is strictly prohibited.
