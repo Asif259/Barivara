@@ -1,6 +1,5 @@
 import { RemindersService } from './reminders.service';
 import { ErrorCode } from '../common/constants/error-codes';
-import { ReminderStatus } from '@prisma/client';
 
 const OWNER_ID = 'owner-uuid-001';
 const OTHER_OWNER_ID = 'owner-uuid-002';

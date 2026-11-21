@@ -1,9 +1,7 @@
 import { ReportsService } from './reports.service';
 import { ErrorCode } from '../common/constants/error-codes';
-import { Prisma } from '@prisma/client';
 
 const OWNER_ID = 'owner-uuid-001';
-const OTHER_OWNER_ID = 'owner-uuid-002';
 const TENANT_ID = 'tenant-uuid-001';
 
 describe('ReportsService - Security Tests', () => {

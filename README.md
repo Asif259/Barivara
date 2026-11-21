@@ -175,60 +175,63 @@ flowchart TD
 ## 📂 Repository Structure
 
 ```text
-Barivara/
-├── barivara-api/                     # NestJS Backend Application
-│   ├── prisma/
-│   │   ├── migrations/               # Database migration history
-│   │   ├── schema.prisma             # Primary Prisma data model definitions
-│   │   └── seed.ts                   # Development test fixtures
-│   ├── src/
-│   │   ├── audit-logs/               # Audit trail of system events
-│   │   ├── auth/                     # Authentication, JWT, Argon2, and OTP
-│   │   ├── common/                   # Filters, interceptors, guards, decorators, errors
-│   │   ├── config/                   # Configuration loader and env validators
-│   │   ├── dashboard/                # Analytics and metric aggregations
-│   │   ├── expenses/                 # Expense management and categories
-│   │   ├── files/                    # Supabase storage integration & media records
-│   │   ├── health/                   # /api/v1/health monitoring endpoint
-│   │   ├── monthly-rents/            # Billing generation and due-date logic
-│   │   ├── payments/                 # Payment processing & atomic reversals
-│   │   ├── prisma/                   # Global Prisma Service provider
-│   │   ├── properties/               # Property CRUD and summaries
-│   │   ├── reminders/                # Tenant due notices & reminders
-│   │   ├── rental-agreements/        # Agreement life-cycle & conflict checks
-│   │   ├── reports/                  # Monthly financial reports & CSV streaming
-│   │   ├── tenants/                  # Tenant records, NID storage
-│   │   ├── units/                    # Unit management & status lifecycle
-│   │   ├── users/                    # User profile service
-│   │   ├── app.module.ts             # Root application module
-│   │   └── main.ts                   # Application bootstrap, Swagger, Helmet, CORS
-│   ├── docker-compose.yml            # Local PostgreSQL 16 container definition
-│   ├── package.json                  # Backend dependencies and test scripts
-│   └── tsconfig.json                 # TypeScript compiler configuration
+Barivara/                             # Turborepo + npm Workspaces Monorepo
+├── apps/
+│   ├── api/                          # NestJS Backend Application (apps/api)
+│   │   ├── prisma/
+│   │   │   ├── migrations/           # Database migration history
+│   │   │   ├── schema.prisma         # Primary Prisma data model definitions
+│   │   │   └── seed.ts               # Development test fixtures
+│   │   ├── src/
+│   │   │   ├── audit-logs/           # Audit trail of system events
+│   │   │   ├── auth/                 # Authentication, JWT, Argon2, and OTP
+│   │   │   ├── common/               # Filters, interceptors, guards, decorators, errors
+│   │   │   ├── config/               # Configuration loader and env validators
+│   │   │   ├── dashboard/            # Analytics and metric aggregations
+│   │   │   ├── expenses/             # Expense management and categories
+│   │   │   ├── files/                # Supabase storage integration & media records
+│   │   │   ├── health/               # /api/v1/health monitoring endpoint
+│   │   │   ├── monthly-rents/        # Billing generation and due-date logic
+│   │   │   ├── payments/             # Payment processing & atomic reversals
+│   │   │   ├── prisma/               # Global Prisma Service provider
+│   │   │   ├── properties/           # Property CRUD and summaries
+│   │   │   ├── reminders/            # Tenant due notices & reminders
+│   │   │   ├── rental-agreements/    # Agreement life-cycle & conflict checks
+│   │   │   ├── reports/              # Monthly financial reports & CSV streaming
+│   │   │   ├── tenants/              # Tenant records, NID storage
+│   │   │   ├── units/                # Unit management & status lifecycle
+│   │   │   ├── users/                # User profile service
+│   │   │   ├── app.module.ts         # Root application module
+│   │   │   └── main.ts               # Application bootstrap, Swagger, Helmet, CORS
+│   │   ├── docker-compose.yml        # Local PostgreSQL 16 container definition
+│   │   ├── package.json              # Backend dependencies and test scripts
+│   │   └── tsconfig.json             # TypeScript compiler configuration
+│   │
+│   └── web/                          # Next.js Frontend Application (apps/web)
+│       ├── src/
+│       │   ├── app/                  # Next.js App Router
+│       │   │   ├── (auth)/           # Login, register, forgot/reset password
+│       │   │   ├── (dashboard)/      # Authenticated landlord workspace
+│       │   │   │   ├── agreements/   # Rental agreements directory
+│       │   │   │   ├── dashboard/    # KPI metrics & quick actions
+│       │   │   │   ├── expenses/     # Property expense logs
+│       │   │   │   ├── payments/     # Payment collection logs & receipts
+│       │   │   │   ├── properties/   # Property & unit management
+│       │   │   │   ├── rents/        # Monthly rent invoicing & batch notices
+│       │   │   │   ├── reports/      # Financial summaries & export
+│       │   │   │   ├── settings/     # Profile & owner signature upload
+│       │   │   │   └── tenants/      # Tenant registry & profiles
+│       │   │   ├── layout.tsx        # Global layout with font & metadata
+│       │   │   └── page.tsx          # Root route redirecting to dashboard
+│       │   ├── components/           # Modular UI, forms, dialogs, documents
+│       │   ├── hooks/                # Reusable React hooks
+│       │   ├── lib/                  # Axios client, types, translations, WhatsApp util
+│       │   └── stores/               # Zustand stores (Auth & Language)
+│       ├── package.json              # Frontend dependencies and Next scripts
+│       └── tsconfig.json             # Frontend TypeScript configuration
 │
-├── barivara-web/                     # Next.js Frontend Application
-│   ├── src/
-│   │   ├── app/                      # Next.js App Router
-│   │   │   ├── (auth)/               # Login, register, forgot/reset password
-│   │   │   ├── (dashboard)/          # Authenticated landlord workspace
-│   │   │   │   ├── agreements/       # Rental agreements directory
-│   │   │   │   ├── dashboard/        # KPI metrics & quick actions
-│   │   │   │   ├── expenses/         # Property expense logs
-│   │   │   │   ├── payments/         # Payment collection logs & receipts
-│   │   │   │   ├── properties/       # Property & unit management
-│   │   │   │   ├── rents/            # Monthly rent invoicing & batch notices
-│   │   │   │   ├── reports/          # Financial summaries & export
-│   │   │   │   ├── settings/         # Profile & owner signature upload
-│   │   │   │   └── tenants/          # Tenant registry & profiles
-│   │   │   ├── layout.tsx            # Global layout with font & metadata
-│   │   │   └── page.tsx              # Root route redirecting to dashboard
-│   │   ├── components/               # Modular UI, forms, dialogs, documents
-│   │   ├── hooks/                    # Reusable React hooks
-│   │   ├── lib/                      # Axios client, types, translations, WhatsApp util
-│   │   └── stores/                   # Zustand stores (Auth & Language)
-│   ├── package.json                  # Frontend dependencies and Next scripts
-│   └── tsconfig.json                 # Frontend TypeScript configuration
-│
+├── package.json                      # Monorepo root workspaces & Turborepo scripts
+├── turbo.json                        # Turborepo task pipeline configuration
 ├── brag-output/                      # Product launch showcase video & poster
 │   ├── brag.mp4                      # Full 20s launch video
 │   ├── brag.jpg                      # Settled poster thumbnail

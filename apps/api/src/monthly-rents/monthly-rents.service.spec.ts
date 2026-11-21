@@ -1,5 +1,6 @@
 import { RentCalculationUtil } from '../common/utils/rent-calculation.util';
 import { Prisma, RentStatus } from '@prisma/client';
+import { MonthlyRentsService } from './monthly-rents.service';
 
 describe('RentCalculationUtil.calculateStatus', () => {
   it('should return PENDING when paidAmount is 0 and dueDate is in future', () => {
@@ -95,7 +96,6 @@ describe('MonthlyRentsService - Notice / Payment Request Workflow', () => {
       },
     };
 
-    const { MonthlyRentsService } = require('./monthly-rents.service');
     service = new MonthlyRentsService(mockPrisma);
   });
 
