@@ -11,7 +11,7 @@
     "lint": "turbo run lint",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",
-    "start": "node dist/src/main.js",
+    "start": "node start.js",
     "start:prod": "node dist/src/main.js",
     "prisma:deploy": "npx prisma migrate deploy --schema=apps/api/prisma/schema.prisma",
     "prisma:generate": "npx prisma generate --schema=apps/api/prisma/schema.prisma",
