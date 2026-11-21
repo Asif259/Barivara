@@ -7,7 +7,7 @@
   ],
   "scripts": {
     "dev": "turbo run dev",
-    "build": "turbo run build && cp -r apps/api/dist ./dist",
+    "build": "turbo run build && rm -rf ./dist && cp -r apps/api/dist ./dist",
     "lint": "turbo run lint",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",
