@@ -7,7 +7,7 @@
   ],
   "scripts": {
     "dev": "turbo run dev",
-    "build": "npm install --include=dev && npm --prefix apps/api run build && rm -rf ./dist && cp -r apps/api/dist ./dist && cp apps/api/prisma/schema.prisma dist/schema.prisma && mv dist/src/main.js dist/src/app.js && cp scripts/boot.js dist/src/main.js",
+    "build": "npm install --include=dev && npm --prefix apps/api run build && rm -rf ./dist && cp -r apps/api/dist ./dist",
     "lint": "turbo run lint",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",
