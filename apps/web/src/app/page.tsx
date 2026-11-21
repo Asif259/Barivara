@@ -1,8 +1,11 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useGSAP } from '@gsap/react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
   ArrowRight,
   ArrowUpRight,
@@ -32,6 +35,11 @@ import { FogHero } from '@/components/landing/fog-hero';
 import { SmoothScroll } from '@/components/landing/smooth-scroll';
 import { LandingDialog } from '@/components/landing/landing-dialog';
 import s from '@/components/landing/landing.module.css';
+
+// Register GSAP plugins safely on client
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 const STEP_ICONS = {
   building: Building2,
@@ -64,7 +72,10 @@ function SectionHeading({
 }) {
   const center = align === 'center';
   return (
-    <div className={`${s.reveal} ${center ? 'mx-auto text-center' : ''} max-w-3xl`}>
+    <div
+      data-section-heading
+      className={`${s.reveal} ${center ? 'mx-auto text-center' : ''} max-w-3xl`}
+    >
       <span className={s.eyebrow}>{eyebrow}</span>
       <h2 id={id} className={`${s.heading} mt-5`}>
         {title}
@@ -80,6 +91,7 @@ function SectionHeading({
 }
 
 export default function LandingPage() {
+  const containerRef = useRef<HTMLDivElement>(null);
   const [locale, setLocale] = useState<SupportedLocale>('en');
   const isBn = locale === 'bn';
 
@@ -97,6 +109,199 @@ export default function LandingPage() {
 
   const [footerEmail, setFooterEmail] = useState('');
   const [isFooterSubscribed, setIsFooterSubscribed] = useState(false);
+
+  // GSAP ScrollTrigger entrance reveals & scroll animations
+  useGSAP(
+    () => {
+      if (typeof window === 'undefined') return;
+      const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      if (motion.matches) return;
+
+      const scope = containerRef.current;
+      if (!scope) return;
+
+      // 1. Hero Entrance & Scroll Scrub
+      const heroBar = scope.querySelector('[data-hero-bar]');
+      const heroTitle = scope.querySelector('[data-hero-title]');
+      const heroDock = scope.querySelector('[data-hero-dock]');
+      const heroUi = scope.querySelector('[data-hero-ui]');
+
+      if (heroBar && heroTitle && heroDock) {
+        const heroTl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+        heroTl
+          .from(heroBar, { y: -20, opacity: 0, duration: 0.8, delay: 0.1 })
+          .from(heroTitle, { y: 35, opacity: 0, duration: 0.9 }, '-=0.5')
+          .from(heroDock, { y: 25, opacity: 0, duration: 0.8 }, '-=0.6');
+      }
+
+      if (heroUi) {
+        gsap.to(heroUi, {
+          y: -50,
+          opacity: 0.15,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: '#hero',
+            start: 'top top',
+            end: '70% top',
+            scrub: 0.5,
+          },
+        });
+      }
+
+      // 2. Section Headings Reveal
+      const headings = scope.querySelectorAll('[data-section-heading]');
+      headings.forEach((heading) => {
+        gsap.from(heading, {
+          y: 30,
+          opacity: 0,
+          duration: 0.8,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: heading,
+            start: 'top 85%',
+            once: true,
+          },
+        });
+      });
+
+      // 3. Features Bento Grid Cards
+      const featureCards = scope.querySelectorAll('[data-features-grid] > article');
+      if (featureCards.length > 0) {
+        gsap.from(featureCards, {
+          y: 40,
+          opacity: 0,
+          scale: 0.97,
+          duration: 0.85,
+          stagger: 0.1,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: '[data-features-grid]',
+            start: 'top 82%',
+            once: true,
+          },
+        });
+      }
+
+      // 4. Stats Grid Cells
+      const statCells = scope.querySelectorAll('[data-stats-grid] > div');
+      if (statCells.length > 0) {
+        gsap.from(statCells, {
+          y: 28,
+          opacity: 0,
+          duration: 0.75,
+          stagger: 0.08,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: '[data-stats-grid]',
+            start: 'top 85%',
+            once: true,
+          },
+        });
+      }
+
+      // 5. Process Timeline & Steps
+      const processTrack = scope.querySelector('[data-process-track]');
+      const processSteps = scope.querySelectorAll('[data-process-steps] > li');
+
+      if (processTrack) {
+        gsap.from(processTrack, {
+          scaleX: 0,
+          transformOrigin: 'left center',
+          duration: 1.1,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: '[data-process-container]',
+            start: 'top 80%',
+            once: true,
+          },
+        });
+      }
+
+      if (processSteps.length > 0) {
+        gsap.from(processSteps, {
+          y: 35,
+          opacity: 0,
+          scale: 0.95,
+          duration: 0.8,
+          stagger: 0.12,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: '[data-process-container]',
+            start: 'top 80%',
+            once: true,
+          },
+        });
+      }
+
+      // 6. Testimonial Card
+      const testimonialCard = scope.querySelector('[data-testimonial-card]');
+      if (testimonialCard) {
+        gsap.from(testimonialCard, {
+          y: 40,
+          opacity: 0,
+          scale: 0.98,
+          duration: 0.9,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: testimonialCard,
+            start: 'top 82%',
+            once: true,
+          },
+        });
+      }
+
+      // 7. Articles / Guides Grid
+      const articleCards = scope.querySelectorAll('[data-blog-grid] > article');
+      if (articleCards.length > 0) {
+        gsap.from(articleCards, {
+          y: 35,
+          opacity: 0,
+          duration: 0.8,
+          stagger: 0.12,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: '[data-blog-grid]',
+            start: 'top 82%',
+            once: true,
+          },
+        });
+      }
+
+      // 8. CTA Scene
+      const ctaScene = scope.querySelector('[data-cta-scene]');
+      if (ctaScene) {
+        gsap.from(ctaScene, {
+          y: 35,
+          opacity: 0,
+          scale: 0.98,
+          duration: 0.85,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: '#cta',
+            start: 'top 80%',
+            once: true,
+          },
+        });
+      }
+
+      // 9. Footer
+      const footerContent = scope.querySelector('[data-footer] > div');
+      if (footerContent) {
+        gsap.from(footerContent, {
+          y: 25,
+          opacity: 0,
+          duration: 0.75,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: '[data-footer]',
+            start: 'top 92%',
+            once: true,
+          },
+        });
+      }
+    },
+    { scope: containerRef }
+  );
 
   const toggleLocale = useCallback(() => {
     setLocale((prev) => (prev === 'en' ? 'bn' : 'en'));
@@ -141,7 +346,7 @@ export default function LandingPage() {
   const m = activeModule;
 
   return (
-    <div className={`${s.page} ${isBn ? s.bn : ''} min-h-screen font-sans antialiased`}>
+    <div ref={containerRef} className={`${s.page} ${isBn ? s.bn : ''} min-h-screen font-sans antialiased`}>
       <SmoothScroll />
 
       <FogHero isBn={isBn} onToggleLocale={toggleLocale} onContact={openConsultation} />
@@ -162,7 +367,7 @@ export default function LandingPage() {
             muted={isBn ? 'একটি শান্ত, গোছানো জায়গা' : 'in one calm place'}
           />
 
-          <div className="mt-14 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+          <div className="mt-14 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5" data-features-grid>
             {PRODUCT_MODULES.map((module, idx) => {
               const layout = MODULE_LAYOUT[idx] ?? MODULE_LAYOUT[1];
               return (
@@ -226,8 +431,8 @@ export default function LandingPage() {
         {/* ─────────────────────────────────────────────────────────────
             STATS — four figures between hairlines
         ───────────────────────────────────────────────────────────── */}
-        <section aria-label={isBn ? 'এক নজরে' : 'At a glance'} className="border-y border-white/10">
-          <dl className="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4">
+        <section id="stats" aria-label={isBn ? 'এক নজরে' : 'At a glance'} className="border-y border-white/10">
+          <dl className="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4" data-stats-grid>
             {STATS.map((stat, idx) => (
               <div
                 key={stat.labelEn}
@@ -264,9 +469,9 @@ export default function LandingPage() {
             muted={isBn ? 'কাগজহীন ভাড়া ব্যবস্থাপনা' : 'paperless rent management'}
           />
 
-          <div className="relative mt-16">
-            <div className={`${s.track} hidden lg:block`} aria-hidden="true" />
-            <ol className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-12">
+          <div className="relative mt-16" data-process-container>
+            <div className={`${s.track} hidden lg:block`} aria-hidden="true" data-process-track />
+            <ol className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-12" data-process-steps>
               {PROCESS_STEPS.map((step) => {
                 const Icon = STEP_ICONS[step.iconType];
                 return (
@@ -307,6 +512,7 @@ export default function LandingPage() {
 
           <div
             className={`${s.glass} ${s.reveal} mt-14 rounded-[28px] p-4 sm:p-6 lg:p-8 grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-12 items-center`}
+            data-testimonial-card
           >
             <div className="md:col-span-5">
               <div className="relative aspect-[4/4.4] rounded-[18px] overflow-hidden border border-white/10 bg-[#111c31]">
@@ -388,7 +594,7 @@ export default function LandingPage() {
             muted={isBn ? 'জরুরি পরামর্শ' : 'for property owners'}
           />
 
-          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-5" data-blog-grid>
             {ARTICLES.map((article) => (
               <article
                 key={article.id}
@@ -439,7 +645,7 @@ export default function LandingPage() {
             CTA — the hero's night scene in a panel
         ───────────────────────────────────────────────────────────── */}
         <section id="cta" aria-labelledby="cta-title" className="scroll-mt-6 px-4 sm:px-8 pb-20 sm:pb-28">
-          <div className={`${s.scene} ${s.reveal} max-w-7xl mx-auto`}>
+          <div className={`${s.scene} ${s.reveal} max-w-7xl mx-auto`} data-cta-scene>
             {/* eslint-disable-next-line @next/next/no-img-element -- local decorative backdrop, blurred */}
             <img src="/hero/sky-night.webp" alt="" loading="lazy" />
             <div className="px-6 sm:px-12 lg:px-16 py-16 sm:py-20 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
@@ -508,7 +714,7 @@ export default function LandingPage() {
       {/* ─────────────────────────────────────────────────────────────
           FOOTER
       ───────────────────────────────────────────────────────────── */}
-      <footer className="border-t border-white/10 bg-[#070d1a] px-4 sm:px-8 pt-16 pb-10">
+      <footer className="border-t border-white/10 bg-[#070d1a] px-4 sm:px-8 pt-16 pb-10" data-footer>
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-10 pb-12 border-b border-white/10 text-sm">
             <div className="lg:col-span-4 flex flex-col gap-4">

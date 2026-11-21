@@ -250,24 +250,12 @@
     linear-gradient(180deg, rgba(11, 20, 38, 0.35), rgba(11, 20, 38, 0.2) 40%, rgba(64, 76, 105, 0.75) 88%, rgba(102, 115, 145, 0.85));
 }
 
-/* ── Scroll reveal: decorative, so progressive enhancement with no fallback ── */
+/* ── Scroll reveal: driven by GSAP ScrollTrigger for 60/120fps smooth control ── */
 
-@keyframes reveal-in {
-  from {
-    opacity: 0;
-    translate: 0 36px;
-  }
+.reveal {
+  will-change: transform, opacity;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  @supports ((animation-timeline: view()) and (animation-range: entry)) {
-    .reveal {
-      animation: reveal-in auto cubic-bezier(0.23, 1, 0.32, 1) backwards;
-      animation-timeline: view();
-      animation-range: entry 0% entry 70%;
-    }
-  }
-}
 
 /* ── Native modal dialogs ── */
 

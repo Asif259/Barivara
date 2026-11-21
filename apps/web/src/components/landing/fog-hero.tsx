@@ -268,8 +268,8 @@ export function FogHero({ isBn, onToggleLocale, onContact }: FogHeroProps) {
       <canvas ref={canvasRef} className={styles.fog} aria-hidden="true" />
       <div className={styles.seam} aria-hidden="true" />
 
-      <div className={styles.ui}>
-        <header className={styles.bar}>
+      <div className={styles.ui} data-hero-ui>
+        <header className={styles.bar} data-hero-bar>
           <Link className={styles.logo} href="#hero" aria-label="BariVara">
             <img src="/logo.png" alt="" />
             BARIVARA
@@ -312,7 +312,7 @@ export function FogHero({ isBn, onToggleLocale, onContact }: FogHeroProps) {
           </div>
         </header>
 
-        <h1 className={styles.title}>
+        <h1 className={styles.title} data-hero-title>
           <span className={styles.l1}>{isBn ? 'কাগজের খাতা আর নয়' : 'No More Paper Khata'}</span>
           <span>
             <i>{isBn ? 'আপনার' : 'for your'}</i>{' '}
@@ -320,7 +320,7 @@ export function FogHero({ isBn, onToggleLocale, onContact }: FogHeroProps) {
           </span>
         </h1>
 
-        <div className={styles.dock}>
+        <div className={styles.dock} data-hero-dock>
           <div
             className={styles.toggle}
             role="group"
