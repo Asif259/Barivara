@@ -16,7 +16,6 @@ import {
   RiDeleteBinLine,
   RiExternalLinkLine,
 } from '@remixicon/react';
-import { cx } from '@/utils/cx';
 
 interface TenantRowProps {
   tenant: Tenant;

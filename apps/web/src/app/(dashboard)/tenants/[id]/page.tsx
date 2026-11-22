@@ -42,22 +42,22 @@ import {
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import {
-  ArrowLeft,
-  User,
-  Phone,
-  Mail,
-  MapPin,
-  Briefcase,
-  Shield,
-  Edit,
-  FileText,
-  CheckCircle2,
-  Eye,
-  Ban,
-  Loader2,
-  AlertTriangle,
-  Image as ImageIcon,
-} from 'lucide-react';
+  RiArrowLeftLine,
+  RiUser3Line,
+  RiPhoneLine,
+  RiMailLine,
+  RiMapPinLine,
+  RiBriefcaseLine,
+  RiShieldCheckLine,
+  RiEditLine,
+  RiFileList3Line,
+  RiCheckboxCircleLine,
+  RiEyeLine,
+  RiForbidLine,
+  RiLoader4Line,
+  RiAlertLine,
+  RiImageLine,
+} from '@remixicon/react';
 
 /**
  * Shared thumbnail for a document/photo field on the tenant profile.
@@ -81,25 +81,25 @@ function DocumentThumbnail({
 }) {
   return (
     <div className="space-y-1.5">
-      <span className="text-[13px] text-[#6B7280] block font-medium">{label}</span>
+      <span className="text-[13px] text-text-secondary block font-medium">{label}</span>
       {url ? (
         <button
           onClick={onView}
-          className="group relative h-24 w-full rounded-xl overflow-hidden border border-slate-200 bg-slate-100 hover:border-emerald-300 transition-colors cursor-pointer"
+          className="group relative h-24 w-full rounded-2xl overflow-hidden border border-border-button-default bg-background-secondary-default hover:border-accent-400 transition-colors cursor-pointer"
           aria-label={alt}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={url} alt={alt} className="w-full h-full object-contain p-1.5" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
             <span className="text-white text-xs font-medium flex items-center gap-1">
-              <Eye className="w-3 h-3" />
+              <RiEyeLine className="w-3 h-3" />
               {viewLabel}
             </span>
           </div>
         </button>
       ) : (
-        <div className="h-24 w-full rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 flex flex-col items-center justify-center text-slate-400">
-          <ImageIcon className="w-6 h-6 mb-1" />
+        <div className="h-24 w-full rounded-2xl border-2 border-dashed border-border-button-default bg-background-secondary-default flex flex-col items-center justify-center text-text-tertiary">
+          <RiImageLine className="w-6 h-6 mb-1" />
           <span className="text-xs">{emptyLabel}</span>
         </div>
       )}
@@ -115,9 +115,9 @@ function DocumentThumbnail({
 function DocumentThumbnailError({ label, isEn }: { label: string; isEn: boolean }) {
   return (
     <div className="space-y-1.5">
-      <span className="text-[13px] text-[#6B7280] block font-medium">{label}</span>
-      <div className="h-24 w-full rounded-xl border border-dashed border-amber-300 bg-amber-50 flex flex-col items-center justify-center text-amber-700">
-        <AlertTriangle className="w-5 h-5 mb-1" />
+      <span className="text-[13px] text-text-secondary block font-medium">{label}</span>
+      <div className="h-24 w-full rounded-2xl border border-dashed border-status-warning-subtle bg-status-warning-subtle flex flex-col items-center justify-center text-status-warning-foreground">
+        <RiAlertLine className="w-5 h-5 mb-1" />
         <span className="text-xs font-medium">{isEn ? 'Preview unavailable' : 'প্রিভিউ দেখানো যাচ্ছে না'}</span>
       </div>
     </div>
@@ -128,8 +128,6 @@ export default function TenantDetailPage() {
   const params = useParams();
   const router = useRouter();
 
-  // Next.js dynamic route params can theoretically be string | string[] | undefined.
-  // Normalize defensively instead of an unchecked `as string` cast.
   const rawTenantId = params?.id;
   const tenantId = Array.isArray(rawTenantId) ? rawTenantId[0] : rawTenantId;
 
@@ -170,10 +168,7 @@ export default function TenantDetailPage() {
     enabled: !!tenantId,
   });
 
-  // 2. Fetch document URLs.
-  // IMPORTANT: these hooks must run unconditionally (same order every render),
-  // so they're declared before any early `return` and gated with `enabled`
-  // instead of being skipped via a conditional return above them.
+  // 2. Fetch document URLs
   const { data: profilePictureUrl } = useQuery({
     queryKey: ['file-download-url', tenant?.profilePictureId],
     queryFn: () => getFileDownloadUrl(tenant!.profilePictureId!),
@@ -222,8 +217,8 @@ export default function TenantDetailPage() {
     return (
       <div className="space-y-8 pb-8">
         <Skeleton className="h-10 w-48" />
-        <Skeleton className="h-32 w-full rounded-[10px]" />
-        <Skeleton className="h-80 w-full rounded-[10px]" />
+        <Skeleton className="h-32 w-full rounded-3xl" />
+        <Skeleton className="h-80 w-full rounded-3xl" />
       </div>
     );
   }
@@ -231,7 +226,7 @@ export default function TenantDetailPage() {
   if (isError) {
     return (
       <EmptyState
-        icon={AlertTriangle}
+        icon={RiAlertLine}
         title={isEn ? 'Something went wrong' : 'কিছু একটা ভুল হয়েছে'}
         description={
           isEn
@@ -247,7 +242,7 @@ export default function TenantDetailPage() {
   if (!tenant) {
     return (
       <EmptyState
-        icon={User}
+        icon={RiUser3Line}
         title={t.noTenantsFound}
         actionLabel={isEn ? 'Back to Tenants' : 'সকল ভাড়াটিয়াদের তালিকায় ফিরুন'}
         onAction={() => router.push('/tenants')}
@@ -258,10 +253,10 @@ export default function TenantDetailPage() {
   return (
     <div className="space-y-8 pb-8">
       {/* Header */}
-      <div className="flex flex-col gap-5 border-b border-[#E5E7EB] pb-6 sm:flex-row sm:items-center">
+      <div className="flex flex-col gap-5 border-b border-separator-border pb-6 sm:flex-row sm:items-center">
         <Link href="/tenants">
           <Button variant="outline" size="icon" className="h-9 w-9 shrink-0">
-            <ArrowLeft className="h-4 w-4" />
+            <RiArrowLeftLine className="h-4 w-4" />
           </Button>
         </Link>
 
@@ -271,7 +266,7 @@ export default function TenantDetailPage() {
             {profilePictureUrl ? (
               <button
                 onClick={() => openPreview(profilePictureUrl, t.profilePicture)}
-                className="h-16 w-16 sm:h-20 sm:w-20 rounded-lg overflow-hidden border border-[#CDE4DA] bg-[#E8F3EF] hover:border-[#10B981] transition-colors cursor-pointer"
+                className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl overflow-hidden border border-accent-200 bg-accent-50 hover:border-accent-400 transition-colors cursor-pointer"
                 aria-label={isEn ? 'View profile picture' : 'প্রোফাইল ছবি দেখুন'}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -282,7 +277,7 @@ export default function TenantDetailPage() {
                 />
               </button>
             ) : (
-              <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-lg bg-[#E8F3EF] text-[#12664F] flex items-center justify-center font-semibold text-2xl sm:text-3xl border border-[#CDE4DA]">
+              <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl bg-accent-50 text-accent-700 flex items-center justify-center font-semibold text-2xl sm:text-3xl border border-accent-200">
                 {tenant.name.charAt(0).toUpperCase()}
               </div>
             )}
@@ -290,21 +285,21 @@ export default function TenantDetailPage() {
 
           {/* Tenant Info */}
           <div className="flex-1 min-w-0">
-            <h1 className="text-[28px] sm:text-[30px] font-semibold leading-tight tracking-tight text-[#171717] truncate">{tenant.name}</h1>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-sm text-[#6B7280]">
+            <h1 className="text-[28px] sm:text-[30px] font-semibold leading-tight tracking-tight text-text-primary truncate">{tenant.name}</h1>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-sm text-text-secondary">
               <span className="flex items-center gap-1">
-                <Phone className="w-3.5 h-3.5" />
+                <RiPhoneLine className="w-3.5 h-3.5" />
                 {tenant.phone}
               </span>
               {tenant.email && (
                 <span className="flex items-center gap-1">
-                  <Mail className="w-3.5 h-3.5" />
+                  <RiMailLine className="w-3.5 h-3.5" />
                   {tenant.email}
                 </span>
               )}
               {tenant.occupation && (
                 <span className="flex items-center gap-1">
-                  <Briefcase className="w-3.5 h-3.5" />
+                  <RiBriefcaseLine className="w-3.5 h-3.5" />
                   {tenant.occupation}
                 </span>
               )}
@@ -318,61 +313,61 @@ export default function TenantDetailPage() {
             onClick={() => setEditDialogOpen(true)}
             className="gap-1.5 shrink-0 self-start sm:self-center"
           >
-            <Edit className="w-3.5 h-3.5" />
+            <RiEditLine className="w-3.5 h-3.5" />
             {t.editTenant}
           </Button>
         </div>
       </div>
 
       {/* Personal & Contact Information */}
-      <Card className="rounded-[10px] border-[#E5E7EB] shadow-none">
+      <Card className="rounded-3xl border border-border-button-default bg-background-primary-default">
         <CardHeader className="pb-3">
-          <CardTitle className="text-[17px] font-semibold text-[#171717] flex items-center gap-2">
-            <User className="w-4 h-4 text-[#307473]" />
+          <CardTitle className="text-[17px] font-semibold text-text-primary flex items-center gap-2">
+            <RiUser3Line className="w-4 h-4 text-accent-700" />
             {t.personalContact}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-3">
             <div className="space-y-1">
-              <span className="text-[13px] text-[#6B7280] block">{t.tenantName}</span>
-              <span className="font-medium text-[#171717] block">{tenant.name}</span>
+              <span className="text-[13px] text-text-secondary block">{t.tenantName}</span>
+              <span className="font-medium text-text-primary block">{tenant.name}</span>
             </div>
             <div className="space-y-1">
-              <span className="text-[13px] text-[#6B7280] block">{t.phone}</span>
-              <span className="font-medium text-[#171717] block">{tenant.phone}</span>
+              <span className="text-[13px] text-text-secondary block">{t.phone}</span>
+              <span className="font-medium text-text-primary block">{tenant.phone}</span>
             </div>
             {tenant.email && (
               <div className="space-y-1">
-                <span className="text-[13px] text-[#6B7280] block">{t.email}</span>
-                <span className="font-medium text-[#171717] block">{tenant.email}</span>
+                <span className="text-[13px] text-text-secondary block">{t.email}</span>
+                <span className="font-medium text-text-primary block">{tenant.email}</span>
               </div>
             )}
             {tenant.occupation && (
               <div className="space-y-1">
-                <span className="text-[13px] text-[#6B7280] block">{t.occupation}</span>
-                <span className="font-medium text-[#171717] block">{tenant.occupation}</span>
+                <span className="text-[13px] text-text-secondary block">{t.occupation}</span>
+                <span className="font-medium text-text-primary block">{tenant.occupation}</span>
               </div>
             )}
           </div>
 
-          <div className="pt-3 border-t border-[#F3F4F6] space-y-1">
-            <span className="text-[13px] text-[#6B7280] flex items-center gap-1.5">
-              <MapPin className="w-3.5 h-3.5 text-[#307473]" />
+          <div className="pt-3 border-t border-separator-border space-y-1">
+            <span className="text-[13px] text-text-secondary flex items-center gap-1.5">
+              <RiMapPinLine className="w-3.5 h-3.5 text-accent-700" />
               {t.address}
             </span>
-            <p className="text-sm font-medium text-[#171717] whitespace-pre-wrap">
+            <p className="text-sm font-medium text-text-primary whitespace-pre-wrap">
               {tenant.permanentAddress || (isEn ? 'Not provided' : 'প্রদান করা হয়নি')}
             </p>
           </div>
         </CardContent>
       </Card>
 
-      {/* Documents — horizontal row */}
-      <Card className="rounded-[10px] border-[#E5E7EB] shadow-none">
+      {/* Documents */}
+      <Card className="rounded-3xl border border-border-button-default bg-background-primary-default">
         <CardHeader className="pb-3">
-          <CardTitle className="text-[17px] font-semibold text-[#171717] flex items-center gap-2">
-            <FileText className="w-4 h-4 text-[#307473]" />
+          <CardTitle className="text-[17px] font-semibold text-text-primary flex items-center gap-2">
+            <RiFileList3Line className="w-4 h-4 text-accent-700" />
             {t.documents}
           </CardTitle>
         </CardHeader>
@@ -413,8 +408,8 @@ export default function TenantDetailPage() {
             )}
 
             {!tenant.nidFrontImageId && !tenant.nidBackImageId && (
-              <div className="col-span-full text-center py-4 text-[#6B7280]">
-                <FileText className="w-8 h-8 mx-auto mb-2 text-slate-300" />
+              <div className="col-span-full text-center py-4 text-text-secondary">
+                <RiFileList3Line className="w-8 h-8 mx-auto mb-2 text-text-tertiary" />
                 <p className="text-sm">{isEn ? 'No documents uploaded' : 'কোনো ডকুমেন্ট আপলোড করা হয়নি'}</p>
               </div>
             )}
@@ -423,32 +418,32 @@ export default function TenantDetailPage() {
       </Card>
 
       {/* Emergency Contact */}
-      <Card className="rounded-[10px] border-[#E5E7EB] shadow-none">
+      <Card className="rounded-3xl border border-border-button-default bg-background-primary-default">
         <CardHeader className="pb-3">
-          <CardTitle className="text-[17px] font-semibold text-[#171717] flex items-center gap-2">
-            <Shield className="w-4 h-4 text-[#307473]" />
+          <CardTitle className="text-[17px] font-semibold text-text-primary flex items-center gap-2">
+            <RiShieldCheckLine className="w-4 h-4 text-accent-700" />
             {t.emergencyContactSection}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
             <div className="space-y-1">
-              <span className="text-[13px] text-[#6B7280] block">{isEn ? 'Contact Person' : 'ব্যক্তির নাম'}</span>
-              <span className="font-medium text-[#171717] block">{tenant.emergencyContactName || (isEn ? 'Not provided' : 'প্রদান করা হয়নি')}</span>
+              <span className="text-[13px] text-text-secondary block">{isEn ? 'Contact Person' : 'ব্যক্তির নাম'}</span>
+              <span className="font-medium text-text-primary block">{tenant.emergencyContactName || (isEn ? 'Not provided' : 'প্রদান করা হয়নি')}</span>
             </div>
             <div className="space-y-1">
-              <span className="text-[13px] text-[#6B7280] block">{isEn ? 'Emergency Phone' : 'জরুরি ফোন'}</span>
-              <span className="font-medium text-[#171717] block">{tenant.emergencyContactPhone || (isEn ? 'Not provided' : 'প্রদান করা হয়নি')}</span>
+              <span className="text-[13px] text-text-secondary block">{isEn ? 'Emergency Phone' : 'জরুরি ফোন'}</span>
+              <span className="font-medium text-text-primary block">{tenant.emergencyContactPhone || (isEn ? 'Not provided' : 'প্রদান করা হয়নি')}</span>
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Rental Agreements */}
-      <Card className="rounded-[10px] border-[#E5E7EB] shadow-none shadow-xs">
+      <Card className="rounded-3xl border border-border-button-default bg-background-primary-default">
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <FileText className="w-5 h-5 text-[#307473]" />
+          <CardTitle className="text-lg flex items-center gap-2 text-text-primary">
+            <RiFileList3Line className="w-5 h-5 text-accent-700" />
             {isEn ? 'Rental Agreements' : 'ভাড়া চুক্তিসমূহ'}
           </CardTitle>
         </CardHeader>
@@ -476,26 +471,26 @@ export default function TenantDetailPage() {
                       return (
                         <TableRow key={agr.id}>
                           <TableCell className="min-w-[140px]">
-                            <div className="font-semibold text-[#0F172A]">{agr.unit?.unitNumber || '—'}</div>
+                            <div className="font-semibold text-text-primary">{agr.unit?.unitNumber || '—'}</div>
                             {agr.unit?.property?.name && (
-                              <div className="text-xs text-[#64748B] truncate max-w-[160px]" title={agr.unit.property.name}>
+                              <div className="text-xs text-text-secondary truncate max-w-[160px]" title={agr.unit.property.name}>
                                 {agr.unit.property.name}
                               </div>
                             )}
                           </TableCell>
-                          <TableCell align="right" className="font-semibold text-[#0F172A] whitespace-nowrap">
+                          <TableCell align="right" className="font-semibold text-text-primary whitespace-nowrap">
                             {formatCurrency(agr.monthlyRent, language)}
                           </TableCell>
-                          <TableCell align="right" className="text-[#64748B] whitespace-nowrap">
+                          <TableCell align="right" className="text-text-secondary whitespace-nowrap">
                             {formatCurrency(agr.serviceFee, language)}
                           </TableCell>
-                          <TableCell align="right" className="text-[#059669] font-medium whitespace-nowrap">
+                          <TableCell align="right" className="text-accent-600 font-medium whitespace-nowrap">
                             {formatCurrency(agr.securityDeposit, language)}
                           </TableCell>
-                          <TableCell align="left" className="text-xs text-[#64748B] whitespace-nowrap">
+                          <TableCell align="left" className="text-xs text-text-secondary whitespace-nowrap">
                             {formatBnDate(agr.startDate, language)}
                           </TableCell>
-                          <TableCell align="left" className="text-xs text-[#64748B] whitespace-nowrap">
+                          <TableCell align="left" className="text-xs text-text-secondary whitespace-nowrap">
                             {agr.endDate ? formatBnDate(agr.endDate, language) : '—'}
                           </TableCell>
                           <TableCell align="center">
@@ -507,22 +502,22 @@ export default function TenantDetailPage() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => router.push(`/agreements/${agr.id}`)}
-                                className="h-8 px-2.5 text-xs text-[#059669] hover:text-[#047857] hover:bg-[#F0FDF4] gap-1.5 border border-[#A7F3D0]"
+                                className="h-8 px-2.5 text-xs text-accent-700 hover:text-accent-800 hover:bg-accent-50 gap-1.5 border border-accent-200"
                                 title={t.view}
                                 aria-label={`${t.view} — ${agr.unit?.unitNumber ?? ''}`}
                               >
-                                <Eye className="w-3.5 h-3.5" />
+                                <RiEyeLine className="w-3.5 h-3.5" />
                                 <span className="hidden sm:inline">{t.view}</span>
                               </Button>
                               <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => router.push(`/agreements/${agr.id}/edit`)}
-                                className="h-8 px-2.5 text-xs text-[#2563EB] hover:text-[#1D4ED8] hover:bg-[#EFF6FF] gap-1.5 border border-[#BFDBFE]"
+                                className="h-8 px-2.5 text-xs text-text-secondary hover:text-text-primary hover:bg-background-secondary-default gap-1.5 border border-border-button-default"
                                 title={t.edit}
                                 aria-label={`${t.edit} — ${agr.unit?.unitNumber ?? ''}`}
                               >
-                                <Edit className="w-3.5 h-3.5" />
+                                <RiEditLine className="w-3.5 h-3.5" />
                                 <span className="hidden sm:inline">{t.edit}</span>
                               </Button>
                               {agr.status === 'ACTIVE' && (
@@ -531,14 +526,14 @@ export default function TenantDetailPage() {
                                   size="sm"
                                   onClick={() => setConfirmEndAgreementId(agr.id)}
                                   disabled={isEndingThisRow}
-                                  className="h-8 px-2.5 text-xs text-[#DC2626] hover:text-[#B91C1C] hover:bg-[#FEF2F2] gap-1.5 border border-[#FECACA]"
+                                  className="h-8 px-2.5 text-xs text-text-error-primary hover:bg-status-danger-subtle gap-1.5 border border-status-danger-subtle"
                                   title={t.endAgreement}
                                   aria-label={`${t.endAgreement} — ${agr.unit?.unitNumber ?? ''}`}
                                 >
                                   {isEndingThisRow ? (
-                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    <RiLoader4Line className="w-3.5 h-3.5 animate-spin" />
                                   ) : (
-                                    <Ban className="w-3.5 h-3.5" />
+                                    <RiForbidLine className="w-3.5 h-3.5" />
                                   )}
                                   <span className="hidden sm:inline">{t.endAgreement}</span>
                                 </Button>
@@ -553,7 +548,7 @@ export default function TenantDetailPage() {
               </div>
 
               {/* Mobile 2-Line Rows */}
-              <div className="block md:hidden divide-y divide-[#F1F5F9]">
+              <div className="block md:hidden divide-y divide-separator-border">
                 {tenant.agreements.map((agr) => {
                   const isActive = agr.status === 'ACTIVE';
                   return (
@@ -563,9 +558,9 @@ export default function TenantDetailPage() {
                       showChevron
                       identity={
                         <div className="flex items-center gap-1.5 min-w-0">
-                          <span className="font-semibold text-sm text-[#0F172A]">Unit {agr.unit?.unitNumber || '—'}</span>
+                          <span className="font-semibold text-sm text-text-primary">Unit {agr.unit?.unitNumber || '—'}</span>
                           {agr.unit?.property?.name && (
-                            <span className="text-xs text-[#64748B] truncate max-w-[130px]">· {agr.unit.property.name}</span>
+                            <span className="text-xs text-text-secondary truncate max-w-[130px]">· {agr.unit.property.name}</span>
                           )}
                         </div>
                       }
@@ -576,7 +571,7 @@ export default function TenantDetailPage() {
                             label={isActive ? (isEn ? 'Active' : 'সক্রিয়') : (isEn ? 'Ended' : 'সমাপ্ত')}
                             variant={isActive ? 'success' : 'neutral'}
                           />
-                          <span className="text-slate-300">·</span>
+                          <span className="text-text-tertiary">·</span>
                           <span>{isEn ? `Started ${formatBnDate(agr.startDate, language)}` : `শুরু ${formatBnDate(agr.startDate, language)}`}</span>
                         </>
                       }
@@ -586,9 +581,9 @@ export default function TenantDetailPage() {
                             size="sm"
                             variant="outline"
                             onClick={() => router.push(`/agreements/${agr.id}`)}
-                            className="h-8 min-h-[38px] px-2.5 text-xs text-[#059669] border-[#A7F3D0] hover:bg-[#F0FDF4] gap-1"
+                            className="h-8 min-h-[38px] px-2.5 text-xs text-accent-700 border-accent-200 hover:bg-accent-50 gap-1"
                           >
-                            <Eye className="w-3.5 h-3.5" />
+                            <RiEyeLine className="w-3.5 h-3.5" />
                             <span>{t.view}</span>
                           </Button>
                         </div>
@@ -599,7 +594,7 @@ export default function TenantDetailPage() {
               </div>
             </ResponsiveTableContainer>
           ) : (
-            <p className="text-sm text-[#64748B] py-5 text-center">
+            <p className="text-sm text-text-secondary py-5 text-center">
               {isEn ? 'No rental agreements found for this tenant.' : 'এই ভাড়াটিয়ার কোনো সক্রিয় বা পূর্বের চুক্তি পাওয়া যায়নি।'}
             </p>
           )}
@@ -658,9 +653,9 @@ export default function TenantDetailPage() {
                     setDetailAgreement(null);
                     router.push(`/agreements/${id}`);
                   }}
-                  className="w-full sm:w-auto bg-[#059669] hover:bg-[#047857] min-h-[44px]"
+                  className="w-full sm:w-auto bg-accent-600 hover:bg-accent-700 min-h-[44px]"
                 >
-                  <Eye className="w-4 h-4 mr-2" />
+                  <RiEyeLine className="w-4 h-4 mr-2" />
                   {t.view}
                 </Button>
                 <Button
@@ -672,7 +667,7 @@ export default function TenantDetailPage() {
                   }}
                   className="w-full sm:w-auto min-h-[44px]"
                 >
-                  <Edit className="w-4 h-4 mr-2" />
+                  <RiEditLine className="w-4 h-4 mr-2" />
                   {t.edit}
                 </Button>
                 {detailAgreement.status === 'ACTIVE' && (
@@ -683,9 +678,9 @@ export default function TenantDetailPage() {
                       setDetailAgreement(null);
                       setConfirmEndAgreementId(id);
                     }}
-                    className="w-full sm:w-auto min-h-[44px] text-[#DC2626] hover:bg-[#FEF2F2] border-[#FCA5A5]"
+                    className="w-full sm:w-auto min-h-[44px] text-text-error-primary hover:bg-status-danger-subtle border-status-danger-subtle"
                   >
-                    <Ban className="w-4 h-4 mr-2" />
+                    <RiForbidLine className="w-4 h-4 mr-2" />
                     {t.endAgreement}
                   </Button>
                 )}
@@ -711,7 +706,7 @@ export default function TenantDetailPage() {
         title={previewTitle}
       />
 
-      {/* End Agreement Confirmation Dialog (replaces native confirm()) */}
+      {/* End Agreement Confirmation Dialog */}
       <Dialog
         open={!!confirmEndAgreementId}
         onOpenChange={(nextOpen) => {
@@ -722,8 +717,8 @@ export default function TenantDetailPage() {
       >
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-rose-700">
-              <Ban className="w-5 h-5" />
+            <DialogTitle className="flex items-center gap-2 text-text-error-primary">
+              <RiForbidLine className="w-5 h-5" />
               {t.endAgreement}
             </DialogTitle>
             <DialogDescription>
@@ -745,9 +740,9 @@ export default function TenantDetailPage() {
               size="sm"
               onClick={() => confirmEndAgreementId && handleEndAgreement(confirmEndAgreementId)}
               disabled={endingAgreementId !== null}
-              className="bg-rose-600 hover:bg-rose-700 text-white gap-2"
+              className="bg-status-danger-foreground hover:opacity-90 text-white gap-2"
             >
-              {endingAgreementId ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+              {endingAgreementId ? <RiLoader4Line className="w-4 h-4 animate-spin" /> : <RiCheckboxCircleLine className="w-4 h-4" />}
               {isEn ? 'End Agreement' : 'চুক্তি সমাপ্ত করুন'}
             </Button>
           </DialogFooter>

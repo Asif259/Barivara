@@ -43,14 +43,14 @@ import {
 import { PaymentReceiptDialog } from '@/components/payments/payment-receipt-dialog';
 import { TenantAvatar } from '@/components/ui/tenant-avatar';
 import {
-  CreditCard,
-  FileText,
-  RotateCcw,
-  Search,
-  X,
-  Wallet,
-  CheckCircle2,
-} from 'lucide-react';
+  RiBankCardLine,
+  RiFileList3Line,
+  RiRestartLine,
+  RiSearchLine,
+  RiCloseLine,
+  RiWallet3Line,
+  RiCheckboxCircleLine,
+} from '@remixicon/react';
 
 export default function PaymentsPage() {
   const { language } = useLanguageStore();
@@ -205,7 +205,7 @@ export default function PaymentsPage() {
       {isLoading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Card key={i} className="rounded-[10px] border-[#E5E7EB] p-5 shadow-none">
+            <Card key={i} className="rounded-3xl border border-border-button-default bg-background-primary-default p-5">
               <div className="space-y-3">
                 <Skeleton className="h-3.5 w-24" />
                 <Skeleton className="h-7 w-20" />
@@ -220,16 +220,16 @@ export default function PaymentsPage() {
             title={isEn ? 'Total Collections Logged' : 'মোট আদায়কৃত টাকা'}
             value={formatCurrency(kpiStats.totalCollected, language)}
             subtitle={`${formatNumber(kpiStats.validCount, language)} ${isEn ? 'verified payments' : 'টি সফল ট্রানজেকশন'}`}
-            icon={CheckCircle2}
-            valueClassName="text-[#15803D]"
-            iconColor="text-[#15803D]"
-            iconBgColor="bg-emerald-50"
+            icon={RiCheckboxCircleLine}
+            valueClassName="text-accent-700"
+            iconColor="text-accent-700"
+            iconBgColor="bg-accent-50"
           />
           <StatCard
             title={isEn ? 'bKash & MFS Volume' : 'বিকাশ ও ডিজিটাল আদায়'}
             value={formatCurrency(kpiStats.mfsAmount, language)}
             subtitle={`${formatNumber(kpiStats.mfsCount, language)} ${isEn ? 'mobile transactions' : 'টি মোবাইল ব্যাংকিং লেনদেন'}`}
-            icon={Wallet}
+            icon={RiWallet3Line}
             badge={{
               text: `${formatNumber(kpiStats.mfsRate, language)}% ${isEn ? 'MFS' : 'ডিজিটাল'}`,
               variant: 'info',
@@ -240,7 +240,7 @@ export default function PaymentsPage() {
             title={isEn ? 'Cash & Bank Transfers' : 'নগদ ও ব্যাংক ডিপোজিট'}
             value={formatCurrency(kpiStats.cashBankAmount, language)}
             subtitle={`${formatNumber(kpiStats.cashBankCount, language)} ${isEn ? 'manual collections' : 'টি ক্যাশ ও ব্যাংক আদায়'}`}
-            icon={CreditCard}
+            icon={RiBankCardLine}
             badge={{
               text: `${formatNumber(100 - kpiStats.mfsRate, language)}%`,
               variant: 'neutral',
@@ -251,9 +251,9 @@ export default function PaymentsPage() {
             title={isEn ? 'Reversals & Adjustments' : 'বাতিলকৃত ট্রানজেকশন'}
             value={formatCurrency(kpiStats.reversedAmount, language)}
             subtitle={`${formatNumber(kpiStats.reversedCount, language)} ${isEn ? 'reversed entries' : 'টি বাতিল লেনদেন'}`}
-            icon={RotateCcw}
-            iconColor={kpiStats.reversedCount > 0 ? 'text-[#B45309]' : 'text-[#6B7280]'}
-            iconBgColor={kpiStats.reversedCount > 0 ? 'bg-amber-50' : 'bg-gray-50'}
+            icon={RiRestartLine}
+            iconColor={kpiStats.reversedCount > 0 ? 'text-status-warning-foreground' : 'text-text-secondary'}
+            iconBgColor={kpiStats.reversedCount > 0 ? 'bg-status-warning-subtle' : 'bg-background-secondary-default'}
             badge={kpiStats.reversedCount > 0 ? {
               text: isEn ? 'Audited' : 'অডিটকৃত',
               variant: 'warning',
@@ -267,14 +267,14 @@ export default function PaymentsPage() {
       )}
 
       {/* Filter Bar */}
-      <div className="flex flex-wrap items-center gap-3 bg-white p-3 rounded-[10px] border border-[#E5E7EB] shadow-none">
+      <div className="flex flex-wrap items-center gap-3 bg-background-primary-default p-3 rounded-2xl border border-border-button-default">
         {/* Month Selector */}
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-[#6B7280]">{isEn ? 'Month:' : 'মাস:'}</span>
+          <span className="text-xs font-semibold text-text-secondary">{isEn ? 'Month:' : 'মাস:'}</span>
           <select
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(e.target.value)}
-            className="h-9 rounded-lg border border-[#E5E7EB] bg-white px-3 text-xs font-semibold text-[#374151] outline-none"
+            className="h-9 rounded-lg border border-border-button-default bg-background-primary-default px-3 text-xs font-semibold text-text-primary outline-none"
           >
             <option value="">{isEn ? 'All Months' : 'সকল মাস'}</option>
             {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
@@ -287,11 +287,11 @@ export default function PaymentsPage() {
 
         {/* Year Selector */}
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-[#6B7280]">{isEn ? 'Year:' : 'সাল:'}</span>
+          <span className="text-xs font-semibold text-text-secondary">{isEn ? 'Year:' : 'সাল:'}</span>
           <select
             value={selectedYear}
             onChange={(e) => setSelectedYear(e.target.value)}
-            className="h-9 rounded-lg border border-[#E5E7EB] bg-white px-3 text-xs font-semibold text-[#374151] outline-none"
+            className="h-9 rounded-lg border border-border-button-default bg-background-primary-default px-3 text-xs font-semibold text-text-primary outline-none"
           >
             <option value="">{isEn ? 'All Years' : 'সকল সাল'}</option>
             {yearOptions.map((y) => (
@@ -304,11 +304,11 @@ export default function PaymentsPage() {
 
         {/* Payment Method Selector */}
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-[#6B7280]">{t.paymentMethod}:</span>
+          <span className="text-xs font-semibold text-text-secondary">{t.paymentMethod}:</span>
           <select
             value={methodFilter}
             onChange={(e) => setMethodFilter(e.target.value)}
-            className="h-9 rounded-lg border border-[#E5E7EB] bg-white px-3 text-xs font-semibold text-[#374151] outline-none"
+            className="h-9 rounded-lg border border-border-button-default bg-background-primary-default px-3 text-xs font-semibold text-text-primary outline-none"
           >
             <option value="">{t.all}</option>
             <option value="CASH">Cash (নগদ)</option>
@@ -323,11 +323,11 @@ export default function PaymentsPage() {
 
         {/* Status Selector */}
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-[#6B7280]">{t.status}:</span>
+          <span className="text-xs font-semibold text-text-secondary">{t.status}:</span>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="h-9 rounded-lg border border-[#E5E7EB] bg-white px-3 text-xs font-semibold text-[#374151] outline-none"
+            className="h-9 rounded-lg border border-border-button-default bg-background-primary-default px-3 text-xs font-semibold text-text-primary outline-none"
           >
             <option value="">{t.all}</option>
             <option value="COMPLETED">{isEn ? 'Completed' : 'পরিশোধিত (Completed)'}</option>
@@ -337,11 +337,11 @@ export default function PaymentsPage() {
 
         {/* Property Selector */}
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-[#6B7280]">{t.properties}:</span>
+          <span className="text-xs font-semibold text-text-secondary">{t.properties}:</span>
           <select
             value={propertyFilter}
             onChange={(e) => setPropertyFilter(e.target.value)}
-            className="h-9 rounded-lg border border-[#E5E7EB] bg-white px-3 text-xs font-semibold text-[#374151] outline-none max-w-[180px]"
+            className="h-9 rounded-lg border border-border-button-default bg-background-primary-default px-3 text-xs font-semibold text-text-primary outline-none max-w-[180px]"
           >
             <option value="">{isEn ? 'All Properties' : 'সকল বাড়ি'}</option>
             {properties?.map((p) => (
@@ -359,9 +359,9 @@ export default function PaymentsPage() {
             variant="ghost"
             size="sm"
             onClick={handleClearFilters}
-            className="h-9 px-2.5 text-xs text-slate-500 hover:text-slate-900 ml-auto cursor-pointer"
+            className="h-9 px-2.5 text-xs text-text-secondary hover:text-text-primary ml-auto cursor-pointer"
           >
-            <X className="w-3.5 h-3.5 mr-1" />
+            <RiCloseLine className="w-3.5 h-3.5 mr-1" />
             {isEn ? 'Reset' : 'রিসেট'}
           </Button>
         )}
@@ -369,10 +369,10 @@ export default function PaymentsPage() {
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full sm:max-w-sm">
-          <Search className="absolute left-3.5 top-3 h-4 w-4 text-[#9CA3AF]" />
+          <RiSearchLine className="absolute left-3.5 top-3 h-4 w-4 text-text-placeholder" />
           <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={isEn ? 'Search tenant, phone, unit, property, or transaction' : 'ভাড়াটিয়া, ফোন, ইউনিট, বাড়ি বা ট্রানজেকশন খুঁজুন'} className="pl-10" />
         </div>
-        <p className="text-xs text-[#6B7280]">{visiblePayments.length} {isEn ? 'payments' : 'টি পেমেন্ট'}</p>
+        <p className="text-xs text-text-secondary">{visiblePayments.length} {isEn ? 'payments' : 'টি পেমেন্ট'}</p>
       </div>
 
       {/* Payments Responsive Table Container */}
@@ -421,7 +421,7 @@ export default function PaymentsPage() {
               <TableBody>
                 {visiblePayments.map((payment) => (
                   <TableRow key={payment.id}>
-                    <TableCell align="left" className="text-xs text-[#64748B] whitespace-nowrap">
+                    <TableCell align="left" className="text-xs text-text-secondary whitespace-nowrap">
                       {formatBnDate(payment.paymentDate, language)}
                     </TableCell>
                     <TableCell className="min-w-[220px]">
@@ -434,10 +434,10 @@ export default function PaymentsPage() {
                           ariaLabel={isEn ? 'View tenant profile' : 'ভাড়াটিয়ার প্রোফাইল দেখুন'}
                         />
                         <div className="min-w-0 max-w-[160px]">
-                          <p className="truncate font-medium text-[#0F172A] text-sm" title={payment.monthlyRent?.agreement?.tenant?.name || 'Tenant'}>
+                          <p className="truncate font-medium text-text-primary text-sm" title={payment.monthlyRent?.agreement?.tenant?.name || 'Tenant'}>
                             {payment.monthlyRent?.agreement?.tenant?.name || 'Tenant'}
                           </p>
-                          <p className="truncate text-xs text-[#64748B]" title={payment.monthlyRent?.agreement?.tenant?.phone || ''}>
+                          <p className="truncate text-xs text-text-secondary" title={payment.monthlyRent?.agreement?.tenant?.phone || ''}>
                             {payment.monthlyRent?.agreement?.tenant?.phone || '—'}
                           </p>
                         </div>
@@ -445,23 +445,23 @@ export default function PaymentsPage() {
                     </TableCell>
                     <TableCell className="min-w-[120px]">
                       <div className="min-w-0">
-                        <span className="font-semibold text-[#1E293B] block">
+                        <span className="font-semibold text-text-primary block">
                           {payment.monthlyRent?.agreement?.unit?.unitNumber || '—'}
                         </span>
-                        <span className="block text-xs text-[#64748B] truncate max-w-[130px]" title={payment.monthlyRent?.agreement?.unit?.property?.name || ''}>
+                        <span className="block text-xs text-text-secondary truncate max-w-[130px]" title={payment.monthlyRent?.agreement?.unit?.property?.name || ''}>
                           {payment.monthlyRent?.agreement?.unit?.property?.name || '—'}
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell align="right" className="font-semibold text-[#059669] text-sm whitespace-nowrap">
+                    <TableCell align="right" className="font-semibold text-accent-600 text-sm whitespace-nowrap">
                       {formatCurrency(payment.amount, language)}
                     </TableCell>
                     <TableCell align="center">
-                      <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#F8FAFC] text-[#334155] border border-[#E2E8F0] whitespace-nowrap">
+                      <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-background-secondary-default text-text-secondary border border-border-button-default whitespace-nowrap">
                         {payment.paymentMethod || '—'}
                       </span>
                     </TableCell>
-                    <TableCell align="left" className="font-mono text-xs text-[#64748B] whitespace-nowrap">
+                    <TableCell align="left" className="font-mono text-xs text-text-secondary whitespace-nowrap">
                       {payment.transactionId || '—'}
                     </TableCell>
                     <TableCell align="center">
@@ -473,9 +473,9 @@ export default function PaymentsPage() {
                           size="sm"
                           variant="outline"
                           onClick={() => handleViewReceipt(payment)}
-                          className="h-8 gap-1.5 text-xs px-2.5 rounded-lg text-[#334155] hover:text-[#059669] hover:bg-[#F0FDF4]"
+                          className="h-8 gap-1.5 text-xs px-2.5 rounded-lg text-text-secondary hover:text-accent-700 hover:bg-accent-50"
                         >
-                          <FileText className="w-3.5 h-3.5 text-[#059669]" />
+                          <RiFileList3Line className="w-3.5 h-3.5 text-accent-600" />
                           <span>{t.receipt || (isEn ? 'Receipt' : 'মানি রিসিট')}</span>
                         </Button>
 
@@ -484,10 +484,10 @@ export default function PaymentsPage() {
                             size="sm"
                             variant="ghost"
                             onClick={() => handleReversePayment(payment.id, payment.amount)}
-                            className="h-8 text-xs text-[#DC2626] hover:text-[#B91C1C] hover:bg-[#FEF2F2] gap-1 px-2"
+                            className="h-8 text-xs text-text-error-primary hover:bg-status-danger-subtle gap-1 px-2"
                             title={t.reversePayment}
                           >
-                            <RotateCcw className="w-3.5 h-3.5" />
+                            <RiRestartLine className="w-3.5 h-3.5" />
                             <span>{isEn ? 'Reverse' : 'রিভার্স'}</span>
                           </Button>
                         )}
@@ -500,7 +500,7 @@ export default function PaymentsPage() {
           </div>
 
           {/* Mobile 2-Line Row Representation */}
-          <div className="block md:hidden divide-y divide-[#F1F5F9]">
+          <div className="block md:hidden divide-y divide-separator-border">
             {visiblePayments.map((payment) => {
               const statusVariant =
                 payment.status === 'COMPLETED'
@@ -528,7 +528,7 @@ export default function PaymentsPage() {
                         name={payment.monthlyRent?.agreement?.tenant?.name || 'Tenant'}
                         size="sm"
                       />
-                      <span className="font-semibold text-sm text-[#0F172A] truncate">
+                      <span className="font-semibold text-sm text-text-primary truncate">
                         {payment.monthlyRent?.agreement?.tenant?.name || 'Tenant'}
                       </span>
                     </div>
@@ -537,11 +537,11 @@ export default function PaymentsPage() {
                   stateAndDetail={
                     <>
                       <CompactStatus label={statusLabel} variant={statusVariant} />
-                      <span className="text-slate-300">·</span>
+                      <span className="text-text-tertiary">·</span>
                       <span>{isEn ? `Paid ${formatBnDate(payment.paymentDate, language)}` : `পরিশোধ ${formatBnDate(payment.paymentDate, language)}`}</span>
                       {payment.monthlyRent?.agreement?.unit?.unitNumber && (
                         <>
-                          <span className="text-slate-300">·</span>
+                          <span className="text-text-tertiary">·</span>
                           <span>Unit {payment.monthlyRent.agreement.unit.unitNumber}</span>
                         </>
                       )}
@@ -555,9 +555,9 @@ export default function PaymentsPage() {
                         e.stopPropagation();
                         handleViewReceipt(payment);
                       }}
-                      className="h-8 min-h-[40px] px-2.5 text-xs text-[#059669] border-[#E2E8F0] hover:bg-[#F0FDF4] gap-1"
+                      className="h-8 min-h-[40px] px-2.5 text-xs text-accent-700 border-border-button-default hover:bg-accent-50 gap-1"
                     >
-                      <FileText className="w-3.5 h-3.5" />
+                      <RiFileList3Line className="w-3.5 h-3.5" />
                       <span>{isEn ? 'Receipt' : 'রিসিট'}</span>
                     </Button>
                   }
@@ -567,10 +567,10 @@ export default function PaymentsPage() {
           </div>
         </ResponsiveTableContainer>
       ) : (
-        <Card className="rounded-[10px] border-[#E2E8F0] shadow-none">
+        <Card className="rounded-3xl border border-border-button-default bg-background-primary-default">
           <CardContent className="p-0">
             <EmptyState
-              icon={CreditCard}
+              icon={RiBankCardLine}
               title={isEn ? 'No Payment Transactions' : 'কোনো পেমেন্ট রেকর্ড পাওয়া যায়নি'}
               description={isEn ? 'Recorded rent payments will appear here' : 'ভাড়া আদায় করলে তার ট্রানজেকশন তালিকা এখানে দেখতে পাবেন'}
             />
@@ -630,9 +630,9 @@ export default function PaymentsPage() {
                   setDetailPayment(null);
                   handleViewReceipt(p);
                 }}
-                className="w-full sm:w-auto bg-[#059669] hover:bg-[#047857] min-h-[44px]"
+                className="w-full sm:w-auto bg-accent-600 hover:bg-accent-700 min-h-[44px] text-white"
               >
-                <FileText className="w-4 h-4 mr-2" />
+                <RiFileList3Line className="w-4 h-4 mr-2" />
                 {t.receipt || (isEn ? 'View Receipt' : 'মানি রিসিট')}
               </Button>
 
@@ -645,9 +645,9 @@ export default function PaymentsPage() {
                     setDetailPayment(null);
                     handleReversePayment(id, amount);
                   }}
-                  className="w-full sm:w-auto min-h-[44px] text-[#DC2626] hover:bg-[#FEF2F2] border-[#FCA5A5]"
+                  className="w-full sm:w-auto min-h-[44px] text-text-error-primary hover:bg-status-danger-subtle border-status-danger-subtle"
                 >
-                  <RotateCcw className="w-4 h-4 mr-2" />
+                  <RiRestartLine className="w-4 h-4 mr-2" />
                   {isEn ? 'Reverse Payment' : 'রিভার্স করুন'}
                 </Button>
               )}

@@ -19,20 +19,20 @@ import { FileUploader } from '@/components/ui/file-uploader';
 import { ChangePasswordCard } from '@/components/settings/change-password-card';
 import { formatBnDate } from '@/lib/utils';
 import {
-  User as UserIcon,
-  Mail,
-  Phone,
-  ShieldCheck,
-  CalendarDays,
-  Pencil,
-  Trash2,
-  ImageIcon,
-  Upload,
-  Info,
-  Check,
-  X,
-  Loader2,
-} from 'lucide-react';
+  RiUser3Line,
+  RiMailLine,
+  RiPhoneLine,
+  RiShieldCheckLine,
+  RiCalendarLine,
+  RiPencilLine,
+  RiDeleteBinLine,
+  RiImageLine,
+  RiUploadLine,
+  RiInformationLine,
+  RiCheckLine,
+  RiCloseLine,
+  RiLoader4Line,
+} from '@remixicon/react';
 
 export default function SettingsPage() {
   const { language } = useLanguageStore();
@@ -161,7 +161,7 @@ export default function SettingsPage() {
   }, []);
 
   /**
-   * Confirm the pending file → call PATCH /users/profile/signature
+   * Confirm the pending file -> call PATCH /users/profile/signature
    */
   const handleSaveSignature = () => {
     if (!pendingFileId) return;
@@ -205,9 +205,9 @@ export default function SettingsPage() {
   if (isProfileLoading && !storeUser) {
     return (
       <div className="space-y-8 pb-8">
-        <Skeleton className="h-24 rounded-[10px]" />
-        <Skeleton className="h-72 rounded-[10px]" />
-        <Skeleton className="h-48 rounded-[10px]" />
+        <Skeleton className="h-24 rounded-3xl" />
+        <Skeleton className="h-72 rounded-3xl" />
+        <Skeleton className="h-48 rounded-3xl" />
       </div>
     );
   }
@@ -220,8 +220,8 @@ export default function SettingsPage() {
     <div className="space-y-6 max-w-4xl">
       {/* Page Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-[#171717]">{t.settings}</h1>
-        <p className="text-sm text-[#6B7280] mt-1">
+        <h1 className="text-2xl font-bold tracking-tight text-text-primary">{t.settings}</h1>
+        <p className="text-sm text-text-secondary mt-1">
           {isEn
             ? 'Manage your profile information and owner signature used on receipts.'
             : 'আপনার প্রোফাইল তথ্য এবং রশিদে ব্যবহৃত মালিকের স্বাক্ষর পরিচালনা করুন।'}
@@ -229,13 +229,13 @@ export default function SettingsPage() {
       </div>
 
       {/* Account Information Card */}
-      <Card className="rounded-[10px] border-[#E5E7EB] shadow-none">
+      <Card className="rounded-3xl border border-border-button-default bg-background-primary-default">
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <UserIcon className="w-5 h-5 text-[#12664F]" />
+          <CardTitle className="text-lg flex items-center gap-2 text-text-primary">
+            <RiUser3Line className="w-5 h-5 text-accent-700" />
             {t.profileInformation}
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-text-secondary">
             {isEn
               ? 'Your account details registered with BariVara.'
               : 'বাড়িভাড়া সিস্টেমে নিবন্ধিত আপনার অ্যাকাউন্টের তথ্য।'}
@@ -244,8 +244,8 @@ export default function SettingsPage() {
         <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className={`space-y-1.5 transition-all ${isEditingName ? 'sm:col-span-2' : ''}`}>
             <div className="flex items-center justify-between">
-              <Label className="text-xs text-[#6B7280] flex items-center gap-1.5">
-                <UserIcon className="w-3.5 h-3.5" />
+              <Label className="text-xs text-text-secondary flex items-center gap-1.5">
+                <RiUser3Line className="w-3.5 h-3.5" />
                 {t.fullName}
               </Label>
               {!isEditingName && (
@@ -257,9 +257,9 @@ export default function SettingsPage() {
                     setNameInput(currentUser.name || '');
                     setIsEditingName(true);
                   }}
-                  className="h-6 px-2 text-xs text-[#12664F] hover:text-[#0E513F] hover:bg-[#E8F3EF] font-medium gap-1"
+                  className="h-6 px-2 text-xs text-accent-700 hover:text-accent-800 hover:bg-accent-50 font-medium gap-1"
                 >
-                  <Pencil className="w-3 h-3" />
+                  <RiPencilLine className="w-3 h-3" />
                   {t.editName}
                 </Button>
               )}
@@ -292,12 +292,12 @@ export default function SettingsPage() {
                     type="submit"
                     size="sm"
                     disabled={updateNameMutation.isPending || !nameInput.trim()}
-                    className="h-9 px-3 gap-1.5 bg-[#12664F] hover:bg-[#0E513F] text-white shrink-0"
+                    className="h-9 px-3 gap-1.5 bg-accent-600 hover:bg-accent-700 text-white shrink-0"
                   >
                     {updateNameMutation.isPending ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <RiLoader4Line className="w-3.5 h-3.5 animate-spin" />
                     ) : (
-                      <Check className="w-3.5 h-3.5" />
+                      <RiCheckLine className="w-3.5 h-3.5" />
                     )}
                     <span>{t.save}</span>
                   </Button>
@@ -310,25 +310,25 @@ export default function SettingsPage() {
                       setNameInput(currentUser.name || '');
                     }}
                     disabled={updateNameMutation.isPending}
-                    className="h-9 px-3 gap-1 text-[#6B7280] hover:text-[#171717] shrink-0"
+                    className="h-9 px-3 gap-1 text-text-secondary hover:text-text-primary shrink-0"
                   >
-                    <X className="w-3.5 h-3.5" />
+                    <RiCloseLine className="w-3.5 h-3.5" />
                     <span>{t.cancel}</span>
                   </Button>
                 </div>
                 {nameInput.trim().length > 0 && nameInput.trim().length < 2 && (
-                  <p className="text-[11px] text-rose-500 font-medium">
+                  <p className="text-[11px] text-text-error-primary font-medium">
                     {t.nameMinLength}
                   </p>
                 )}
               </form>
             ) : (
-              <p className="font-semibold text-[#171717]">{currentUser.name}</p>
+              <p className="font-semibold text-text-primary">{currentUser.name}</p>
             )}
           </div>
           <div className="space-y-1.5">
-            <Label className="text-xs text-[#6B7280] flex items-center gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5" />
+            <Label className="text-xs text-text-secondary flex items-center gap-1.5">
+              <RiShieldCheckLine className="w-3.5 h-3.5" />
               {t.role}
             </Label>
             <div>
@@ -339,28 +339,28 @@ export default function SettingsPage() {
           </div>
           {currentUser.email && (
             <div className="space-y-1.5">
-              <Label className="text-xs text-[#6B7280] flex items-center gap-1.5">
-                <Mail className="w-3.5 h-3.5" />
+              <Label className="text-xs text-text-secondary flex items-center gap-1.5">
+                <RiMailLine className="w-3.5 h-3.5" />
                 {t.email}
               </Label>
-              <p className="font-medium text-[#171717]">{currentUser.email}</p>
+              <p className="font-medium text-text-primary">{currentUser.email}</p>
             </div>
           )}
           {currentUser.phone && (
             <div className="space-y-1.5">
-              <Label className="text-xs text-[#6B7280] flex items-center gap-1.5">
-                <Phone className="w-3.5 h-3.5" />
+              <Label className="text-xs text-text-secondary flex items-center gap-1.5">
+                <RiPhoneLine className="w-3.5 h-3.5" />
                 {t.phone}
               </Label>
-              <p className="font-medium text-[#171717]">{currentUser.phone}</p>
+              <p className="font-medium text-text-primary">{currentUser.phone}</p>
             </div>
           )}
           <div className="space-y-1.5 sm:col-span-2">
-            <Label className="text-xs text-[#6B7280] flex items-center gap-1.5">
-              <CalendarDays className="w-3.5 h-3.5" />
+            <Label className="text-xs text-text-secondary flex items-center gap-1.5">
+              <RiCalendarLine className="w-3.5 h-3.5" />
               {t.memberSince}
             </Label>
-            <p className="font-medium text-[#171717]">
+            <p className="font-medium text-text-primary">
               {formatBnDate(currentUser.createdAt, language)}
             </p>
           </div>
@@ -368,19 +368,19 @@ export default function SettingsPage() {
       </Card>
 
       {/* Owner Signature Card */}
-      <Card className="rounded-[10px] border-[#E5E7EB] shadow-none">
+      <Card className="rounded-3xl border border-border-button-default bg-background-primary-default">
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Pencil className="w-5 h-5 text-[#12664F]" />
+          <CardTitle className="text-lg flex items-center gap-2 text-text-primary">
+            <RiPencilLine className="w-5 h-5 text-accent-700" />
             {t.ownerSignature}
           </CardTitle>
-          <CardDescription>{t.ownerSignatureDescription}</CardDescription>
+          <CardDescription className="text-text-secondary">{t.ownerSignatureDescription}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
           {/* Current Signature Preview */}
-          <div className="rounded-[10px] border border-dashed border-[#D1D5DB] bg-[#FAFAF9] p-5">
+          <div className="rounded-2xl border border-dashed border-border-button-default bg-background-secondary-default p-5">
             <div className="flex flex-col sm:flex-row gap-5 items-start sm:items-center">
-              <div className="h-32 w-full sm:w-56 rounded-lg bg-white border border-[#E5E7EB] flex items-center justify-center overflow-hidden shrink-0 relative">
+              <div className="h-32 w-full sm:w-56 rounded-lg bg-background-primary-default border border-border-button-default flex items-center justify-center overflow-hidden shrink-0 relative">
                 {signaturePreviewUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -390,30 +390,30 @@ export default function SettingsPage() {
                   />
                 ) : (
                   <div className="text-center px-3">
-                    <ImageIcon className="w-8 h-8 mx-auto text-[#9CA3AF]" />
-                    <p className="text-xs font-medium text-[#6B7280] mt-2">
+                    <RiImageLine className="w-8 h-8 mx-auto text-text-tertiary" />
+                    <p className="text-xs font-medium text-text-secondary mt-2">
                       {t.noSignatureUploaded}
                     </p>
                   </div>
                 )}
               </div>
               <div className="flex-1 space-y-2">
-                <div className="flex items-start gap-2 text-xs text-[#6B7280]">
-                  <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                <div className="flex items-start gap-2 text-xs text-text-secondary">
+                  <RiInformationLine className="w-3.5 h-3.5 mt-0.5 shrink-0" />
                   <p>
                     {isEn
                       ? 'Upload a clear, high-contrast image of your signature (PNG with a transparent background is recommended). Once set, it will appear on all new payment receipts.'
                       : 'আপনার স্বাক্ষরের একটি পরিষ্কার ছবি আপলোড করুন (স্বচ্ছ ব্যাকগ্রাউন্ডসহ PNG ফরম্যাট সুপারিশকৃত)। একবার সেট করলে নতুন সকল রশিদে এটি দেখাবে।'}
                   </p>
                 </div>
-                <p className="text-[11px] text-[#9CA3AF]">{t.signatureUploadHint}</p>
+                <p className="text-[11px] text-text-tertiary">{t.signatureUploadHint}</p>
               </div>
             </div>
           </div>
 
           {/* File Uploader */}
           <div className="space-y-2">
-            <Label className="text-sm font-semibold text-[#374151]">
+            <Label className="text-sm font-semibold text-text-primary">
               {currentSignatureFileId ? t.replaceSignature : t.uploadSignature}
             </Label>
             <FileUploader
@@ -428,7 +428,7 @@ export default function SettingsPage() {
           </div>
 
           {/* Action buttons */}
-          <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[#F3F4F6]">
+          <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-separator-border">
             {pendingFileId && (
               <Button
                 onClick={handleSaveSignature}
@@ -437,7 +437,7 @@ export default function SettingsPage() {
                 size="sm"
                 className="gap-1.5"
               >
-                <Upload className="w-4 h-4" />
+                <RiUploadLine className="w-4 h-4" />
                 {setSignatureMutation.isPending ? t.loading : t.save}
               </Button>
             )}
@@ -458,17 +458,17 @@ export default function SettingsPage() {
                 onClick={() => setShowRemoveConfirm(true)}
                 variant="outline"
                 size="sm"
-                className="gap-1.5 text-[#DC2626] border-[#FECACA] hover:bg-[#FEF7F7] hover:text-[#B91C1C] ml-auto"
+                className="gap-1.5 text-text-error-primary border-status-danger-subtle hover:bg-status-danger-subtle ml-auto"
                 disabled={removeSignatureMutation.isPending}
               >
-                <Trash2 className="w-4 h-4" />
+                <RiDeleteBinLine className="w-4 h-4" />
                 {t.removeSignature}
               </Button>
             )}
 
             {showRemoveConfirm && (
-              <div className="ml-auto flex items-center gap-2 bg-[#FEF7F7] border border-[#FECACA] rounded-lg px-3 py-1.5">
-                <span className="text-xs font-medium text-[#B91C1C]">
+              <div className="ml-auto flex items-center gap-2 bg-status-danger-subtle border border-status-danger-subtle rounded-lg px-3 py-1.5">
+                <span className="text-xs font-medium text-text-error-primary">
                   {t.confirmRemoveSignature}
                 </span>
                 <Button

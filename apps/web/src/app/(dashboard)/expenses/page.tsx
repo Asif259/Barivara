@@ -40,14 +40,14 @@ import {
 } from '@/components/ui/bottom-sheet';
 import { ExpenseFormDialog } from '@/components/expenses/expense-form-dialog';
 import {
-  Wallet,
-  Plus,
-  Edit,
-  Trash2,
-  Search,
-  Receipt,
-  TrendingUp,
-} from 'lucide-react';
+  RiWallet3Line,
+  RiAddLine,
+  RiEditLine,
+  RiDeleteBinLine,
+  RiSearchLine,
+  RiReceiptLine,
+  RiLineChartLine,
+} from '@remixicon/react';
 
 export default function ExpensesPage() {
   const { language } = useLanguageStore();
@@ -84,7 +84,6 @@ export default function ExpensesPage() {
       if (search) url += `&search=${encodeURIComponent(search)}`;
       const res = await apiClient.get<ApiResponse<Expense[]>>(url);
       const raw = res.data?.data;
-      // API may return paginated object { items, total } or a plain array
       if (Array.isArray(raw)) return raw;
       const paginated = raw as unknown as { items?: unknown };
       if (paginated && Array.isArray(paginated.items)) return paginated.items as Expense[];
@@ -157,7 +156,7 @@ export default function ExpensesPage() {
         description={isEn ? 'Track maintenance, electricity, and operating costs' : 'বাড়ির যাবতীয় বিদ্যুৎ, গ্যাস, মেরামত ও পরিচালনা খরচ'}
         action={
           <Button onClick={handleCreate} variant="default" className="h-10 gap-2">
-            <Plus className="w-4 h-4" />
+            <RiAddLine className="w-4 h-4" />
             {isEn ? 'Add Expense' : 'নতুন খরচ যোগ করুন'}
           </Button>
         }
@@ -167,7 +166,7 @@ export default function ExpensesPage() {
       {isLoading ? (
         <div className="grid gap-4 sm:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i} className="rounded-[10px] border-[#E5E7EB] p-5 shadow-none">
+            <Card key={i} className="rounded-3xl border border-border-button-default bg-background-primary-default p-5">
               <div className="space-y-3">
                 <Skeleton className="h-3.5 w-24" />
                 <Skeleton className="h-7 w-20" />
@@ -182,16 +181,16 @@ export default function ExpensesPage() {
             title={isEn ? 'Total Outflow (Expenses)' : 'মোট খরচের পরিমাণ'}
             value={formatCurrency(totalExpenseAmount, language)}
             subtitle={`${formatNumber(expenses?.length || 0, language)} ${isEn ? 'vouchers recorded' : 'টি খরচের হিসাব'}`}
-            icon={Wallet}
-            iconColor="text-[#DC2626]"
-            iconBgColor="bg-red-50"
-            valueClassName="text-[#DC2626]"
+            icon={RiWallet3Line}
+            iconColor="text-text-error-primary"
+            iconBgColor="bg-status-danger-subtle"
+            valueClassName="text-text-error-primary"
           />
           <StatCard
             title={isEn ? 'Largest Cost Driver' : 'সর্বোচ্চ খরচের খাত'}
             value={topCategory ? formatCurrency(topCategoryAmount, language) : '৳০'}
             subtitle={topCategory ? `${topCategory} (${totalExpenseAmount > 0 ? Math.round((topCategoryAmount / totalExpenseAmount) * 100) : 0}% of spend)` : (isEn ? 'No expenses' : 'কোন খরচ নেই')}
-            icon={Receipt}
+            icon={RiReceiptLine}
             badge={topCategory ? {
               text: topCategory,
               variant: 'neutral',
@@ -202,20 +201,20 @@ export default function ExpensesPage() {
             title={isEn ? 'Average Ticket Size' : 'গড় প্রতি খরচের আকার'}
             value={formatCurrency(averageExpense, language)}
             subtitle={isEn ? 'Mean cost per invoice/voucher' : 'গড় প্রতি বিলের পরিমাণ'}
-            icon={TrendingUp}
+            icon={RiLineChartLine}
           />
         </div>
       )}
 
       {/* Filter Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-3 rounded-[10px] border border-[#E5E7EB] shadow-none">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-background-primary-default p-3 rounded-2xl border border-border-button-default">
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-[#6B7280]">{t.properties}:</span>
+            <span className="text-xs font-semibold text-text-secondary">{t.properties}:</span>
             <select
               value={propertyFilter}
               onChange={(e) => setPropertyFilter(e.target.value)}
-              className="h-9 rounded-lg border border-[#E5E7EB] bg-white px-3 text-xs font-semibold text-[#374151] outline-none"
+              className="h-9 rounded-lg border border-border-button-default bg-background-primary-default px-3 text-xs font-semibold text-text-primary outline-none"
             >
               <option value="">{isEn ? 'All Properties' : 'সকল বাড়ি'}</option>
               {properties?.map((p) => (
@@ -227,11 +226,11 @@ export default function ExpensesPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-[#6B7280]">{isEn ? 'Category:' : 'খাত:'}</span>
+            <span className="text-xs font-semibold text-text-secondary">{isEn ? 'Category:' : 'খাত:'}</span>
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="h-9 rounded-lg border border-[#E5E7EB] bg-white px-3 text-xs font-semibold text-[#374151] outline-none"
+              className="h-9 rounded-lg border border-border-button-default bg-background-primary-default px-3 text-xs font-semibold text-text-primary outline-none"
             >
               <option value="">{t.all}</option>
               <option value="ELECTRICITY">Electricity (বিদ্যুৎ)</option>
@@ -252,10 +251,10 @@ export default function ExpensesPage() {
       {/* Search Bar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full sm:max-w-sm">
-          <Search className="absolute left-3.5 top-3 h-4 w-4 text-[#9CA3AF]" />
+          <RiSearchLine className="absolute left-3.5 top-3 h-4 w-4 text-text-placeholder" />
           <Input placeholder={isEn ? 'Search property, category, description, or voucher' : 'বাড়ি, খাত, বিবরণ বা ভাউচার খুঁজুন'} value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
         </div>
-        <p className="text-xs text-[#6B7280]">{expenses ? `${expenses.length} ${isEn ? 'expenses' : 'টি খরচ'}` : ''}</p>
+        <p className="text-xs text-text-secondary">{expenses ? `${expenses.length} ${isEn ? 'expenses' : 'টি খরচ'}` : ''}</p>
       </div>
 
       {/* Expenses Responsive Table Container */}
@@ -302,40 +301,40 @@ export default function ExpensesPage() {
               <TableBody>
                 {expenses.map((expense) => (
                   <TableRow key={expense.id}>
-                    <TableCell align="left" className="text-xs text-[#64748B] whitespace-nowrap">
+                    <TableCell align="left" className="text-xs text-text-secondary whitespace-nowrap">
                       {formatBnDate(expense.expenseDate, language)}
                     </TableCell>
                     <TableCell className="min-w-[150px]">
-                      <span className="font-semibold text-[#0F172A] block truncate max-w-[160px]" title={expense.property?.name || 'Property'}>
+                      <span className="font-semibold text-text-primary block truncate max-w-[160px]" title={expense.property?.name || 'Property'}>
                         {expense.property?.name || '—'}
                       </span>
                     </TableCell>
                     <TableCell align="left">
-                      <span className="px-2.5 py-0.5 rounded text-[11px] font-semibold bg-[#F8FAFC] text-[#334155] border border-[#E2E8F0] whitespace-nowrap">
+                      <span className="px-2.5 py-0.5 rounded text-[11px] font-semibold bg-background-secondary-default text-text-secondary border border-border-button-default whitespace-nowrap">
                         {expense.category}
                       </span>
                     </TableCell>
-                    <TableCell align="right" className="font-bold text-[#DC2626] text-sm whitespace-nowrap">
+                    <TableCell align="right" className="font-bold text-text-error-primary text-sm whitespace-nowrap">
                       {formatCurrency(expense.amount, language)}
                     </TableCell>
                     <TableCell align="left" className="min-w-[180px]">
-                      <span className="text-xs text-[#64748B] block truncate max-w-[200px]" title={expense.description || ''}>
+                      <span className="text-xs text-text-secondary block truncate max-w-[200px]" title={expense.description || ''}>
                         {expense.description || '—'}
                       </span>
                     </TableCell>
-                    <TableCell align="center" className="text-xs text-[#64748B] whitespace-nowrap">
+                    <TableCell align="center" className="text-xs text-text-secondary whitespace-nowrap">
                       {expense.paymentMethod || '—'}
                     </TableCell>
-                    <TableCell align="left" className="font-mono text-xs text-[#64748B] whitespace-nowrap">
+                    <TableCell align="left" className="font-mono text-xs text-text-secondary whitespace-nowrap">
                       {expense.reference || '—'}
                     </TableCell>
                     <TableCell align="right">
                       <div className="flex items-center justify-end gap-1">
-                        <Button size="sm" variant="ghost" onClick={() => handleEdit(expense)} className="h-8 w-8 p-0 text-[#64748B] hover:text-[#0F172A]" title={isEn ? 'Edit' : 'সম্পাদনা'}>
-                          <Edit className="w-3.5 h-3.5" />
+                        <Button size="sm" variant="ghost" onClick={() => handleEdit(expense)} className="h-8 w-8 p-0 text-text-secondary hover:text-text-primary" title={isEn ? 'Edit' : 'সম্পাদনা'}>
+                          <RiEditLine className="w-3.5 h-3.5" />
                         </Button>
-                        <Button size="sm" variant="ghost" onClick={() => handleDelete(expense.id)} className="h-8 w-8 p-0 text-[#DC2626] hover:text-[#B91C1C] hover:bg-[#FEF2F2]" title={isEn ? 'Delete' : 'মুছুন'}>
-                          <Trash2 className="w-3.5 h-3.5" />
+                        <Button size="sm" variant="ghost" onClick={() => handleDelete(expense.id)} className="h-8 w-8 p-0 text-text-error-primary hover:bg-status-danger-subtle" title={isEn ? 'Delete' : 'মুছুন'}>
+                          <RiDeleteBinLine className="w-3.5 h-3.5" />
                         </Button>
                       </div>
                     </TableCell>
@@ -346,7 +345,7 @@ export default function ExpensesPage() {
           </div>
 
           {/* Mobile 2-Line Rows */}
-          <div className="block md:hidden divide-y divide-[#F1F5F9]">
+          <div className="block md:hidden divide-y divide-separator-border">
             {expenses.map((expense) => (
               <MobileDataRow
                 key={expense.id}
@@ -354,27 +353,27 @@ export default function ExpensesPage() {
                 showChevron
                 identity={
                   <div className="min-w-0">
-                    <span className="font-semibold text-sm text-[#0F172A] truncate block">{expense.category}</span>
+                    <span className="font-semibold text-sm text-text-primary truncate block">{expense.category}</span>
                   </div>
                 }
                 value={formatCurrency(expense.amount, language)}
                 stateAndDetail={
                   <>
-                    <span className="text-[#64748B]">{expense.property?.name || '—'}</span>
+                    <span className="text-text-secondary">{expense.property?.name || '—'}</span>
                     {expense.description && (
-                      <><span className="text-slate-300">·</span><span className="truncate max-w-[140px]">{expense.description}</span></>
+                      <><span className="text-text-tertiary">·</span><span className="truncate max-w-[140px]">{expense.description}</span></>
                     )}
-                    <span className="text-slate-300">·</span>
+                    <span className="text-text-tertiary">·</span>
                     <span>{isEn ? `Paid ${formatBnDate(expense.expenseDate, language)}` : `${formatBnDate(expense.expenseDate, language)}`}</span>
                   </>
                 }
                 action={
                   <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
-                    <Button size="sm" variant="ghost" onClick={() => handleEdit(expense)} className="h-10 w-10 p-0 text-[#64748B] hover:text-[#0F172A]">
-                      <Edit className="w-4 h-4" />
+                    <Button size="sm" variant="ghost" onClick={() => handleEdit(expense)} className="h-10 w-10 p-0 text-text-secondary hover:text-text-primary">
+                      <RiEditLine className="w-4 h-4" />
                     </Button>
-                    <Button size="sm" variant="ghost" onClick={() => handleDelete(expense.id)} className="h-10 w-10 p-0 text-[#DC2626] hover:bg-[#FEF2F2]">
-                      <Trash2 className="w-4 h-4" />
+                    <Button size="sm" variant="ghost" onClick={() => handleDelete(expense.id)} className="h-10 w-10 p-0 text-text-error-primary hover:bg-status-danger-subtle">
+                      <RiDeleteBinLine className="w-4 h-4" />
                     </Button>
                   </div>
                 }
@@ -383,10 +382,10 @@ export default function ExpensesPage() {
           </div>
         </ResponsiveTableContainer>
       ) : (
-        <Card className="rounded-[10px] border-[#E2E8F0] shadow-none">
+        <Card className="rounded-3xl border border-border-button-default bg-background-primary-default">
           <CardContent className="p-0">
             <EmptyState
-              icon={Wallet}
+              icon={RiWallet3Line}
               title={isEn ? 'No Expense Records' : 'কোনো খরচের রেকর্ড নেই'}
               description={isEn ? 'Track electricity and repair costs by adding your first expense' : 'বাড়ির খরচের হিসাব রাখতে নতুন খরচ যুক্ত করুন'}
               actionLabel={isEn ? 'Add Expense' : 'নতুন খরচ যোগ করুন'}
@@ -412,11 +411,11 @@ export default function ExpensesPage() {
               <DetailItem label={isEn ? 'Voucher/Reference' : 'ভাউচার'} value={detailExpense.reference || '—'} />
             </div>
             <BottomSheetFooter>
-              <Button onClick={() => { setDetailExpense(null); handleEdit(detailExpense); }} className="w-full sm:w-auto min-h-[44px] bg-[#059669] hover:bg-[#047857]">
-                <Edit className="w-4 h-4 mr-2" />{isEn ? 'Edit Expense' : 'সম্পাদনা'}
+              <Button onClick={() => { setDetailExpense(null); handleEdit(detailExpense); }} className="w-full sm:w-auto min-h-[44px] bg-accent-600 hover:bg-accent-700 text-white">
+                <RiEditLine className="w-4 h-4 mr-2" />{isEn ? 'Edit Expense' : 'সম্পাদনা'}
               </Button>
-              <Button variant="outline" onClick={() => { const id = detailExpense.id; setDetailExpense(null); handleDelete(id); }} className="w-full sm:w-auto min-h-[44px] text-[#DC2626] hover:bg-[#FEF2F2] border-[#FCA5A5]">
-                <Trash2 className="w-4 h-4 mr-2" />{isEn ? 'Delete' : 'মুছুন'}
+              <Button variant="outline" onClick={() => { const id = detailExpense.id; setDetailExpense(null); handleDelete(id); }} className="w-full sm:w-auto min-h-[44px] text-text-error-primary hover:bg-status-danger-subtle border-status-danger-subtle">
+                <RiDeleteBinLine className="w-4 h-4 mr-2" />{isEn ? 'Delete' : 'মুছুন'}
               </Button>
             </BottomSheetFooter>
           </BottomSheetContent>

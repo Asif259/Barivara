@@ -32,7 +32,14 @@ import { TenantFormDialog } from '@/components/tenants/tenant-form-dialog';
 import { ImagePreviewDialog } from '@/components/ui/image-preview-dialog';
 import { TenantRow } from '@/components/ui/tenant-row';
 import { TenantAvatar } from '@/components/ui/tenant-avatar';
-import { Users, UserPlus, Search, Edit, Trash2, ExternalLink } from 'lucide-react';
+import {
+  RiGroupLine,
+  RiUserAddLine,
+  RiSearchLine,
+  RiEditLine,
+  RiDeleteBinLine,
+  RiExternalLinkLine,
+} from '@remixicon/react';
 import Link from 'next/link';
 
 export default function TenantsPage() {
@@ -103,15 +110,20 @@ export default function TenantsPage() {
       <PageHeader
         title={t.tenants}
         description={isEn ? 'Manage tenant profiles, contact details, and rental history.' : 'ভাড়াটিয়ার প্রোফাইল, যোগাযোগের তথ্য ও ভাড়ার ইতিহাস পরিচালনা করুন।'}
-        action={<Button onClick={handleCreate} className="h-10 gap-2"><UserPlus className="h-4 w-4" />{t.addNewTenant}</Button>}
+        action={
+          <Button onClick={handleCreate} className="h-10 gap-2">
+            <RiUserAddLine className="h-4 w-4" />
+            {t.addNewTenant}
+          </Button>
+        }
       />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full sm:max-w-sm">
-          <Search className="absolute left-3.5 top-3 h-4 w-4 text-[#9CA3AF]" />
+          <RiSearchLine className="absolute left-3.5 top-3 h-4 w-4 text-text-placeholder" />
           <Input placeholder={isEn ? 'Search by name, phone, or NID' : 'নাম, ফোন বা এনআইডি দিয়ে খুঁজুন'} value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
         </div>
-        <p className="text-xs text-[#6B7280]">{tenants ? `${tenants.length} ${isEn ? 'tenants' : 'জন ভাড়াটিয়া'}` : ''}</p>
+        <p className="text-xs text-text-secondary">{tenants ? `${tenants.length} ${isEn ? 'tenants' : 'জন ভাড়াটিয়া'}` : ''}</p>
       </div>
 
       {/* Responsive Tenants Table */}
@@ -169,7 +181,7 @@ export default function TenantsPage() {
           </div>
 
           {/* Mobile 2-Line Rows */}
-          <div className="block md:hidden divide-y divide-[#F1F5F9]">
+          <div className="block md:hidden divide-y divide-separator-border">
             {tenants.map((tenant) => (
               <MobileDataRow
                 key={tenant.id}
@@ -182,23 +194,23 @@ export default function TenantsPage() {
                       name={tenant.name}
                       size="sm"
                     />
-                    <span className="truncate font-semibold text-sm text-[#0F172A]">{tenant.name}</span>
+                    <span className="truncate font-semibold text-sm text-text-primary">{tenant.name}</span>
                   </div>
                 }
                 value={tenant.phone || '—'}
                 stateAndDetail={
                   <>
                     {tenant.occupation && <span>{tenant.occupation}</span>}
-                    {tenant.occupation && tenant.email && <span className="text-slate-300">·</span>}
+                    {tenant.occupation && tenant.email && <span className="text-text-tertiary">·</span>}
                     {tenant.email && <span className="truncate max-w-[140px]">{tenant.email}</span>}
-                    <span className="text-slate-300">·</span>
+                    <span className="text-text-tertiary">·</span>
                     <span>{formatBnDate(tenant.createdAt, language)}</span>
                   </>
                 }
                 action={
                   <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                     <Link href={`/tenants/${tenant.id}`}>
-                      <Button size="sm" variant="outline" className="h-8 min-h-[38px] px-2 text-xs border-[#E2E8F0]">
+                      <Button size="sm" variant="outline" className="h-8 min-h-[38px] px-2 text-xs border-border-button-default">
                         {isEn ? 'Profile' : 'প্রোফাইল'}
                       </Button>
                     </Link>
@@ -209,10 +221,10 @@ export default function TenantsPage() {
           </div>
         </ResponsiveTableContainer>
       ) : (
-        <Card className="rounded-[10px] border-[#E2E8F0] shadow-none">
+        <Card className="rounded-3xl border border-border-button-default bg-background-primary-default">
           <CardContent className="p-0">
             <EmptyState
-              icon={Users}
+              icon={RiGroupLine}
               title={t.noTenantsFound}
               description={isEn ? 'Add your tenants to assign them to flats and record rent' : 'ভাড়াটিয়া যুক্ত করে ফ্ল্যাটে চুক্তি সম্পন্ন করুন'}
               actionLabel={t.addNewTenant}
@@ -274,8 +286,8 @@ export default function TenantsPage() {
 
             <BottomSheetFooter>
               <Link href={`/tenants/${detailTenant.id}`} className="w-full sm:w-auto">
-                <Button className="w-full sm:w-auto bg-[#059669] hover:bg-[#047857] min-h-[44px]">
-                  <ExternalLink className="w-4 h-4 mr-2" />
+                <Button className="w-full sm:w-auto bg-accent-600 hover:bg-accent-700 min-h-[44px]">
+                  <RiExternalLinkLine className="w-4 h-4 mr-2" />
                   {isEn ? 'Full Profile' : 'পূর্ণ প্রোফাইল দেখুন'}
                 </Button>
               </Link>
@@ -288,7 +300,7 @@ export default function TenantsPage() {
                 }}
                 className="w-full sm:w-auto min-h-[44px]"
               >
-                <Edit className="w-4 h-4 mr-2" />
+                <RiEditLine className="w-4 h-4 mr-2" />
                 {isEn ? 'Edit' : 'সম্পাদনা'}
               </Button>
               <Button
@@ -299,9 +311,9 @@ export default function TenantsPage() {
                   setDetailTenant(null);
                   handleDelete(id, name);
                 }}
-                className="w-full sm:w-auto min-h-[44px] text-[#DC2626] hover:bg-[#FEF2F2] border-[#FCA5A5]"
+                className="w-full sm:w-auto min-h-[44px] text-text-error-primary hover:bg-status-danger-subtle border-status-danger-subtle"
               >
-                <Trash2 className="w-4 h-4 mr-2" />
+                <RiDeleteBinLine className="w-4 h-4 mr-2" />
                 {isEn ? 'Delete' : 'মুছুন'}
               </Button>
             </BottomSheetFooter>

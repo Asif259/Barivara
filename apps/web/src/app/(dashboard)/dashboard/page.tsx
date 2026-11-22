@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api';
 import { useLanguageStore } from '@/stores/language-store';
@@ -31,20 +32,20 @@ import {
 } from '@/components/ui/bottom-sheet';
 import { CollectPaymentDialog } from '@/components/payments/collect-payment-dialog';
 import {
-  Building2,
-  Home,
-  Users,
-  Percent,
-  Wallet,
-  CheckCircle2,
-  AlertCircle,
-  TrendingUp,
-  DollarSign,
-  Receipt,
-  ArrowUpRight,
-  Filter,
-} from 'lucide-react';
-import Link from 'next/link';
+  RiBuildingLine as Building2,
+  RiHomeLine as Home,
+  RiGroupLine as Users,
+  RiPercentLine as Percent,
+  RiWallet3Line as Wallet,
+  RiCheckboxCircleLine as CheckCircle2,
+  RiErrorWarningLine as AlertCircle,
+  RiLineChartLine as TrendingUp,
+  RiMoneyDollarCircleLine as DollarSign,
+  RiReceiptLine as Receipt,
+  RiArrowRightUpLine as ArrowUpRight,
+  RiFilterLine as Filter,
+} from '@remixicon/react';
+import { cx } from '@/utils/cx';
 
 export default function DashboardPage() {
   const { language } = useLanguageStore();
@@ -110,11 +111,11 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-10 pb-8">
-      <div className="flex flex-col gap-5 border-b border-[#E5E7EB] pb-6 lg:flex-row lg:items-end lg:justify-between">
+      <div className="flex flex-col gap-5 border-b border-separator-border pb-6 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="mb-2 text-xs font-medium uppercase tracking-[0.14em] text-[#6B7280]">BariVara</p>
-          <h1 className="text-[30px] font-semibold leading-tight tracking-tight text-[#171717]">{t.dashboard}</h1>
-          <p className="mt-2 max-w-2xl text-sm text-[#6B7280]">
+          <p className="mb-2 text-caption-1-medium uppercase tracking-[0.14em] text-text-tertiary">BariVara</p>
+          <h1 className="text-title-1-semibold leading-tight tracking-tight text-text-primary">{t.dashboard}</h1>
+          <p className="mt-2 max-w-2xl text-body-medium text-text-secondary">
             {isEn
               ? 'A clear view of your properties, occupancy, and rent collection.'
               : 'আপনার বাড়ি, ভাড়াটিয়া এবং ভাড়া আদায়ের সংক্ষিপ্ত সারাংশ।'}
@@ -122,13 +123,13 @@ export default function DashboardPage() {
         </div>
 
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <label className="flex h-10 items-center gap-2 rounded-lg border border-[#E5E7EB] bg-white px-3 text-sm text-[#6B7280] focus-within:border-[#10B981] focus-within:ring-2 focus-within:ring-[#10B981]/10">
-            <Filter className="h-4 w-4 text-[#9CA3AF]" />
+          <label className="flex h-10 items-center gap-2 rounded-xl border border-border-button-default bg-background-primary-default px-3 text-body-medium text-text-secondary focus-within:ring-2 focus-within:ring-border-focus-ring">
+            <Filter className="h-4 w-4 text-foreground-icon-tertiary" />
             <span className="sr-only">{isEn ? 'Filter by property' : 'বাড়ি দিয়ে ফিল্টার করুন'}</span>
             <select
               value={selectedPropertyId}
               onChange={(e) => setSelectedPropertyId(e.target.value)}
-              className="min-w-[150px] bg-transparent text-sm font-medium text-[#374151] outline-none"
+              className="min-w-[150px] bg-transparent text-body-medium font-medium text-text-primary outline-none"
             >
               <option value="">{isEn ? 'All properties' : 'সকল বাড়ি'}</option>
               {propertiesData?.map((p) => (
@@ -150,10 +151,10 @@ export default function DashboardPage() {
       <section aria-labelledby="portfolio-overview-heading">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <h2 id="portfolio-overview-heading" className="text-[17px] font-semibold text-[#171717]">
+            <h2 id="portfolio-overview-heading" className="text-title-3-semibold text-text-primary">
               {isEn ? 'Portfolio overview' : 'সম্পত্তির সারাংশ'}
             </h2>
-            <p className="mt-1 text-[13px] text-[#6B7280]">
+            <p className="mt-1 text-caption-1-regular text-text-tertiary">
               {isEn ? 'Current operating snapshot' : 'বর্তমান পরিচালনামূলক অবস্থা'}
             </p>
           </div>
@@ -162,7 +163,7 @@ export default function DashboardPage() {
         {isOverviewLoading ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {Array.from({ length: 4 }).map((_, i) => (
-              <Card key={i} className="rounded-[10px] border-[#E5E7EB] p-5 shadow-none">
+              <Card key={i} className="rounded-3xl border-border-button-default bg-background-primary-default p-5 shadow-none">
                 <div className="space-y-3">
                   <Skeleton className="h-3.5 w-24" />
                   <Skeleton className="h-7 w-20" />
@@ -224,33 +225,33 @@ export default function DashboardPage() {
 
       <section aria-labelledby="collection-heading">
         <div className="mb-4">
-          <h2 id="collection-heading" className="text-[17px] font-semibold text-[#171717]">
+          <h2 id="collection-heading" className="text-title-3-semibold text-text-primary">
             {isEn ? 'Collection overview' : 'ভাড়া আদায়ের সারাংশ'}
           </h2>
-          <p className="mt-1 text-[13px] text-[#6B7280]">
+          <p className="mt-1 text-caption-1-regular text-text-tertiary">
             {isEn ? 'Monthly financial performance at a glance' : 'চলতি মাসের আর্থিক অগ্রগতি'}
           </p>
         </div>
 
         {isOverviewLoading ? (
           <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
-            <Skeleton className="h-52 rounded-[10px]" />
-            <Skeleton className="h-52 rounded-[10px]" />
+            <Skeleton className="h-52 rounded-3xl" />
+            <Skeleton className="h-52 rounded-3xl" />
           </div>
         ) : (
           <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
-            <Card className="rounded-[10px] border-[#E5E7EB] shadow-none">
-              <CardHeader className="border-b border-[#F3F4F6] pb-4">
+            <Card className="rounded-3xl border-border-button-default bg-background-primary-default shadow-xs">
+              <CardHeader className="border-b border-separator-border pb-4">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <CardTitle className="text-[17px]">{isEn ? 'Monthly rent' : 'মাসিক ভাড়া'}</CardTitle>
-                    <CardDescription className="mt-1">
+                    <CardTitle className="text-title-3-semibold text-text-primary">{isEn ? 'Monthly rent' : 'মাসিক ভাড়া'}</CardTitle>
+                    <CardDescription className="mt-1 text-caption-1-regular text-text-tertiary">
                       {currentMonth?.month
                         ? new Date(currentMonth.year, currentMonth.month - 1).toLocaleString(isEn ? 'en-US' : 'bn-BD', { month: 'long', year: 'numeric' })
                         : (isEn ? 'Current billing period' : 'চলতি বিলিং সময়')}
                     </CardDescription>
                   </div>
-                  <DollarSign className="h-4 w-4 text-[#12664F]" />
+                  <DollarSign className="h-5 w-5 text-accent-600" />
                 </div>
               </CardHeader>
               <CardContent className="grid gap-6 pt-5 sm:grid-cols-3">
@@ -260,25 +261,25 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            <Card className="rounded-[10px] border-[#E5E7EB] shadow-none">
+            <Card className="rounded-3xl border-border-button-default bg-background-primary-default shadow-xs">
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <CardTitle className="text-[17px]">{t.collectionRate}</CardTitle>
-                    <CardDescription className="mt-1">{isEn ? 'Collected vs expected' : 'আদায়ের অগ্রগতি'}</CardDescription>
+                    <CardTitle className="text-title-3-semibold text-text-primary">{t.collectionRate}</CardTitle>
+                    <CardDescription className="mt-1 text-caption-1-regular text-text-tertiary">{isEn ? 'Collected vs expected' : 'আদায়ের অগ্রগতি'}</CardDescription>
                   </div>
-                  <TrendingUp className="h-4 w-4 text-[#10B981]" />
+                  <TrendingUp className="h-5 w-5 text-accent-600" />
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="flex items-end justify-between gap-4">
-                  <span className="text-4xl font-semibold tracking-tight text-[#171717] tabular-nums">{formatNumber(collectionRate, language)}%</span>
-                  <span className="pb-1 text-xs text-[#6B7280] tabular-nums">{formatNumber(currentMonth?.paidCount || 0, language)} {isEn ? 'fully paid' : 'সম্পূর্ণ পরিশোধিত'}</span>
+                  <span className="text-4xl font-semibold tracking-tight text-text-primary tabular-nums">{formatNumber(collectionRate, language)}%</span>
+                  <span className="pb-1 text-caption-1-regular text-text-tertiary tabular-nums">{formatNumber(currentMonth?.paidCount || 0, language)} {isEn ? 'fully paid' : 'সম্পূর্ণ পরিশোধিত'}</span>
                 </div>
-                <div className="mt-5 h-2 overflow-hidden rounded-full bg-[#E8F3EF]">
-                  <div className="h-full rounded-full bg-[#10B981] transition-all" style={{ width: `${Math.min(Math.max(collectionRate, 0), 100)}%` }} />
+                <div className="mt-5 h-2 overflow-hidden rounded-full bg-background-secondary-default">
+                  <div className="h-full rounded-full bg-accent-500 transition-all" style={{ width: `${Math.min(Math.max(collectionRate, 0), 100)}%` }} />
                 </div>
-                <div className="mt-3 flex items-center justify-between text-xs text-[#6B7280]">
+                <div className="mt-3 flex items-center justify-between text-caption-1-regular text-text-tertiary">
                   <span>{isEn ? 'Collection progress' : 'আদায়ের অগ্রগতি'}</span>
                   <span>{formatNumber(outstandingCount, language)} {isEn ? 'pending' : 'বকেয়া'}</span>
                 </div>
@@ -289,16 +290,16 @@ export default function DashboardPage() {
 
         {/* Action Alert Banner for Overdue / Pending items */}
         {outstandingCount > 0 && (
-          <div className="mt-4 flex flex-col gap-3 rounded-[10px] border border-amber-200 bg-amber-50/60 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-amber-300 dark:border-amber-900/60 bg-amber-50/70 dark:bg-amber-950/30 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-700">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
                 <AlertCircle className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-amber-900">
+                <p className="text-body-medium font-semibold text-amber-900 dark:text-amber-200">
                   {formatNumber(outstandingCount, language)} {isEn ? 'unpaid or overdue invoices require attention' : 'টি অপরিশোধিত বা বকেয়া রসিদে মনোযোগ প্রয়োজন'}
                 </p>
-                <p className="text-xs text-amber-700">
+                <p className="text-caption-1-regular text-amber-700 dark:text-amber-400">
                   {isEn
                     ? `Total outstanding due: ${formatCurrency(currentMonth?.outstanding || 0, language)}`
                     : `মোট বকেয়া টাকার পরিমাণ: ${formatCurrency(currentMonth?.outstanding || 0, language)}`}
@@ -307,7 +308,7 @@ export default function DashboardPage() {
             </div>
             <Link
               href="/rents?status=OVERDUE"
-              className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-amber-600 px-3.5 py-2 text-xs font-medium text-white transition-colors hover:bg-amber-700 shrink-0"
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber-600 px-3.5 py-2 text-caption-1-medium font-medium text-white transition-colors hover:bg-amber-700 shrink-0"
             >
               <span>{isEn ? 'Review Invoices & Send Notices' : 'বকেয়া রসিদ দেখুন ও নোটিশ পাঠান'}</span>
               <ArrowUpRight className="h-3.5 w-3.5" />
@@ -317,20 +318,20 @@ export default function DashboardPage() {
       </section>
 
       <section aria-labelledby="outstanding-heading">
-        <Card className="rounded-[10px] border-[#E5E7EB] shadow-none">
-          <CardHeader className="flex flex-col gap-3 border-b border-[#F3F4F6] pb-4 sm:flex-row sm:items-end sm:justify-between">
+        <Card className="rounded-3xl border-border-button-default bg-background-primary-default shadow-xs overflow-hidden">
+          <CardHeader className="flex flex-col gap-3 border-b border-separator-border pb-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <div className="flex items-center gap-2">
-                <AlertCircle className="h-4 w-4 text-[#B45309]" />
-                <CardTitle id="outstanding-heading" className="text-[17px]">
+                <AlertCircle className="h-4 w-4 text-amber-600" />
+                <CardTitle id="outstanding-heading" className="text-title-3-semibold text-text-primary">
                   {isEn ? 'Outstanding rent' : 'বকেয়া ভাড়া'}
                 </CardTitle>
               </div>
-              <CardDescription className="mt-1">
+              <CardDescription className="mt-1 text-caption-1-regular text-text-tertiary">
                 {isEn ? 'Invoices that need attention' : 'যেসব বিলের জন্য পদক্ষেপ প্রয়োজন'}
               </CardDescription>
             </div>
-            <Link href="/rents" className="inline-flex items-center gap-1 text-sm font-medium text-[#12664F] hover:text-[#0E513F]">
+            <Link href="/rents" className="inline-flex items-center gap-1 text-body-medium font-medium text-accent-600 hover:text-accent-700">
               {isEn ? 'View all rents' : 'সকল ভাড়া দেখুন'} <ArrowUpRight className="h-4 w-4" />
             </Link>
           </CardHeader>
@@ -382,34 +383,34 @@ export default function DashboardPage() {
                         <TableRow key={rent.id}>
                           <TableCell className="min-w-[200px]">
                             <div className="min-w-0 max-w-[180px]">
-                              <span className="font-semibold text-[#0F172A] block truncate" title={rent.agreement?.tenant?.name || 'Tenant'}>
+                              <span className="font-semibold text-text-primary block truncate" title={rent.agreement?.tenant?.name || 'Tenant'}>
                                 {rent.agreement?.tenant?.name || 'Tenant'}
                               </span>
-                              <span className="block text-xs font-normal text-[#64748B] truncate" title={rent.agreement?.tenant?.phone || ''}>
+                              <span className="block text-caption-1-regular font-normal text-text-tertiary truncate" title={rent.agreement?.tenant?.phone || ''}>
                                 {rent.agreement?.tenant?.phone || '—'}
                               </span>
                             </div>
                           </TableCell>
                           <TableCell className="min-w-[120px]">
                             <div className="min-w-0">
-                              <span className="font-semibold text-[#1E293B] block">
+                              <span className="font-semibold text-text-primary block">
                                 {rent.agreement?.unit?.unitNumber || '—'}
                               </span>
-                              <span className="block text-xs text-[#64748B] truncate max-w-[120px]" title={rent.agreement?.unit?.property?.name || ''}>
+                              <span className="block text-caption-1-regular text-text-tertiary truncate max-w-[120px]" title={rent.agreement?.unit?.property?.name || ''}>
                                 {rent.agreement?.unit?.property?.name || '—'}
                               </span>
                             </div>
                           </TableCell>
-                          <TableCell align="left" className="text-xs text-[#64748B] whitespace-nowrap">
+                          <TableCell align="left" className="text-caption-1-regular text-text-tertiary whitespace-nowrap">
                             {rent.month}/{rent.year}
                           </TableCell>
-                          <TableCell align="right" className="font-semibold text-[#0F172A] whitespace-nowrap">
+                          <TableCell align="right" className="font-semibold text-text-primary whitespace-nowrap">
                             {formatCurrency(rent.totalAmount, language)}
                           </TableCell>
-                          <TableCell align="right" className="font-medium text-[#059669] whitespace-nowrap">
+                          <TableCell align="right" className="font-medium text-accent-600 whitespace-nowrap">
                             {formatCurrency(rent.paidAmount, language)}
                           </TableCell>
-                          <TableCell align="right" className="font-semibold text-[#DC2626] whitespace-nowrap">
+                          <TableCell align="right" className="font-semibold text-text-error-primary whitespace-nowrap">
                             {formatCurrency(rent.remainingAmount, language)}
                           </TableCell>
                           <TableCell align="center">
@@ -420,9 +421,9 @@ export default function DashboardPage() {
                               size="sm"
                               variant="outline"
                               onClick={() => handleOpenPayment(rent)}
-                              className="h-8 gap-1.5 whitespace-nowrap text-xs px-2.5 text-[#334155] hover:text-[#059669] hover:bg-[#F0FDF4]"
+                              className="h-8 gap-1.5 whitespace-nowrap text-caption-1-medium px-2.5 rounded-xl border-border-button-default hover:bg-background-secondary-hover"
                             >
-                              <Wallet className="h-3.5 w-3.5 text-[#059669]" />
+                              <Wallet className="h-3.5 w-3.5 text-accent-600" />
                               <span>{isEn ? 'Collect' : 'আদায়'}</span>
                             </Button>
                           </TableCell>
@@ -433,7 +434,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Mobile 2-Line Rows */}
-                <div className="block md:hidden divide-y divide-[#F1F5F9]">
+                <div className="block md:hidden divide-y divide-separator-border">
                   {outstandingRents.map((rent) => {
                     const statusLabel =
                       rent.status === 'PAID' ? (isEn ? 'Paid' : 'পরিশোধিত') :
@@ -451,7 +452,7 @@ export default function DashboardPage() {
                         showChevron
                         identity={
                           <div className="min-w-0">
-                            <span className="font-semibold text-sm text-[#0F172A] truncate block">
+                            <span className="font-semibold text-body-medium text-text-primary truncate block">
                               {rent.agreement?.tenant?.name || 'Tenant'}
                             </span>
                           </div>
@@ -460,9 +461,9 @@ export default function DashboardPage() {
                         stateAndDetail={
                           <>
                             <CompactStatus label={statusLabel} variant={statusVariant} />
-                            <span className="text-slate-300">·</span>
+                            <span className="text-text-quaternary">·</span>
                             <span>Unit {rent.agreement?.unit?.unitNumber || '—'}</span>
-                            <span className="text-slate-300">·</span>
+                            <span className="text-text-quaternary">·</span>
                             <span>{rent.month}/{rent.year}</span>
                           </>
                         }
@@ -474,7 +475,7 @@ export default function DashboardPage() {
                               e.stopPropagation();
                               handleOpenPayment(rent);
                             }}
-                            className="h-8 min-h-[40px] px-2.5 text-xs bg-[#059669] hover:bg-[#047857] gap-1"
+                            className="h-8 min-h-[40px] px-2.5 text-caption-1-medium rounded-xl gap-1"
                           >
                             <Wallet className="w-3.5 h-3.5" />
                             <span>{isEn ? 'Collect' : 'আদায়'}</span>
@@ -556,7 +557,7 @@ export default function DashboardPage() {
                       setDetailRent(null);
                       handleOpenPayment(r);
                     }}
-                    className="w-full sm:w-auto bg-[#059669] hover:bg-[#047857] min-h-[44px]"
+                    className="w-full sm:w-auto min-h-[44px]"
                   >
                     <Wallet className="w-4 h-4 mr-2" />
                     {isEn ? 'Collect Payment' : 'ভাড়া আদায় করুন'}
@@ -576,8 +577,8 @@ export default function DashboardPage() {
 function FinancialFigure({ label, value, accent = false, danger = false }: { label: string; value: string; accent?: boolean; danger?: boolean }) {
   return (
     <div>
-      <p className="text-[13px] text-[#6B7280]">{label}</p>
-      <p className={`mt-2 text-xl font-semibold tracking-tight tabular-nums ${danger ? 'text-[#DC2626]' : accent ? 'text-[#15803D]' : 'text-[#171717]'}`}>
+      <p className="text-caption-1-medium text-text-secondary">{label}</p>
+      <p className={cx('mt-2 text-title-2-semibold tracking-tight tabular-nums', danger ? 'text-text-error-primary' : accent ? 'text-accent-600' : 'text-text-primary')}>
         {value}
       </p>
     </div>

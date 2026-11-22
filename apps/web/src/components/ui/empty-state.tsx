@@ -4,7 +4,7 @@ import { Button } from './button';
 import { cx } from '@/utils/cx';
 
 interface EmptyStateProps {
-  icon?: any;
+  icon?: React.ComponentType<{ className?: string }>;
   title: string;
   description?: string;
   actionLabel?: string;

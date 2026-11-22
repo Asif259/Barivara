@@ -8,7 +8,7 @@ export interface StatCardProps {
   title: string;
   value: string | number;
   subtitle?: string;
-  icon?: any;
+  icon?: React.ComponentType<{ className?: string }>;
   iconColor?: string;
   iconBgColor?: string;
   trend?: {

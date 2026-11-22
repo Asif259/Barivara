@@ -14,14 +14,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { StatCard } from '@/components/ui/stat-card';
 import {
-  Download,
-  TrendingUp,
-  AlertCircle,
-  CheckCircle2,
-  Wallet,
-  Building2,
-  PieChart,
-} from 'lucide-react';
+  RiDownloadLine,
+  RiLineChartLine,
+  RiErrorWarningLine,
+  RiCheckboxCircleLine,
+  RiWallet3Line,
+  RiBuildingLine,
+  RiPieChartLine,
+} from '@remixicon/react';
 
 const currentYear = new Date().getFullYear();
 const currentMonth = new Date().getMonth() + 1;
@@ -107,21 +107,21 @@ export default function ReportsPage() {
             className="h-10 gap-2"
             disabled={isExporting}
           >
-            <Download className="w-4 h-4" />
+            <RiDownloadLine className="w-4 h-4" />
             {isEn ? 'Export CSV' : 'CSV রিপোর্ট ডাউনলোড'}
           </Button>
         }
       />
 
       {/* Filter Bar */}
-      <div className="flex flex-wrap items-center gap-3 bg-white p-3 rounded-[10px] border border-[#E5E7EB] shadow-none">
+      <div className="flex flex-wrap items-center gap-3 bg-background-primary-default p-3 rounded-2xl border border-border-button-default">
         {/* Month Selector */}
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-[#6B7280]">{isEn ? 'Month:' : 'মাস:'}</span>
+          <span className="text-xs font-semibold text-text-secondary">{isEn ? 'Month:' : 'মাস:'}</span>
           <select
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(Number(e.target.value))}
-            className="h-9 rounded-lg border border-[#E5E7EB] bg-[#FAFAF9] px-3 text-xs font-semibold text-[#374151] outline-none"
+            className="h-9 rounded-lg border border-border-button-default bg-background-secondary-default px-3 text-xs font-semibold text-text-primary outline-none"
           >
             {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
               <option key={m} value={m}>
@@ -133,11 +133,11 @@ export default function ReportsPage() {
 
         {/* Year Selector */}
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-[#6B7280]">{isEn ? 'Year:' : 'সাল:'}</span>
+          <span className="text-xs font-semibold text-text-secondary">{isEn ? 'Year:' : 'সাল:'}</span>
           <select
             value={selectedYear}
             onChange={(e) => setSelectedYear(Number(e.target.value))}
-            className="h-9 rounded-lg border border-[#E5E7EB] bg-[#FAFAF9] px-3 text-xs font-semibold text-[#374151] outline-none"
+            className="h-9 rounded-lg border border-border-button-default bg-background-secondary-default px-3 text-xs font-semibold text-text-primary outline-none"
           >
             {[2024, 2025, 2026, 2027].map((y) => (
               <option key={y} value={y}>
@@ -149,11 +149,11 @@ export default function ReportsPage() {
 
         {/* Property Selector */}
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-[#6B7280]">{t.properties}:</span>
+          <span className="text-xs font-semibold text-text-secondary">{t.properties}:</span>
           <select
             value={selectedPropertyId}
             onChange={(e) => setSelectedPropertyId(e.target.value)}
-            className="h-9 rounded-lg border border-[#E5E7EB] bg-[#FAFAF9] px-3 text-xs font-semibold text-[#374151] outline-none max-w-[200px]"
+            className="h-9 rounded-lg border border-border-button-default bg-background-secondary-default px-3 text-xs font-semibold text-text-primary outline-none max-w-[200px]"
           >
             <option value="">{isEn ? 'All Properties' : 'সকল বাড়ি'}</option>
             {properties?.map((p) => (
@@ -168,17 +168,17 @@ export default function ReportsPage() {
       {/* Financial Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {isLoading ? (
-          Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-28 rounded-[10px]" />)
+          Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-28 rounded-3xl" />)
         ) : (
           <>
             <StatCard
               title={isEn ? 'Collected Revenue' : 'আদায়কৃত মোট ভাড়া'}
               value={formatCurrency(fin?.collectedRent || 0, language)}
               subtitle={`${isEn ? 'Expected:' : 'প্রত্যাশিত:'} ${formatCurrency(fin?.expectedRent || 0, language)}`}
-              icon={CheckCircle2}
-              iconColor="text-[#15803D]"
-              iconBgColor="bg-emerald-50"
-              valueClassName="text-[#15803D]"
+              icon={RiCheckboxCircleLine}
+              iconColor="text-accent-700"
+              iconBgColor="bg-accent-50"
+              valueClassName="text-accent-700"
               badge={{
                 text: `${fin?.collectionRate || 0}%`,
                 variant: (fin?.collectionRate || 0) >= 90 ? 'success' : 'info',
@@ -189,19 +189,19 @@ export default function ReportsPage() {
               title={isEn ? 'Total Expenses' : 'মোট খরচাপাতি'}
               value={formatCurrency(fin?.totalExpenses || 0, language)}
               subtitle={isEn ? 'Electricity, repairs & maintenance' : 'বিদ্যুৎ, মেরামত ও পরিচালনা'}
-              icon={Wallet}
-              iconColor="text-[#DC2626]"
-              iconBgColor="bg-red-50"
-              valueClassName="text-[#DC2626]"
+              icon={RiWallet3Line}
+              iconColor="text-text-error-primary"
+              iconBgColor="bg-status-danger-subtle"
+              valueClassName="text-text-error-primary"
               href="/expenses"
             />
             <StatCard
               title={isEn ? 'Net Operating Income' : 'নীট লাভ / আয়'}
               value={formatCurrency(netIncome, language)}
               subtitle={isEn ? 'Revenue minus operating costs' : 'মোট আদায় থেকে খরচ বাদ'}
-              icon={TrendingUp}
-              iconColor={netIncome >= 0 ? 'text-[#12664F]' : 'text-[#DC2626]'}
-              iconBgColor={netIncome >= 0 ? 'bg-[#E8F3EF]' : 'bg-red-50'}
+              icon={RiLineChartLine}
+              iconColor={netIncome >= 0 ? 'text-accent-700' : 'text-text-error-primary'}
+              iconBgColor={netIncome >= 0 ? 'bg-accent-50' : 'bg-status-danger-subtle'}
               badge={netIncome >= 0 ? {
                 text: isEn ? 'Profitable' : 'লাভজনক',
                 variant: 'success',
@@ -214,10 +214,10 @@ export default function ReportsPage() {
               title={isEn ? 'Outstanding Due' : 'মোট বকেয়া'}
               value={formatCurrency(fin?.outstandingRent || 0, language)}
               subtitle={`${fin?.collectionRate || 0}% ${t.collectionRate}`}
-              icon={AlertCircle}
-              iconColor={fin?.outstandingRent ? 'text-[#DC2626]' : 'text-[#12664F]'}
-              iconBgColor={fin?.outstandingRent ? 'bg-red-50' : 'bg-[#E8F3EF]'}
-              valueClassName={fin?.outstandingRent ? 'text-[#DC2626]' : undefined}
+              icon={RiErrorWarningLine}
+              iconColor={fin?.outstandingRent ? 'text-text-error-primary' : 'text-accent-700'}
+              iconBgColor={fin?.outstandingRent ? 'bg-status-danger-subtle' : 'bg-accent-50'}
+              valueClassName={fin?.outstandingRent ? 'text-text-error-primary' : undefined}
               badge={fin?.outstandingRent ? {
                 text: isEn ? 'Uncollected' : 'বকেয়া রয়েছে',
                 variant: 'danger',
@@ -234,52 +234,52 @@ export default function ReportsPage() {
       {/* Breakdown Details */}
       {report && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="rounded-[10px] border-[#E5E7EB] shadow-none">
+          <Card className="rounded-3xl border border-border-button-default bg-background-primary-default">
             <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <PieChart className="w-5 h-5 text-[#12664F]" />
+              <CardTitle className="text-base flex items-center gap-2 text-text-primary">
+                <RiPieChartLine className="w-5 h-5 text-accent-700" />
                 {isEn ? 'Rent Invoices by Status' : 'ভাড়ার বিলসমূহের বর্তমান অবস্থা'}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
-              <div className="flex justify-between items-center p-3 rounded-lg bg-[#F3FAF5] text-emerald-900 font-medium">
+              <div className="flex justify-between items-center p-3 rounded-lg bg-accent-50 text-accent-800 font-medium">
                 <span>{isEn ? 'Fully Paid Units' : 'সম্পূর্ণ পরিশোধিত ফ্ল্যাট'}:</span>
                 <span className="font-bold">{report.rentsByStatus?.paid ?? '-'}</span>
               </div>
-              <div className="flex justify-between items-center p-3 rounded-lg bg-[#FFFCF2] text-[#92400E] font-medium">
+              <div className="flex justify-between items-center p-3 rounded-lg bg-status-warning-subtle text-status-warning-foreground font-medium">
                 <span>{isEn ? 'Partial Paid Units' : 'আংশিক পরিশোধিত ফ্ল্যাট'}:</span>
                 <span className="font-bold">{report.rentsByStatus?.partial ?? '-'}</span>
               </div>
-              <div className="flex justify-between items-center p-3 rounded-lg bg-[#FAFAF9] text-[#171717] font-medium">
+              <div className="flex justify-between items-center p-3 rounded-lg bg-background-secondary-default text-text-primary font-medium">
                 <span>{isEn ? 'Pending Units' : 'অপেক্ষমান ফ্ল্যাট'}:</span>
                 <span className="font-bold">{report.rentsByStatus?.pending ?? '-'}</span>
               </div>
-              <div className="flex justify-between items-center p-3 rounded-lg bg-[#FEF7F7] text-[#991B1B] font-medium">
+              <div className="flex justify-between items-center p-3 rounded-lg bg-status-danger-subtle text-text-error-primary font-medium">
                 <span>{isEn ? 'Overdue Units' : 'মেয়াদোত্তীর্ণ ফ্ল্যাট'}:</span>
                 <span className="font-bold">{report.rentsByStatus?.overdue ?? '-'}</span>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="rounded-[10px] border-[#E5E7EB] shadow-none">
+          <Card className="rounded-3xl border border-border-button-default bg-background-primary-default">
             <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <Building2 className="w-5 h-5 text-[#12664F]" />
+              <CardTitle className="text-base flex items-center gap-2 text-text-primary">
+                <RiBuildingLine className="w-5 h-5 text-accent-700" />
                 {isEn ? 'Property Portfolio Stats' : 'বাড়ি ও ফ্ল্যাটের তথ্য'}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
-              <div className="flex justify-between items-center p-3 rounded-lg bg-[#FAFAF9]">
-                <span className="text-[#6B7280]">{t.properties}:</span>
-                <span className="font-bold text-[#171717]">{report.totalProperties}</span>
+              <div className="flex justify-between items-center p-3 rounded-lg bg-background-secondary-default">
+                <span className="text-text-secondary">{t.properties}:</span>
+                <span className="font-bold text-text-primary">{report.totalProperties}</span>
               </div>
-              <div className="flex justify-between items-center p-3 rounded-lg bg-[#FAFAF9]">
-                <span className="text-[#6B7280]">{t.units}:</span>
-                <span className="font-bold text-[#171717]">{report.totalUnits}</span>
+              <div className="flex justify-between items-center p-3 rounded-lg bg-background-secondary-default">
+                <span className="text-text-secondary">{t.units}:</span>
+                <span className="font-bold text-text-primary">{report.totalUnits}</span>
               </div>
-              <div className="flex justify-between items-center p-3 rounded-lg bg-[#FAFAF9]">
-                <span className="text-[#6B7280]">{t.tenants}:</span>
-                <span className="font-bold text-[#171717]">{report.totalTenants}</span>
+              <div className="flex justify-between items-center p-3 rounded-lg bg-background-secondary-default">
+                <span className="text-text-secondary">{t.tenants}:</span>
+                <span className="font-bold text-text-primary">{report.totalTenants}</span>
               </div>
             </CardContent>
           </Card>

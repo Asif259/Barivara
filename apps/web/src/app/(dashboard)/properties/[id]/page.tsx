@@ -34,7 +34,16 @@ import {
 import { UnitFormDialog } from '@/components/units/unit-form-dialog';
 import { BulkUnitFormDialog } from '@/components/units/bulk-unit-form-dialog';
 import { PropertyFormDialog } from '@/components/properties/property-form-dialog';
-import { Building2, ArrowLeft, Plus, Home, MapPin, Edit, Trash2, Layers } from 'lucide-react';
+import {
+  RiBuildingLine,
+  RiArrowLeftLine,
+  RiAddLine,
+  RiHomeLine,
+  RiMapPinLine,
+  RiEditLine,
+  RiDeleteBinLine,
+  RiStackLine,
+} from '@remixicon/react';
 
 export default function PropertyDetailPage() {
   const params = useParams();
@@ -143,8 +152,8 @@ export default function PropertyDetailPage() {
     return (
       <div className="space-y-6 pb-8">
         <Skeleton className="h-10 w-48" />
-        <Skeleton className="h-32 w-full rounded-[10px]" />
-        <Skeleton className="h-80 w-full rounded-[10px]" />
+        <Skeleton className="h-32 w-full rounded-3xl" />
+        <Skeleton className="h-80 w-full rounded-3xl" />
       </div>
     );
   }
@@ -152,7 +161,7 @@ export default function PropertyDetailPage() {
   if (!property) {
     return (
       <EmptyState
-        icon={Building2}
+        icon={RiBuildingLine}
         title={t.noPropertiesFound}
         actionLabel={isEn ? 'Back to Properties' : 'সকল বাড়িতে ফিরে যান'}
         onAction={() => router.push('/properties')}
@@ -162,29 +171,41 @@ export default function PropertyDetailPage() {
 
   return (
     <div className="space-y-8 pb-8">
-      <div className="flex flex-col gap-5 border-b border-[#E5E7EB] pb-6 lg:flex-row lg:items-end lg:justify-between">
+      <div className="flex flex-col gap-5 border-b border-separator-border pb-6 lg:flex-row lg:items-end lg:justify-between">
         <div className="flex items-start gap-3">
           <Link href="/properties">
             <Button variant="outline" size="icon" className="mt-1 h-9 w-9 shrink-0" title={isEn ? 'Back to properties' : 'সকল বাড়িতে ফিরে যান'}>
-              <ArrowLeft className="h-4 w-4" />
+              <RiArrowLeftLine className="h-4 w-4" />
             </Button>
           </Link>
           <div>
-            <p className="mb-2 text-xs font-medium uppercase tracking-[0.14em] text-[#6B7280]">{isEn ? 'Property' : 'বাড়ি'}</p>
-            <h1 className="text-[30px] font-semibold leading-tight tracking-tight text-[#171717]">{property.name}</h1>
-            <p className="mt-2 flex items-center gap-1.5 text-sm text-[#6B7280]"><MapPin className="h-4 w-4 text-[#9CA3AF]" />{property.address}{property.city ? `, ${property.city}` : ''}</p>
+            <p className="mb-2 text-xs font-medium uppercase tracking-[0.14em] text-text-secondary">{isEn ? 'Property' : 'বাড়ি'}</p>
+            <h1 className="text-[30px] font-semibold leading-tight tracking-tight text-text-primary">{property.name}</h1>
+            <p className="mt-2 flex items-center gap-1.5 text-sm text-text-secondary">
+              <RiMapPinLine className="h-4 w-4 text-text-placeholder" />
+              {property.address}{property.city ? `, ${property.city}` : ''}
+            </p>
           </div>
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" onClick={() => setPropertyEditOpen(true)} className="gap-1.5 h-10"><Edit className="h-3.5 w-3.5" />{t.edit}</Button>
-          <Button onClick={handleAddUnit} size="sm" className="gap-1.5 h-10"><Plus className="h-4 w-4" />{t.addNewUnit}</Button>
-          <Button onClick={() => setBulkUnitDialogOpen(true)} variant="outline" size="sm" className="gap-1.5 h-10"><Layers className="h-4 w-4" />{t.addUnitsByFloor}</Button>
+          <Button variant="outline" size="sm" onClick={() => setPropertyEditOpen(true)} className="gap-1.5 h-10">
+            <RiEditLine className="h-3.5 w-3.5" />
+            {t.edit}
+          </Button>
+          <Button onClick={handleAddUnit} size="sm" className="gap-1.5 h-10">
+            <RiAddLine className="h-4 w-4" />
+            {t.addNewUnit}
+          </Button>
+          <Button onClick={() => setBulkUnitDialogOpen(true)} variant="outline" size="sm" className="gap-1.5 h-10">
+            <RiStackLine className="h-4 w-4" />
+            {t.addUnitsByFloor}
+          </Button>
         </div>
       </div>
 
       {summary && (
-        <div className="grid grid-cols-2 divide-x divide-y divide-[#E5E7EB] rounded-[10px] border border-[#E5E7EB] bg-white sm:grid-cols-4 sm:divide-y-0">
+        <div className="grid grid-cols-2 divide-x divide-y divide-separator-border rounded-3xl border border-border-button-default bg-background-primary-default sm:grid-cols-4 sm:divide-y-0">
           <SummaryMetric label={`${t.total} ${t.units}`} value={summary.totalUnits} detail={`${summary.occupiedUnits} ${t.occupied} · ${summary.vacantUnits} ${t.vacant}`} />
           <SummaryMetric label={t.activeAgreement} value={summary.activeTenants} detail={t.tenants} />
           <SummaryMetric label={isEn ? 'Monthly expected' : 'মাসিক প্রত্যাশিত'} value={formatCurrency(summary.currentMonth.expected, language)} detail={`${t.paid}: ${formatCurrency(summary.currentMonth.collected, language)}`} accent />
@@ -192,15 +213,26 @@ export default function PropertyDetailPage() {
         </div>
       )}
 
-      <Card className="rounded-[10px] border-[#E5E7EB] shadow-none">
-        <CardHeader className="flex flex-col gap-3 border-b border-[#F3F4F6] pb-4 sm:flex-row sm:items-end sm:justify-between">
+      <Card className="rounded-3xl border border-border-button-default bg-background-primary-default">
+        <CardHeader className="flex flex-col gap-3 border-b border-separator-border pb-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <div className="flex items-center gap-2"><Home className="h-4 w-4 text-[#307473]" /><CardTitle className="text-[17px]">{isEn ? 'Units' : 'ইউনিট'}</CardTitle></div>
-            <CardDescription className="mt-1">{isEn ? 'Units, occupancy, and rent settings for this property.' : 'এই বাড়ির ইউনিট, দখল এবং ভাড়ার তথ্য।'}</CardDescription>
+            <div className="flex items-center gap-2">
+              <RiHomeLine className="h-4 w-4 text-accent-700" />
+              <CardTitle className="text-[17px] text-text-primary">{isEn ? 'Units' : 'ইউনিট'}</CardTitle>
+            </div>
+            <CardDescription className="mt-1 text-text-secondary">
+              {isEn ? 'Units, occupancy, and rent settings for this property.' : 'এই বাড়ির ইউনিট, দখল এবং ভাড়ার তথ্য।'}
+            </CardDescription>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button onClick={handleAddUnit} variant="outline" size="sm" className="h-9 gap-1.5"><Plus className="h-3.5 w-3.5" />{t.addNewUnit}</Button>
-            <Button onClick={() => setBulkUnitDialogOpen(true)} variant="outline" size="sm" className="h-9 gap-1.5"><Layers className="h-3.5 w-3.5" />{t.addByFloor}</Button>
+            <Button onClick={handleAddUnit} variant="outline" size="sm" className="h-9 gap-1.5">
+              <RiAddLine className="h-3.5 w-3.5" />
+              {t.addNewUnit}
+            </Button>
+            <Button onClick={() => setBulkUnitDialogOpen(true)} variant="outline" size="sm" className="h-9 gap-1.5">
+              <RiStackLine className="h-3.5 w-3.5" />
+              {t.addByFloor}
+            </Button>
           </div>
         </CardHeader>
         <CardContent className="p-0 pt-0">
@@ -248,31 +280,31 @@ export default function PropertyDetailPage() {
                   </TableHeader>
                   <TableBody>
                     {Object.entries(unitsByFloor).sort(([a], [b]) => Number(b) - Number(a)).flatMap(([floor, floorUnits]) => [
-                      <TableRow key={`floor-${floor}`} className="bg-[#F8FAFC] hover:bg-[#F8FAFC]">
-                        <TableCell colSpan={8} className="py-2 px-3.5 text-xs font-semibold text-[#475569] border-y border-[#E2E8F0]">
+                      <TableRow key={`floor-${floor}`} className="bg-background-secondary-default hover:bg-background-secondary-default">
+                        <TableCell colSpan={8} className="py-2 px-3.5 text-xs font-semibold text-text-secondary border-y border-separator-border">
                           <span className="inline-flex items-center gap-2">
-                            <Layers className="h-3.5 w-3.5 text-[#059669]" />
+                            <RiStackLine className="h-3.5 w-3.5 text-accent-600" />
                             <span>{isEn ? `Floor ${floor}` : `${floor} তলা`}</span>
-                            <span className="font-normal text-[#64748B]">({floorUnits.length} {t.units})</span>
+                            <span className="font-normal text-text-secondary">({floorUnits.length} {t.units})</span>
                           </span>
                         </TableCell>
                       </TableRow>,
                       ...floorUnits.map((unit) => (
                         <TableRow key={unit.id}>
-                          <TableCell className="font-semibold text-[#0F172A]">{unit.unitNumber}</TableCell>
-                          <TableCell align="left" className="text-xs text-[#64748B]">{unit.floor} {isEn ? 'Floor' : 'তলা'}</TableCell>
-                          <TableCell align="left" className="text-xs text-[#64748B]">{unit.unitType}</TableCell>
-                          <TableCell align="left" className="text-xs text-[#64748B]">{unit.bedrooms || 0} Bed · {unit.bathrooms || 0} Bath</TableCell>
-                          <TableCell align="right" className="font-semibold text-[#0F172A] whitespace-nowrap">{formatCurrency(unit.monthlyBaseRent, language)}</TableCell>
-                          <TableCell align="right" className="text-[#64748B] whitespace-nowrap">{formatCurrency(unit.defaultServiceFee, language)}</TableCell>
+                          <TableCell className="font-semibold text-text-primary">{unit.unitNumber}</TableCell>
+                          <TableCell align="left" className="text-xs text-text-secondary">{unit.floor} {isEn ? 'Floor' : 'তলা'}</TableCell>
+                          <TableCell align="left" className="text-xs text-text-secondary">{unit.unitType}</TableCell>
+                          <TableCell align="left" className="text-xs text-text-secondary">{unit.bedrooms || 0} Bed · {unit.bathrooms || 0} Bath</TableCell>
+                          <TableCell align="right" className="font-semibold text-text-primary whitespace-nowrap">{formatCurrency(unit.monthlyBaseRent, language)}</TableCell>
+                          <TableCell align="right" className="text-text-secondary whitespace-nowrap">{formatCurrency(unit.defaultServiceFee, language)}</TableCell>
                           <TableCell align="center"><StatusBadge status={unit.status} lang={language} /></TableCell>
                           <TableCell align="right">
                             <div className="flex items-center justify-end gap-1">
-                              <Button size="icon" variant="ghost" onClick={() => handleEditUnit(unit)} className="h-8 w-8 text-[#64748B] hover:text-[#0F172A]" title={t.edit}>
-                                <Edit className="h-3.5 w-3.5" />
+                              <Button size="icon" variant="ghost" onClick={() => handleEditUnit(unit)} className="h-8 w-8 text-text-secondary hover:text-text-primary" title={t.edit}>
+                                <RiEditLine className="h-3.5 w-3.5" />
                               </Button>
-                              <Button size="icon" variant="ghost" onClick={() => handleDeleteUnit(unit.id, unit.unitNumber)} className="h-8 w-8 text-[#DC2626] hover:bg-[#FEF2F2]" title={t.delete}>
-                                <Trash2 className="h-3.5 w-3.5" />
+                              <Button size="icon" variant="ghost" onClick={() => handleDeleteUnit(unit.id, unit.unitNumber)} className="h-8 w-8 text-text-error-primary hover:bg-status-danger-subtle" title={t.delete}>
+                                <RiDeleteBinLine className="h-3.5 w-3.5" />
                               </Button>
                             </div>
                           </TableCell>
@@ -284,14 +316,14 @@ export default function PropertyDetailPage() {
               </div>
 
               {/* Mobile 2-Line Rows Grouped by Floor */}
-              <div className="block md:hidden divide-y divide-[#F1F5F9]">
+              <div className="block md:hidden divide-y divide-separator-border">
                 {Object.entries(unitsByFloor).sort(([a], [b]) => Number(b) - Number(a)).flatMap(([floor, floorUnits]) => [
-                  <div key={`mobile-floor-${floor}`} className="px-4 py-2 bg-[#F8FAFC] border-y border-[#E2E8F0] flex items-center justify-between text-xs font-semibold text-[#475569]">
+                  <div key={`mobile-floor-${floor}`} className="px-4 py-2 bg-background-secondary-default border-y border-separator-border flex items-center justify-between text-xs font-semibold text-text-secondary">
                     <span className="flex items-center gap-1.5">
-                      <Layers className="h-3.5 w-3.5 text-[#059669]" />
+                      <RiStackLine className="h-3.5 w-3.5 text-accent-600" />
                       <span>{isEn ? `Floor ${floor}` : `${floor} তলা`}</span>
                     </span>
-                    <span className="text-[#64748B] font-normal">({floorUnits.length} {t.units})</span>
+                    <span className="text-text-secondary font-normal">({floorUnits.length} {t.units})</span>
                   </div>,
                   ...floorUnits.map((unit) => {
                     const statusLabel = unit.status === 'OCCUPIED' ? t.occupied : (unit.status === 'VACANT' ? t.vacant : unit.status);
@@ -304,19 +336,19 @@ export default function PropertyDetailPage() {
                         showChevron
                         identity={
                           <div className="flex items-center gap-2 min-w-0">
-                            <span className="font-semibold text-sm text-[#0F172A]">Unit {unit.unitNumber}</span>
-                            {unit.unitType && <span className="text-xs text-[#64748B]">· {unit.unitType}</span>}
+                            <span className="font-semibold text-sm text-text-primary">Unit {unit.unitNumber}</span>
+                            {unit.unitType && <span className="text-xs text-text-secondary">· {unit.unitType}</span>}
                           </div>
                         }
                         value={formatCurrency(unit.monthlyBaseRent, language)}
                         stateAndDetail={
                           <>
                             <CompactStatus label={statusLabel} variant={statusVariant} />
-                            <span className="text-slate-300">·</span>
+                            <span className="text-text-tertiary">·</span>
                             <span>{isEn ? `Floor ${unit.floor}` : `${unit.floor} তলা`}</span>
                             {(unit.bedrooms || unit.bathrooms) ? (
                               <>
-                                <span className="text-slate-300">·</span>
+                                <span className="text-text-tertiary">·</span>
                                 <span>{unit.bedrooms || 0}B/{unit.bathrooms || 0}B</span>
                               </>
                             ) : null}
@@ -324,8 +356,8 @@ export default function PropertyDetailPage() {
                         }
                         action={
                           <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                            <Button size="sm" variant="ghost" onClick={() => handleEditUnit(unit)} className="h-10 w-10 p-0 text-[#64748B] hover:text-[#0F172A]">
-                              <Edit className="w-4 h-4" />
+                            <Button size="sm" variant="ghost" onClick={() => handleEditUnit(unit)} className="h-10 w-10 p-0 text-text-secondary hover:text-text-primary">
+                              <RiEditLine className="w-4 h-4" />
                             </Button>
                           </div>
                         }
@@ -336,7 +368,9 @@ export default function PropertyDetailPage() {
               </div>
             </ResponsiveTableContainer>
           ) : (
-            <div className="p-5"><EmptyState icon={Home} title={isEn ? 'No units added' : 'কোনো ইউনিট নেই'} description={isEn ? 'Add your first flat or shop to this building' : 'এই বাড়ির জন্য ফ্ল্যাট বা দোকান যুক্ত করুন'} actionLabel={t.addNewUnit} onAction={handleAddUnit} /></div>
+            <div className="p-5">
+              <EmptyState icon={RiHomeLine} title={isEn ? 'No units added' : 'কোনো ইউনিট নেই'} description={isEn ? 'Add your first flat or shop to this building' : 'এই বাড়ির জন্য ফ্ল্যাট বা দোকান যুক্ত করুন'} actionLabel={t.addNewUnit} onAction={handleAddUnit} />
+            </div>
           )}
         </CardContent>
 
@@ -393,9 +427,9 @@ export default function PropertyDetailPage() {
                     setDetailUnit(null);
                     handleEditUnit(u);
                   }}
-                  className="w-full sm:w-auto bg-[#059669] hover:bg-[#047857] min-h-[44px]"
+                  className="w-full sm:w-auto bg-accent-600 hover:bg-accent-700 min-h-[44px]"
                 >
-                  <Edit className="w-4 h-4 mr-2" />
+                  <RiEditLine className="w-4 h-4 mr-2" />
                   {t.edit}
                 </Button>
                 <Button
@@ -406,9 +440,9 @@ export default function PropertyDetailPage() {
                     setDetailUnit(null);
                     handleDeleteUnit(id, num);
                   }}
-                  className="w-full sm:w-auto min-h-[44px] text-[#DC2626] hover:bg-[#FEF2F2] border-[#FCA5A5]"
+                  className="w-full sm:w-auto min-h-[44px] text-text-error-primary hover:bg-status-danger-subtle border-status-danger-subtle"
                 >
-                  <Trash2 className="w-4 h-4 mr-2" />
+                  <RiDeleteBinLine className="w-4 h-4 mr-2" />
                   {t.delete}
                 </Button>
               </BottomSheetFooter>
@@ -425,5 +459,11 @@ export default function PropertyDetailPage() {
 }
 
 function SummaryMetric({ label, value, detail, accent = false }: { label: string; value: string | number; detail: string; accent?: boolean }) {
-  return <div className="min-w-0 p-5"><p className="truncate text-[13px] font-medium text-[#6B7280]">{label}</p><p className={`mt-2 truncate text-xl font-semibold tracking-tight tabular-nums ${accent ? 'text-[#12664F]' : 'text-[#171717]'}`}>{value}</p><p className="mt-1 truncate text-xs text-[#6B7280]">{detail}</p></div>;
+  return (
+    <div className="min-w-0 p-5">
+      <p className="truncate text-xs font-medium text-text-secondary">{label}</p>
+      <p className={`mt-2 truncate text-xl font-semibold tracking-tight tabular-nums ${accent ? 'text-accent-700' : 'text-text-primary'}`}>{value}</p>
+      <p className="mt-1 truncate text-xs text-text-secondary">{detail}</p>
+    </div>
+  );
 }

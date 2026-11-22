@@ -46,16 +46,15 @@ import { RentNoticeDialog } from '@/components/rents/rent-notice-dialog';
 import { GenerateRentNoticesDialog } from '@/components/rents/generate-rent-notices-dialog';
 import { TenantAvatar } from '@/components/ui/tenant-avatar';
 import {
-  Receipt,
-  Wallet,
-  Sparkles,
-  Search,
-  User,
-  FileText,
-  AlertCircle,
-  Percent,
-  CheckCircle2,
-} from 'lucide-react';
+  RiReceiptLine,
+  RiWallet3Line,
+  RiSparklingLine,
+  RiSearchLine,
+  RiUser3Line,
+  RiFileList3Line,
+  RiErrorWarningLine,
+  RiPercentLine,
+} from '@remixicon/react';
 
 export default function MonthlyRentsPage() {
   const { language } = useLanguageStore();
@@ -177,13 +176,13 @@ export default function MonthlyRentsPage() {
             <Button
               onClick={() => setNoticesDialogOpen(true)}
               variant="outline"
-              className="h-10 gap-2 border-emerald-300 text-emerald-800 hover:bg-emerald-50"
+              className="h-10 gap-2 border-accent-300 text-accent-700 hover:bg-accent-50"
             >
-              <FileText className="w-4 h-4 text-emerald-600" />
+              <RiFileList3Line className="w-4 h-4 text-accent-600" />
               {isEn ? 'Rent Notices' : 'ভাড়ার নোটিশ'}
             </Button>
             <Button onClick={() => setGenerateDialogOpen(true)} variant="default" className="h-10 gap-2">
-              <Sparkles className="w-4 h-4" />
+              <RiSparklingLine className="w-4 h-4" />
               {t.generateMonthlyRent}
             </Button>
           </div>
@@ -194,7 +193,7 @@ export default function MonthlyRentsPage() {
       {isLoading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Card key={i} className="rounded-[10px] border-[#E5E7EB] p-5 shadow-none">
+            <Card key={i} className="rounded-3xl border border-border-button-default bg-background-primary-default p-5">
               <div className="space-y-3">
                 <Skeleton className="h-3.5 w-24" />
                 <Skeleton className="h-7 w-20" />
@@ -209,29 +208,29 @@ export default function MonthlyRentsPage() {
             title={isEn ? 'Total Invoiced' : 'মোট প্রস্তুতকৃত বিল'}
             value={formatCurrency(totalBilled, language)}
             subtitle={`${formatNumber(rents?.length || 0, language)} ${isEn ? 'invoices generated' : 'টি বিল জেনারেট করা'}`}
-            icon={Receipt}
+            icon={RiReceiptLine}
           />
           <StatCard
             title={isEn ? 'Realized Collection' : 'আদায়কৃত ভাড়া'}
             value={formatCurrency(totalCollected, language)}
             subtitle={`${formatNumber(paidCount, language)} ${isEn ? 'invoices fully paid' : 'টি বিল সম্পূর্ণ পরিশোধ'}`}
-            icon={Wallet}
+            icon={RiWallet3Line}
             badge={{
               text: `${formatNumber(collectionRate, language)}%`,
               variant: collectionRate >= 90 ? 'success' : collectionRate >= 70 ? 'info' : 'warning',
             }}
-            valueClassName="text-[#15803D]"
-            iconColor="text-[#15803D]"
-            iconBgColor="bg-emerald-50"
+            valueClassName="text-accent-700"
+            iconColor="text-accent-700"
+            iconBgColor="bg-accent-50"
           />
           <StatCard
             title={isEn ? 'Outstanding Due' : 'বকেয়া বিলের পরিমাণ'}
             value={formatCurrency(totalDue, language)}
             subtitle={`${formatNumber(pendingOrOverdueCount, language)} ${isEn ? 'invoices pending / overdue' : 'টি বিল বকেয়া / মেয়াদোত্তীর্ণ'}`}
-            icon={AlertCircle}
-            iconColor={totalDue > 0 ? 'text-[#DC2626]' : 'text-[#12664F]'}
-            iconBgColor={totalDue > 0 ? 'bg-red-50' : 'bg-[#E8F3EF]'}
-            valueClassName={totalDue > 0 ? 'text-[#DC2626]' : undefined}
+            icon={RiErrorWarningLine}
+            iconColor={totalDue > 0 ? 'text-text-error-primary' : 'text-accent-700'}
+            iconBgColor={totalDue > 0 ? 'bg-status-danger-subtle' : 'bg-accent-50'}
+            valueClassName={totalDue > 0 ? 'text-text-error-primary' : undefined}
             badge={pendingOrOverdueCount > 0 ? {
               text: isEn ? 'Action Needed' : 'পদক্ষেপ নিন',
               variant: 'danger',
@@ -245,7 +244,7 @@ export default function MonthlyRentsPage() {
             title={t.collectionRate}
             value={`${formatNumber(collectionRate, language)}%`}
             subtitle={isEn ? 'Collected vs Total Billed' : 'মোট বিলের বিপরীতে আদায়'}
-            icon={Percent}
+            icon={RiPercentLine}
             badge={collectionRate >= 90 ? {
               text: isEn ? 'On Track' : 'সঠিক পথে',
               variant: 'success',
@@ -257,15 +256,15 @@ export default function MonthlyRentsPage() {
         </div>
       )}
 
-      {/* Filter Bar - Month/Year/Status/Property selectors */}
-      <div className="flex flex-wrap items-center gap-3 bg-white p-3 rounded-[10px] border border-[#E5E7EB] shadow-none">
+      {/* Filter Bar */}
+      <div className="flex flex-wrap items-center gap-3 bg-background-primary-default p-3 rounded-2xl border border-border-button-default">
         {/* Month Selector */}
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-[#6B7280]">{isEn ? 'Month:' : 'মাস:'}</span>
+          <span className="text-xs font-semibold text-text-secondary">{isEn ? 'Month:' : 'মাস:'}</span>
           <select
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(Number(e.target.value))}
-            className="h-9 rounded-lg border border-[#E5E7EB] bg-white px-3 text-xs font-semibold text-[#374151] outline-none"
+            className="h-9 rounded-lg border border-border-button-default bg-background-primary-default px-3 text-xs font-semibold text-text-primary outline-none"
           >
             {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
               <option key={m} value={m}>
@@ -277,11 +276,11 @@ export default function MonthlyRentsPage() {
 
         {/* Year Selector */}
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-[#6B7280]">{isEn ? 'Year:' : 'সাল:'}</span>
+          <span className="text-xs font-semibold text-text-secondary">{isEn ? 'Year:' : 'সাল:'}</span>
           <select
             value={selectedYear}
             onChange={(e) => setSelectedYear(Number(e.target.value))}
-            className="h-9 rounded-lg border border-[#E5E7EB] bg-white px-3 text-xs font-semibold text-[#374151] outline-none"
+            className="h-9 rounded-lg border border-border-button-default bg-background-primary-default px-3 text-xs font-semibold text-text-primary outline-none"
           >
             {Array.from(new Set([2024, 2025, 2026, 2027, defaultPeriod.year, selectedYear])).sort((a, b) => a - b).map((y) => (
               <option key={y} value={y}>
@@ -293,18 +292,18 @@ export default function MonthlyRentsPage() {
 
         {/* Default / Previous Month Indicator */}
         {selectedYear === defaultPeriod.year && selectedMonth === defaultPeriod.month && (
-          <span className="text-[11px] bg-[#E8F3EF] text-[#12664F] font-semibold px-2.5 py-1 rounded-full border border-[#CDE4DA]">
+          <span className="text-[11px] bg-accent-50 text-accent-700 font-semibold px-2.5 py-1 rounded-full border border-accent-200">
             {t.previousMonth}
           </span>
         )}
 
         {/* Status Selector */}
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-[#6B7280]">{t.status}:</span>
+          <span className="text-xs font-semibold text-text-secondary">{t.status}:</span>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="h-9 rounded-lg border border-[#E5E7EB] bg-white px-3 text-xs font-semibold text-[#374151] outline-none"
+            className="h-9 rounded-lg border border-border-button-default bg-background-primary-default px-3 text-xs font-semibold text-text-primary outline-none"
           >
             <option value="">{t.all}</option>
             <option value="PENDING">{isEn ? 'Pending' : 'অপেক্ষমান (Pending)'}</option>
@@ -316,11 +315,11 @@ export default function MonthlyRentsPage() {
 
         {/* Property Selector */}
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-[#6B7280]">{t.properties}:</span>
+          <span className="text-xs font-semibold text-text-secondary">{t.properties}:</span>
           <select
             value={propertyFilter}
             onChange={(e) => setPropertyFilter(e.target.value)}
-            className="h-9 rounded-lg border border-[#E5E7EB] bg-white px-3 text-xs font-semibold text-[#374151] outline-none max-w-[180px]"
+            className="h-9 rounded-lg border border-border-button-default bg-background-primary-default px-3 text-xs font-semibold text-text-primary outline-none max-w-[180px]"
           >
             <option value="">{isEn ? 'All Properties' : 'সকল বাড়ি'}</option>
             {properties?.map((p) => (
@@ -335,10 +334,10 @@ export default function MonthlyRentsPage() {
       {/* Search Bar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full sm:max-w-sm">
-          <Search className="absolute left-3.5 top-3 h-4 w-4 text-[#9CA3AF]" />
+          <RiSearchLine className="absolute left-3.5 top-3 h-4 w-4 text-text-placeholder" />
           <Input placeholder={isEn ? 'Search tenant, unit, or property' : 'ভাড়াটিয়া, ইউনিট বা বাড়ি খুঁজুন'} value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
         </div>
-        <p className="text-xs text-[#6B7280]">{rents ? `${rents.length} ${isEn ? 'invoices' : 'টি বিল'}` : ''}</p>
+        <p className="text-xs text-text-secondary">{rents ? `${rents.length} ${isEn ? 'invoices' : 'টি বিল'}` : ''}</p>
       </div>
 
       {/* Rents Responsive Table Container */}
@@ -401,10 +400,10 @@ export default function MonthlyRentsPage() {
                           ariaLabel={isEn ? 'View tenant profile' : 'ভাড়াটিয়ার প্রোফাইল দেখুন'}
                         />
                         <div className="min-w-0 max-w-[160px]">
-                          <p className="truncate font-medium text-[#0F172A] text-sm" title={rent.agreement?.tenant?.name || 'Tenant'}>
+                          <p className="truncate font-medium text-text-primary text-sm" title={rent.agreement?.tenant?.name || 'Tenant'}>
                             {rent.agreement?.tenant?.name || 'Tenant'}
                           </p>
-                          <p className="truncate text-xs text-[#64748B]" title={rent.agreement?.tenant?.phone || ''}>
+                          <p className="truncate text-xs text-text-secondary" title={rent.agreement?.tenant?.phone || ''}>
                             {rent.agreement?.tenant?.phone || '—'}
                           </p>
                         </div>
@@ -412,32 +411,32 @@ export default function MonthlyRentsPage() {
                     </TableCell>
                     <TableCell className="min-w-[110px]">
                       <div className="min-w-0">
-                        <span className="font-semibold text-[#1E293B] block">
+                        <span className="font-semibold text-text-primary block">
                           {rent.agreement?.unit?.unitNumber || '—'}
                         </span>
                         {(!propertyFilter && (properties?.length || 0) > 1) && rent.agreement?.unit?.property?.name && (
-                          <span className="block text-xs text-[#64748B] truncate max-w-[120px]" title={rent.agreement.unit.property.name}>
+                          <span className="block text-xs text-text-secondary truncate max-w-[120px]" title={rent.agreement.unit.property.name}>
                             {rent.agreement.unit.property.name}
                           </span>
                         )}
                       </div>
                     </TableCell>
-                    <TableCell align="right" className="text-[#334155] whitespace-nowrap">
+                    <TableCell align="right" className="text-text-secondary whitespace-nowrap">
                       {formatCurrency(rent.rent, language)}
                     </TableCell>
-                    <TableCell align="right" className="text-[#64748B] whitespace-nowrap">
+                    <TableCell align="right" className="text-text-secondary whitespace-nowrap">
                       {formatCurrency(rent.serviceFee, language)}
                     </TableCell>
-                    <TableCell align="right" className="font-semibold text-[#0F172A] whitespace-nowrap">
+                    <TableCell align="right" className="font-semibold text-text-primary whitespace-nowrap">
                       {formatCurrency(rent.totalAmount, language)}
                     </TableCell>
-                    <TableCell align="right" className="text-[#059669] font-medium whitespace-nowrap">
+                    <TableCell align="right" className="text-accent-600 font-medium whitespace-nowrap">
                       {formatCurrency(rent.paidAmount, language)}
                     </TableCell>
-                    <TableCell align="right" className="text-[#DC2626] font-medium whitespace-nowrap">
+                    <TableCell align="right" className="text-text-error-primary font-medium whitespace-nowrap">
                       {formatCurrency(rent.remainingAmount, language)}
                     </TableCell>
-                    <TableCell align="left" className="text-xs text-[#64748B] whitespace-nowrap">
+                    <TableCell align="left" className="text-xs text-text-secondary whitespace-nowrap">
                       {rent.dueDate ? formatBnDate(rent.dueDate, language) : '—'}
                     </TableCell>
                     <TableCell align="center">
@@ -457,9 +456,9 @@ export default function MonthlyRentsPage() {
                                 onClick={() => handleOpenReceipt(rent)}
                                 disabled={loadingReceiptRentId === rent.id}
                                 title={isEn ? 'View Rent Receipt' : 'ভাড়ার রশিদ দেখুন'}
-                                className="h-8 gap-1.5 text-xs px-2.5 rounded-lg border-emerald-200 text-emerald-800 hover:text-emerald-900 hover:bg-emerald-50 cursor-pointer"
+                                className="h-8 gap-1.5 text-xs px-2.5 rounded-lg border-accent-200 text-accent-700 hover:text-accent-800 hover:bg-accent-50 cursor-pointer"
                               >
-                                <Receipt className="w-3.5 h-3.5 text-emerald-600" />
+                                <RiReceiptLine className="w-3.5 h-3.5 text-accent-600" />
                                 <span>{t.receipt || (isEn ? 'Receipt' : 'রশিদ')}</span>
                               </Button>
                             ) : isPartial ? (
@@ -470,9 +469,9 @@ export default function MonthlyRentsPage() {
                                   onClick={() => handleOpenReceipt(rent)}
                                   disabled={loadingReceiptRentId === rent.id}
                                   title={isEn ? 'View Rent Receipt' : 'ভাড়ার রশিদ দেখুন'}
-                                  className="h-8 gap-1 text-xs px-2 rounded-lg border-emerald-200 text-emerald-800 hover:text-emerald-900 hover:bg-emerald-50 cursor-pointer"
+                                  className="h-8 gap-1 text-xs px-2 rounded-lg border-accent-200 text-accent-700 hover:text-accent-800 hover:bg-accent-50 cursor-pointer"
                                 >
-                                  <Receipt className="w-3.5 h-3.5 text-emerald-600" />
+                                  <RiReceiptLine className="w-3.5 h-3.5 text-accent-600" />
                                   <span>{t.receipt || (isEn ? 'Receipt' : 'রশিদ')}</span>
                                 </Button>
                                 <Button
@@ -480,9 +479,9 @@ export default function MonthlyRentsPage() {
                                   variant="ghost"
                                   onClick={() => handleOpenNotice(rent)}
                                   title={isEn ? 'View Rent Notice' : 'ভাড়ার নোটিশ দেখুন'}
-                                  className="h-8 w-8 p-0 text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 cursor-pointer"
+                                  className="h-8 w-8 p-0 text-text-secondary hover:text-accent-700 hover:bg-accent-50 cursor-pointer"
                                 >
-                                  <FileText className="w-4 h-4" />
+                                  <RiFileList3Line className="w-4 h-4" />
                                 </Button>
                               </>
                             ) : (
@@ -491,9 +490,9 @@ export default function MonthlyRentsPage() {
                                 variant="ghost"
                                 onClick={() => handleOpenNotice(rent)}
                                 title={isEn ? 'View Rent Notice' : 'ভাড়ার নোটিশ দেখুন'}
-                                className="h-8 w-8 p-0 text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 cursor-pointer"
+                                className="h-8 w-8 p-0 text-text-secondary hover:text-accent-700 hover:bg-accent-50 cursor-pointer"
                               >
-                                <FileText className="w-4 h-4" />
+                                <RiFileList3Line className="w-4 h-4" />
                               </Button>
                             )}
                             {rent.status !== 'PAID' && rent.remainingAmount > 0 ? (
@@ -501,13 +500,13 @@ export default function MonthlyRentsPage() {
                                 size="sm"
                                 variant="default"
                                 onClick={() => handleOpenPayment(rent)}
-                                className="h-8 gap-1.5 text-xs bg-[#059669] hover:bg-[#047857] px-2.5 cursor-pointer"
+                                className="h-8 gap-1.5 text-xs bg-accent-600 hover:bg-accent-700 text-white px-2.5 cursor-pointer"
                               >
-                                <Wallet className="w-3.5 h-3.5" />
+                                <RiWallet3Line className="w-3.5 h-3.5" />
                                 <span>{t.collectPayment}</span>
                               </Button>
                             ) : (
-                              <span className="text-xs font-semibold text-[#059669] inline-flex items-center gap-1 px-1">
+                              <span className="text-xs font-semibold text-accent-600 inline-flex items-center gap-1 px-1">
                                 {isEn ? 'Completed' : 'সম্পূর্ণ'}
                               </span>
                             )}
@@ -522,7 +521,7 @@ export default function MonthlyRentsPage() {
           </div>
 
           {/* Mobile 2-Line Row Representation */}
-          <div className="block md:hidden divide-y divide-[#F1F5F9]">
+          <div className="block md:hidden divide-y divide-separator-border">
             {rents.map((rent) => {
               const statusVariant =
                 rent.status === 'PAID'
@@ -554,7 +553,7 @@ export default function MonthlyRentsPage() {
                         name={rent.agreement?.tenant?.name || 'Tenant'}
                         size="sm"
                       />
-                      <span className="font-semibold text-sm text-[#0F172A] truncate">
+                      <span className="font-semibold text-sm text-text-primary truncate">
                         {rent.agreement?.tenant?.name || 'Tenant'}
                       </span>
                     </div>
@@ -563,13 +562,13 @@ export default function MonthlyRentsPage() {
                   stateAndDetail={
                     <>
                       <CompactStatus label={statusLabel} variant={statusVariant} />
-                      <span className="text-slate-300">·</span>
+                      <span className="text-text-tertiary">·</span>
                       {rent.agreement?.unit?.unitNumber && (
                         <span>Unit {rent.agreement.unit.unitNumber}</span>
                       )}
                       {rent.dueDate && (
                         <>
-                          <span className="text-slate-300">·</span>
+                          <span className="text-text-tertiary">·</span>
                           <span>{isEn ? `Due ${formatBnDate(rent.dueDate, language)}` : `পরিশোধ ${formatBnDate(rent.dueDate, language)}`}</span>
                         </>
                       )}
@@ -584,9 +583,9 @@ export default function MonthlyRentsPage() {
                           e.stopPropagation();
                           handleOpenPayment(rent);
                         }}
-                        className="h-8 min-h-[40px] px-2.5 text-xs bg-[#059669] hover:bg-[#047857] gap-1"
+                        className="h-8 min-h-[40px] px-2.5 text-xs bg-accent-600 hover:bg-accent-700 text-white gap-1"
                       >
-                        <Wallet className="w-3.5 h-3.5" />
+                        <RiWallet3Line className="w-3.5 h-3.5" />
                         <span>{t.collectPayment}</span>
                       </Button>
                     ) : null
@@ -597,10 +596,10 @@ export default function MonthlyRentsPage() {
           </div>
         </ResponsiveTableContainer>
       ) : (
-        <Card className="rounded-[10px] border-[#E2E8F0] shadow-none">
+        <Card className="rounded-3xl border border-border-button-default bg-background-primary-default">
           <CardContent className="p-0">
             <EmptyState
-              icon={Receipt}
+              icon={RiReceiptLine}
               title={isEn ? 'No Rent Invoices Found' : 'এই মাসের কোনো ভাড়ার বিল তৈরি হয়নি'}
               description={
                 isEn
@@ -689,9 +688,9 @@ export default function MonthlyRentsPage() {
                         setDetailRent(null);
                         handleOpenReceipt(r);
                       }}
-                      className="w-full sm:w-auto min-h-[44px] text-emerald-800 border-emerald-200 hover:bg-emerald-50 cursor-pointer"
+                      className="w-full sm:w-auto min-h-[44px] text-accent-700 border-accent-200 hover:bg-accent-50 cursor-pointer"
                     >
-                      <Receipt className="w-4 h-4 mr-2 text-emerald-600" />
+                      <RiReceiptLine className="w-4 h-4 mr-2 text-accent-600" />
                       {t.receipt || (isEn ? 'Rent Receipt' : 'ভাড়ার রশিদ')}
                     </Button>
                   );
@@ -707,9 +706,9 @@ export default function MonthlyRentsPage() {
                           setDetailRent(null);
                           handleOpenReceipt(r);
                         }}
-                        className="w-full sm:w-auto min-h-[44px] text-emerald-800 border-emerald-200 hover:bg-emerald-50 cursor-pointer"
+                        className="w-full sm:w-auto min-h-[44px] text-accent-700 border-accent-200 hover:bg-accent-50 cursor-pointer"
                       >
-                        <Receipt className="w-4 h-4 mr-2 text-emerald-600" />
+                        <RiReceiptLine className="w-4 h-4 mr-2 text-accent-600" />
                         {t.receipt || (isEn ? 'Rent Receipt' : 'ভাড়ার রশিদ')}
                       </Button>
                       <Button
@@ -721,7 +720,7 @@ export default function MonthlyRentsPage() {
                         }}
                         className="w-full sm:w-auto min-h-[44px] cursor-pointer"
                       >
-                        <FileText className="w-4 h-4 mr-2 text-slate-600" />
+                        <RiFileList3Line className="w-4 h-4 mr-2 text-text-secondary" />
                         {isEn ? 'Rent Notice' : 'ভাড়ার নোটিশ'}
                       </Button>
                     </>
@@ -738,7 +737,7 @@ export default function MonthlyRentsPage() {
                     }}
                     className="w-full sm:w-auto min-h-[44px] cursor-pointer"
                   >
-                    <FileText className="w-4 h-4 mr-2 text-emerald-600" />
+                    <RiFileList3Line className="w-4 h-4 mr-2 text-accent-600" />
                     {isEn ? 'Rent Notice' : 'ভাড়ার নোটিশ'}
                   </Button>
                 );
@@ -750,9 +749,9 @@ export default function MonthlyRentsPage() {
                     setDetailRent(null);
                     handleOpenPayment(r);
                   }}
-                  className="w-full sm:w-auto bg-[#059669] hover:bg-[#047857] min-h-[44px]"
+                  className="w-full sm:w-auto bg-accent-600 hover:bg-accent-700 min-h-[44px] text-white"
                 >
-                  <Wallet className="w-4 h-4 mr-2" />
+                  <RiWallet3Line className="w-4 h-4 mr-2" />
                   {t.collectPayment}
                 </Button>
               )}
@@ -764,7 +763,7 @@ export default function MonthlyRentsPage() {
                   }}
                   className="w-full sm:w-auto min-h-[44px]"
                 >
-                  <User className="w-4 h-4 mr-2" />
+                  <RiUser3Line className="w-4 h-4 mr-2" />
                   {isEn ? 'View Tenant' : 'প্রোফাইল দেখুন'}
                 </Button>
               )}

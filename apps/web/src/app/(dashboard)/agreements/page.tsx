@@ -44,16 +44,16 @@ import {
 import { AgreementFormDialog } from '@/components/agreements/agreement-form-dialog';
 import { TenantAvatar } from '@/components/ui/tenant-avatar';
 import {
-  FileText,
-  Search,
-  Plus,
-  Ban,
-  Edit,
-  ExternalLink,
-  User,
-  Wallet,
-  AlertCircle,
-} from 'lucide-react';
+  RiFileList3Line,
+  RiSearchLine,
+  RiAddLine,
+  RiForbidLine,
+  RiEditLine,
+  RiExternalLinkLine,
+  RiUser3Line,
+  RiWallet3Line,
+  RiErrorWarningLine,
+} from '@remixicon/react';
 
 export default function AgreementsPage() {
   const { language } = useLanguageStore();
@@ -176,7 +176,7 @@ export default function AgreementsPage() {
         description={isEn ? 'Manage active and ended tenant leases' : 'ভাড়াটিয়া ও ফ্ল্যাটের সক্রিয় এবং পূর্ববর্তী চুক্তিসমূহ'}
         action={
           <Button onClick={handleOpenCreateAgreement} variant="default" className="h-10 gap-2">
-            <Plus className="w-4 h-4" />
+            <RiAddLine className="w-4 h-4" />
             {t.addNewAgreement}
           </Button>
         }
@@ -186,7 +186,7 @@ export default function AgreementsPage() {
       {isLoading ? (
         <div className="grid gap-4 sm:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i} className="rounded-[10px] border-[#E5E7EB] p-5 shadow-none">
+            <Card key={i} className="rounded-3xl border border-border-button-default bg-background-primary-default p-5">
               <div className="space-y-3">
                 <Skeleton className="h-3.5 w-24" />
                 <Skeleton className="h-7 w-20" />
@@ -201,7 +201,7 @@ export default function AgreementsPage() {
             title={isEn ? 'Active Leases' : 'সক্রিয় ভাড়া চুক্তি'}
             value={formatNumber(agreementStats.activeCount, language)}
             subtitle={isEn ? 'Currently contracted units' : 'বর্তমানে চুক্তিবদ্ধ ইউনিট'}
-            icon={FileText}
+            icon={RiFileList3Line}
             badge={{
               text: isEn ? 'Active' : 'সক্রিয়',
               variant: 'success',
@@ -212,18 +212,18 @@ export default function AgreementsPage() {
             title={isEn ? 'Monthly Committed Rent' : 'মাসিক নিয়মিত চুক্তি মূল্য'}
             value={formatCurrency(agreementStats.totalCommittedRent, language)}
             subtitle={isEn ? 'Base rent + service fees contracted' : 'মূল ভাড়া এবং সার্ভিস ফি মোট'}
-            icon={Wallet}
-            valueClassName="text-[#12664F]"
-            iconColor="text-[#12664F]"
-            iconBgColor="bg-[#E8F3EF]"
+            icon={RiWallet3Line}
+            valueClassName="text-accent-700"
+            iconColor="text-accent-700"
+            iconBgColor="bg-accent-50"
           />
           <StatCard
             title={isEn ? 'Expiring in 30 Days' : '৩০ দিনের মধ্যে মেয়াদ শেষ'}
             value={formatNumber(agreementStats.expiringSoon, language)}
             subtitle={isEn ? 'Leases requiring renewal notice' : 'নবায়ন নোটিশ প্রয়োজন এমন চুক্তি'}
-            icon={AlertCircle}
-            iconColor={agreementStats.expiringSoon > 0 ? 'text-[#B45309]' : 'text-[#6B7280]'}
-            iconBgColor={agreementStats.expiringSoon > 0 ? 'bg-amber-50' : 'bg-gray-50'}
+            icon={RiErrorWarningLine}
+            iconColor={agreementStats.expiringSoon > 0 ? 'text-status-warning-foreground' : 'text-text-secondary'}
+            iconBgColor={agreementStats.expiringSoon > 0 ? 'bg-status-warning-subtle' : 'bg-background-secondary-default'}
             badge={agreementStats.expiringSoon > 0 ? {
               text: isEn ? 'Needs Review' : 'পর্যালোচনা প্রয়োজন',
               variant: 'warning',
@@ -265,10 +265,10 @@ export default function AgreementsPage() {
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full sm:max-w-sm">
-          <Search className="absolute left-3.5 top-3 h-4 w-4 text-[#9CA3AF]" />
+          <RiSearchLine className="absolute left-3.5 top-3 h-4 w-4 text-text-placeholder" />
           <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={isEn ? 'Search tenant, phone, unit, or property' : 'ভাড়াটিয়া, ফোন, ইউনিট বা বাড়ি খুঁজুন'} className="pl-10" />
         </div>
-        <p className="text-xs text-[#6B7280]">{visibleAgreements.length} {isEn ? 'agreements' : 'টি চুক্তি'}</p>
+        <p className="text-xs text-text-secondary">{visibleAgreements.length} {isEn ? 'agreements' : 'টি চুক্তি'}</p>
       </div>
 
       {/* Responsive Agreements Table */}
@@ -329,10 +329,10 @@ export default function AgreementsPage() {
                           ariaLabel={isEn ? 'View tenant profile' : 'ভাড়াটিয়ার প্রোফাইল দেখুন'}
                         />
                         <div className="min-w-0 max-w-[160px]">
-                          <p className="truncate font-medium text-[#0F172A] text-sm" title={agr.tenant?.name || 'Tenant'}>
+                          <p className="truncate font-medium text-text-primary text-sm" title={agr.tenant?.name || 'Tenant'}>
                             {agr.tenant?.name || 'Tenant'}
                           </p>
-                          <p className="truncate text-xs text-[#64748B]" title={agr.tenant?.phone || ''}>
+                          <p className="truncate text-xs text-text-secondary" title={agr.tenant?.phone || ''}>
                             {agr.tenant?.phone || '—'}
                           </p>
                         </div>
@@ -340,29 +340,29 @@ export default function AgreementsPage() {
                     </TableCell>
                     <TableCell className="min-w-[110px]">
                       <div className="min-w-0">
-                        <span className="font-semibold text-[#1E293B] block">
+                        <span className="font-semibold text-text-primary block">
                           {agr.unit?.unitNumber || '—'}
                         </span>
                         {!isSingleProperty && agr.unit?.property?.name && (
-                          <span className="block text-xs text-[#64748B] truncate max-w-[120px]" title={agr.unit.property.name}>
+                          <span className="block text-xs text-text-secondary truncate max-w-[120px]" title={agr.unit.property.name}>
                             {agr.unit.property.name}
                           </span>
                         )}
                       </div>
                     </TableCell>
-                    <TableCell align="right" className="font-semibold text-[#0F172A] whitespace-nowrap">
+                    <TableCell align="right" className="font-semibold text-text-primary whitespace-nowrap">
                       {formatCurrency(agr.monthlyRent, language)}
                     </TableCell>
-                    <TableCell align="right" className="text-[#64748B] whitespace-nowrap">
+                    <TableCell align="right" className="text-text-secondary whitespace-nowrap">
                       {formatCurrency(agr.serviceFee, language)}
                     </TableCell>
-                    <TableCell align="right" className="text-[#059669] font-medium whitespace-nowrap">
+                    <TableCell align="right" className="text-accent-600 font-medium whitespace-nowrap">
                       {formatCurrency(agr.securityDeposit, language)}
                     </TableCell>
-                    <TableCell align="right" className="text-[#334155] font-medium text-xs whitespace-nowrap">
+                    <TableCell align="right" className="text-text-secondary font-medium text-xs whitespace-nowrap">
                       {isEn ? `Day ${agr.dueDay}` : `প্রতি মাসের ${agr.dueDay} তারিখ`}
                     </TableCell>
-                    <TableCell align="left" className="text-xs text-[#64748B] whitespace-nowrap">
+                    <TableCell align="left" className="text-xs text-text-secondary whitespace-nowrap">
                       {formatBnDate(agr.startDate, language)}
                     </TableCell>
                     <TableCell align="center">
@@ -372,27 +372,27 @@ export default function AgreementsPage() {
                       <div className="flex items-center justify-end gap-1">
                         <Link href={`/tenants/${agr.tenant?.id}`}>
                           <Button size="sm" variant="outline" className="h-8 gap-1.5 whitespace-nowrap text-xs px-2.5">
-                            {isEn ? 'Profile' : 'প্রোফাইল'}<ExternalLink className="h-3.5 w-3.5" />
+                            {isEn ? 'Profile' : 'প্রোফাইল'}<RiExternalLinkLine className="h-3.5 w-3.5" />
                           </Button>
                         </Link>
                         <Button
                           size="icon"
                           variant="ghost"
                           onClick={() => handleEditAgreement(agr)}
-                          className="h-8 w-8 text-[#64748B] hover:text-[#0F172A]"
+                          className="h-8 w-8 text-text-secondary hover:text-text-primary"
                           title={t.edit}
                         >
-                          <Edit className="w-3.5 h-3.5" />
+                          <RiEditLine className="w-3.5 h-3.5" />
                         </Button>
                         {agr.status === 'ACTIVE' && (
                           <Button
                             size="icon"
                             variant="ghost"
                             onClick={() => handleEndAgreement(agr.id, agr.tenant?.name || 'tenant')}
-                            className="h-8 w-8 text-[#DC2626] hover:bg-[#FEF2F2]"
+                            className="h-8 w-8 text-text-error-primary hover:bg-status-danger-subtle"
                             title={t.endAgreement}
                           >
-                            <Ban className="w-3.5 h-3.5" />
+                            <RiForbidLine className="w-3.5 h-3.5" />
                           </Button>
                         )}
                       </div>
@@ -404,7 +404,7 @@ export default function AgreementsPage() {
           </div>
 
           {/* Mobile 2-Line Rows */}
-          <div className="block md:hidden divide-y divide-[#F1F5F9]">
+          <div className="block md:hidden divide-y divide-separator-border">
             {visibleAgreements.map((agr) => {
               const isActive = agr.status === 'ACTIVE';
               return (
@@ -419,7 +419,7 @@ export default function AgreementsPage() {
                         name={agr.tenant?.name || 'Tenant'}
                         size="sm"
                       />
-                      <span className="truncate font-semibold text-sm text-[#0F172A]">
+                      <span className="truncate font-semibold text-sm text-text-primary">
                         {agr.tenant?.name || 'Tenant'}
                       </span>
                     </div>
@@ -431,11 +431,11 @@ export default function AgreementsPage() {
                         label={isActive ? (isEn ? 'Active' : 'সক্রিয়') : (isEn ? 'Ended' : 'সমাপ্ত')}
                         variant={isActive ? 'success' : 'neutral'}
                       />
-                      <span className="text-slate-300">·</span>
+                      <span className="text-text-tertiary">·</span>
                       <span>Unit {agr.unit?.unitNumber || '—'}</span>
                       {!isSingleProperty && agr.unit?.property?.name && (
                         <>
-                          <span className="text-slate-300">·</span>
+                          <span className="text-text-tertiary">·</span>
                           <span className="truncate max-w-[120px]">{agr.unit.property.name}</span>
                         </>
                       )}
@@ -447,10 +447,10 @@ export default function AgreementsPage() {
                         size="sm"
                         variant="ghost"
                         onClick={() => handleEditAgreement(agr)}
-                        className="h-10 w-10 p-0 text-[#64748B] hover:text-[#0F172A]"
+                        className="h-10 w-10 p-0 text-text-secondary hover:text-text-primary"
                         title={t.edit}
                       >
-                        <Edit className="w-4 h-4" />
+                        <RiEditLine className="w-4 h-4" />
                       </Button>
                     </div>
                   }
@@ -460,10 +460,10 @@ export default function AgreementsPage() {
           </div>
         </ResponsiveTableContainer>
       ) : (
-        <Card className="rounded-[10px] border-[#E2E8F0] shadow-none">
+        <Card className="rounded-3xl border border-border-button-default bg-background-primary-default">
           <CardContent className="p-0">
             <EmptyState
-              icon={FileText}
+              icon={RiFileList3Line}
               title={isEn ? 'No Agreements Found' : 'কোনো চুক্তি পাওয়া যায়নি'}
               description={isEn ? 'Create a rental agreement to assign a tenant to a unit' : 'ফ্ল্যাটে ভাড়াটিয়া তোলার জন্য নতুন চুক্তি করুন'}
               actionLabel={t.addNewAgreement}
@@ -541,7 +541,7 @@ export default function AgreementsPage() {
                   }}
                   className="w-full sm:w-auto min-h-[44px]"
                 >
-                  <User className="w-4 h-4 mr-2" />
+                  <RiUser3Line className="w-4 h-4 mr-2" />
                   {isEn ? 'View Profile' : 'প্রোফাইল দেখুন'}
                 </Button>
               )}
@@ -551,9 +551,9 @@ export default function AgreementsPage() {
                   setDetailAgreement(null);
                   handleEditAgreement(agr);
                 }}
-                className="w-full sm:w-auto bg-[#059669] hover:bg-[#047857] min-h-[44px]"
+                className="w-full sm:w-auto bg-accent-600 hover:bg-accent-700 min-h-[44px]"
               >
-                <Edit className="w-4 h-4 mr-2" />
+                <RiEditLine className="w-4 h-4 mr-2" />
                 {t.edit}
               </Button>
               {detailAgreement.status === 'ACTIVE' && (
@@ -565,9 +565,9 @@ export default function AgreementsPage() {
                     setDetailAgreement(null);
                     handleEndAgreement(id, name);
                   }}
-                  className="w-full sm:w-auto min-h-[44px] text-[#DC2626] hover:bg-[#FEF2F2] border-[#FCA5A5]"
+                  className="w-full sm:w-auto min-h-[44px] text-text-error-primary hover:bg-status-danger-subtle border-status-danger-subtle"
                 >
-                  <Ban className="w-4 h-4 mr-2" />
+                  <RiForbidLine className="w-4 h-4 mr-2" />
                   {t.endAgreement}
                 </Button>
               )}
