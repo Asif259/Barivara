@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter, Noto_Sans_Bengali, Noto_Serif_Bengali } from 'next/font/google';
+import '@/styles/globals.css';
 import './globals.css';
 import { Providers } from './providers';
 
@@ -43,8 +44,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${notoSansBengali.variable} ${notoSerifBengali.variable}`}>
-      <body className="min-h-screen bg-slate-50 text-slate-900 antialiased selection:bg-emerald-500 selection:text-white" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${notoSansBengali.variable} ${notoSerifBengali.variable} h-full antialiased`}>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{if(localStorage.getItem('boardui:theme')==='dark'){document.documentElement.classList.add('dark');}}catch(e){}})();`,
+          }}
+        />
+      </head>
+      <body className="min-h-screen bg-background-primary-default text-text-primary antialiased selection:bg-emerald-500 selection:text-white" suppressHydrationWarning>
         <Providers>{children}</Providers>
       </body>
     </html>
