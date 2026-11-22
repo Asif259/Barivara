@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useFileDownloadUrl } from '@/hooks/use-file-download-url';
+import { cx } from '@/utils/cx';
 
 interface TenantAvatarProps {
   profilePictureId: string | undefined | null;
@@ -13,9 +14,9 @@ interface TenantAvatarProps {
 }
 
 const sizeClasses = {
-  sm: 'h-7 w-7 text-xs',
-  md: 'h-9 w-9 text-sm',
-  lg: 'h-12 w-12 text-base',
+  sm: 'size-7 text-caption-1-semibold',
+  md: 'size-9 text-body-medium',
+  lg: 'size-12 text-headline-medium',
 };
 
 export function TenantAvatar({ profilePictureId, name, size = 'md', onClick, disabled, ariaLabel }: TenantAvatarProps) {
@@ -31,13 +32,17 @@ export function TenantAvatar({ profilePictureId, name, size = 'md', onClick, dis
 
   return (
     <button
+      type="button"
       onClick={handleClick}
       disabled={disabled || isLoading || !imageUrl}
-      className={`flex shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[#CDE4DA] bg-[#E8F3EF] font-semibold text-[#12664F] disabled:cursor-default ${sizeClasses[size]}`}
+      className={cx(
+        'flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-border-button-default bg-background-secondary-default font-semibold text-text-primary disabled:cursor-default transition-transform hover:scale-105 active:scale-95',
+        sizeClasses[size]
+      )}
       aria-label={ariaLabel}
     >
       {isLoading ? (
-        <div className="h-5 w-5 animate-pulse rounded bg-[#CDE4DA]" />
+        <div className="size-full animate-pulse bg-background-secondary-hover" />
       ) : imageUrl ? (
         // eslint-disable-next-line @next/next/no-img-element -- Dynamic presigned Supabase storage URL
         <img src={imageUrl} alt={name} className="h-full w-full object-cover" />

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { cn } from "@/lib/utils";
+import { cx } from "@/utils/cx";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const EMPTY_VALUE = "—";
@@ -11,14 +11,14 @@ interface TableProps extends React.HTMLAttributes<HTMLTableElement> {
 const Table = React.forwardRef<HTMLTableElement, TableProps>(
   ({ className, containerClassName, ...props }, ref) => (
     <div
-      className={cn(
-        "table-container relative w-full overflow-x-auto rounded-lg border border-[#E2E8F0] bg-white shadow-none",
+      className={cx(
+        "table-container relative w-full overflow-x-auto rounded-2xl border border-border-table bg-background-primary-default shadow-xs",
         containerClassName
       )}
     >
       <table
         ref={ref}
-        className={cn("w-full caption-bottom text-sm data-table", className)}
+        className={cx("w-full caption-bottom text-body-medium data-table text-text-primary", className)}
         {...props}
       />
     </div>
@@ -32,8 +32,8 @@ const TableHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <thead
     ref={ref}
-    className={cn(
-      "bg-[#FAFAF9] border-b border-[#E2E8F0] text-xs font-semibold text-[#64748B]",
+    className={cx(
+      "bg-background-secondary-default border-b border-border-table text-caption-1-semibold text-text-secondary",
       className
     )}
     {...props}
@@ -47,7 +47,7 @@ const TableBody = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <tbody
     ref={ref}
-    className={cn("[&_tr:last-child]:border-0 divide-y divide-[#F1F5F9]", className)}
+    className={cx("[&_tr:last-child]:border-0 divide-y divide-border-separator-border", className)}
     {...props}
   />
 ));
@@ -59,8 +59,8 @@ const TableFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <tfoot
     ref={ref}
-    className={cn(
-      "border-t border-[#E2E8F0] bg-[#FAFAF9] font-medium [&>tr]:last:border-b-0",
+    className={cx(
+      "border-t border-border-table bg-background-secondary-default font-medium text-text-primary",
       className
     )}
     {...props}
@@ -74,8 +74,8 @@ const TableRow = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <tr
     ref={ref}
-    className={cn(
-      "h-[46px] border-b border-[#F1F5F9] transition-colors hover:bg-[#F8FAFC] data-[state=selected]:bg-[#F1F5F9]",
+    className={cx(
+      "border-b border-border-separator-border transition-colors hover:bg-background-secondary-hover data-[state=selected]:bg-background-secondary-default",
       className
     )}
     {...props}
@@ -83,61 +83,31 @@ const TableRow = React.forwardRef<
 ));
 TableRow.displayName = "TableRow";
 
-interface TableHeadProps extends React.ThHTMLAttributes<HTMLTableCellElement> {
-  align?: "left" | "center" | "right";
-}
-
-const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
-  ({ className, align = "left", ...props }, ref) => (
-    <th
-      ref={ref}
-      className={cn(
-        "h-10 px-3.5 py-2 align-middle text-xs font-semibold text-[#64748B] whitespace-nowrap leading-tight",
-        align === "left" && "text-left",
-        align === "center" && "text-center",
-        align === "right" && "text-right",
-        className
-      )}
-      {...props}
-    />
-  )
-);
+const TableHead = React.forwardRef<
+  HTMLTableCellElement,
+  React.ThHTMLAttributes<HTMLTableCellElement>
+>(({ className, ...props }, ref) => (
+  <th
+    ref={ref}
+    className={cx(
+      "h-11 px-4 text-left align-middle font-medium text-text-secondary [&:has([role=checkbox])]:pr-0",
+      className
+    )}
+    {...props}
+  />
+));
 TableHead.displayName = "TableHead";
 
-interface TableCellProps extends React.TdHTMLAttributes<HTMLTableCellElement> {
-  align?: "left" | "center" | "right";
-  isNumeric?: boolean;
-}
-
-const TableCell = React.forwardRef<HTMLTableCellElement, TableCellProps>(
-  ({ className, align, isNumeric, children, title, ...props }, ref) => {
-    const autoTitle =
-      title ||
-      (typeof children === "string" || typeof children === "number"
-        ? String(children)
-        : undefined);
-
-    const effectiveAlign = align || (isNumeric ? "right" : "left");
-
-    return (
-      <td
-        ref={ref}
-        title={autoTitle}
-        className={cn(
-          "px-3.5 py-2.5 sm:py-3 align-middle text-sm text-[#1E293B] leading-tight",
-          effectiveAlign === "left" && "text-left",
-          effectiveAlign === "center" && "text-center",
-          effectiveAlign === "right" && "text-right tabular-nums",
-          isNumeric && "tabular-nums font-medium",
-          className
-        )}
-        {...props}
-      >
-        {children}
-      </td>
-    );
-  }
-);
+const TableCell = React.forwardRef<
+  HTMLTableCellElement,
+  React.TdHTMLAttributes<HTMLTableCellElement>
+>(({ className, ...props }, ref) => (
+  <td
+    ref={ref}
+    className={cx("p-4 align-middle text-text-primary [&:has([role=checkbox])]:pr-0", className)}
+    {...props}
+  />
+));
 TableCell.displayName = "TableCell";
 
 const TableCaption = React.forwardRef<
@@ -146,18 +116,41 @@ const TableCaption = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <caption
     ref={ref}
-    className={cn("mt-4 text-xs text-[#64748B]", className)}
+    className={cx("mt-4 text-caption-1-semibold text-text-tertiary", className)}
     {...props}
   />
 ));
 TableCaption.displayName = "TableCaption";
 
-interface TableSkeletonProps {
-  columns: number;
+export function TableLoadingRows({
+  columns = 5,
+  rows = 4,
+}: {
+  columns?: number;
   rows?: number;
+}) {
+  return (
+    <>
+      {Array.from({ length: rows }).map((_, r) => (
+        <TableRow key={`loading-row-${r}`}>
+          {Array.from({ length: columns }).map((__, c) => (
+            <TableCell key={`loading-cell-${r}-${c}`}>
+              <Skeleton className="h-4 w-full max-w-[120px]" />
+            </TableCell>
+          ))}
+        </TableRow>
+      ))}
+    </>
+  );
 }
 
-export function TableSkeleton({ columns, rows = 5 }: TableSkeletonProps) {
+export function TableSkeleton({
+  columns,
+  rows = 5,
+}: {
+  columns: number;
+  rows?: number;
+}) {
   return (
     <>
       {Array.from({ length: rows }).map((_, r) => (
@@ -165,8 +158,8 @@ export function TableSkeleton({ columns, rows = 5 }: TableSkeletonProps) {
           {Array.from({ length: columns }).map((_, c) => (
             <TableCell key={c} className="py-3">
               <Skeleton
-                className={cn(
-                  "h-4 rounded",
+                className={cx(
+                  "h-4 rounded-md",
                   c === 0
                     ? "w-28 sm:w-36"
                     : c === columns - 1
@@ -179,6 +172,32 @@ export function TableSkeleton({ columns, rows = 5 }: TableSkeletonProps) {
         </TableRow>
       ))}
     </>
+  );
+}
+
+export function TableEmptyState({
+  colSpan,
+  message = "কোনো তথ্য পাওয়া যায়নি",
+  description,
+  action,
+}: {
+  colSpan: number;
+  message?: string;
+  description?: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <TableRow>
+      <TableCell colSpan={colSpan} className="h-48 text-center">
+        <div className="flex flex-col items-center justify-center space-y-1.5 py-6">
+          <p className="text-body-medium font-medium text-text-secondary">{message}</p>
+          {description && (
+            <p className="text-caption-1-semibold text-text-tertiary">{description}</p>
+          )}
+          {action && <div className="pt-2">{action}</div>}
+        </div>
+      </TableCell>
+    </TableRow>
   );
 }
 

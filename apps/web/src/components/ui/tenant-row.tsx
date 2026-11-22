@@ -8,7 +8,15 @@ import { TenantAvatar } from '@/components/ui/tenant-avatar';
 import { useFileDownloadUrl } from '@/hooks/use-file-download-url';
 import { Tenant } from '@/lib/types';
 import { formatBnDate } from '@/lib/utils';
-import { Phone, Mail, Briefcase, Edit, Trash2, ExternalLink } from 'lucide-react';
+import {
+  RiPhoneLine,
+  RiMailLine,
+  RiBriefcaseLine,
+  RiEditLine,
+  RiDeleteBinLine,
+  RiExternalLinkLine,
+} from '@remixicon/react';
+import { cx } from '@/utils/cx';
 
 interface TenantRowProps {
   tenant: Tenant;
@@ -34,60 +42,65 @@ export function TenantRow({ tenant, language, onEdit, onDelete, onPreview }: Ten
             ariaLabel={isEn ? 'View profile picture' : 'প্রোফাইল ছবি দেখুন'}
           />
           <div className="min-w-0 max-w-[170px]">
-            <p className="truncate font-medium text-[#0F172A] text-sm" title={tenant.name}>
+            <p className="truncate font-medium text-text-primary text-body-medium" title={tenant.name}>
               {tenant.name}
             </p>
-            <p className="truncate text-xs text-[#64748B]" title={tenant.phone || ''}>
+            <p className="truncate text-caption-1-semibold text-text-secondary" title={tenant.phone || ''}>
               {tenant.phone || '—'}
             </p>
           </div>
         </div>
       </TableCell>
-      <TableCell align="left" className="text-xs text-[#334155] whitespace-nowrap">
+      <TableCell align="left" className="text-caption-1-semibold text-text-secondary whitespace-nowrap">
         <span className="inline-flex items-center gap-1.5">
-          <Phone className="h-3.5 w-3.5 text-[#94A3B8]" />
+          <RiPhoneLine className="size-3.5 text-foreground-icon-tertiary" />
           <span>{tenant.phone || '—'}</span>
         </span>
       </TableCell>
-      <TableCell align="left" className="text-xs text-[#64748B]">
+      <TableCell align="left" className="text-caption-1-semibold text-text-secondary">
         <span className="inline-flex items-center gap-1.5 truncate max-w-[200px]" title={tenant.email || ''}>
-          <Mail className="h-3.5 w-3.5 shrink-0 text-[#94A3B8]" />
+          <RiMailLine className="size-3.5 shrink-0 text-foreground-icon-tertiary" />
           <span className="truncate">{tenant.email || '—'}</span>
         </span>
       </TableCell>
-      <TableCell align="left" className="text-xs text-[#64748B]">
+      <TableCell align="left" className="text-caption-1-semibold text-text-secondary">
         <span className="inline-flex items-center gap-1.5 truncate max-w-[160px]" title={tenant.occupation || ''}>
-          <Briefcase className="h-3.5 w-3.5 shrink-0 text-[#94A3B8]" />
+          <RiBriefcaseLine className="size-3.5 shrink-0 text-foreground-icon-tertiary" />
           <span className="truncate">{tenant.occupation || '—'}</span>
         </span>
       </TableCell>
-      <TableCell align="left" className="text-xs text-[#64748B] whitespace-nowrap">
+      <TableCell align="left" className="text-caption-1-semibold text-text-secondary whitespace-nowrap">
         {formatBnDate(tenant.createdAt, language)}
       </TableCell>
       <TableCell align="right">
         <div className="flex items-center justify-end gap-1">
           <Link href={`/tenants/${tenant.id}`}>
-            <Button size="sm" variant="outline" className="h-8 gap-1.5 whitespace-nowrap text-xs px-2.5">
-              {isEn ? 'Profile' : 'প্রোফাইল'}<ExternalLink className="h-3.5 w-3.5" />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="size-8 p-0"
+              title={isEn ? 'View Details' : 'বিস্তারিত দেখুন'}
+            >
+              <RiExternalLinkLine className="size-4" />
             </Button>
           </Link>
           <Button
-            size="icon"
             variant="ghost"
+            size="sm"
+            className="size-8 p-0"
             onClick={() => onEdit(tenant)}
-            className="h-8 w-8 text-[#64748B] hover:text-[#0F172A]"
             title={isEn ? 'Edit' : 'সম্পাদনা'}
           >
-            <Edit className="h-3.5 w-3.5" />
+            <RiEditLine className="size-4" />
           </Button>
           <Button
-            size="icon"
             variant="ghost"
+            size="sm"
+            className="size-8 p-0 text-text-error-primary hover:bg-status-error/10"
             onClick={() => onDelete(tenant.id, tenant.name)}
-            className="h-8 w-8 text-[#DC2626] hover:bg-[#FEF2F2]"
             title={isEn ? 'Delete' : 'মুছুন'}
           >
-            <Trash2 className="h-3.5 w-3.5" />
+            <RiDeleteBinLine className="size-4" />
           </Button>
         </div>
       </TableCell>

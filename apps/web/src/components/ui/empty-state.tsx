@@ -1,9 +1,10 @@
 import React from 'react';
-import { LucideIcon, FolderOpen } from 'lucide-react';
+import { RiFolderOpenLine } from '@remixicon/react';
 import { Button } from './button';
+import { cx } from '@/utils/cx';
 
 interface EmptyStateProps {
-  icon?: LucideIcon;
+  icon?: any;
   title: string;
   description?: string;
   actionLabel?: string;
@@ -12,7 +13,7 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({
-  icon: Icon = FolderOpen,
+  icon: Icon = RiFolderOpenLine,
   title,
   description,
   actionLabel,
@@ -20,13 +21,13 @@ export function EmptyState({
   className,
 }: EmptyStateProps) {
   return (
-    <div className={`flex flex-col items-center justify-center p-10 text-center rounded-[10px] border border-dashed border-[#E5E7EB] bg-[#FAFAF9] ${className || ''}`}>
-      <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-white border border-[#E5E7EB] text-[#9CA3AF] mb-4">
-        <Icon className="h-5 w-5" />
+    <div className={cx("flex flex-col items-center justify-center p-10 text-center rounded-3xl border border-dashed border-border-button-default bg-background-secondary-default/50", className)}>
+      <div className="flex size-12 items-center justify-center rounded-2xl bg-background-primary-default border border-border-button-default text-foreground-icon-secondary mb-4 shadow-xs">
+        <Icon className="size-6" />
       </div>
-      <h3 className="text-base font-semibold text-[#171717] mb-1">{title}</h3>
+      <h3 className="text-title-3-semibold text-text-primary mb-1">{title}</h3>
       {description && (
-        <p className="text-[13px] text-[#6B7280] max-w-sm mb-6">{description}</p>
+        <p className="text-body-regular text-text-secondary max-w-sm mb-6">{description}</p>
       )}
       {actionLabel && onAction && (
         <Button onClick={onAction} variant="default">

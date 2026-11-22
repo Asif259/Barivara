@@ -3,14 +3,14 @@
 import React, { useState, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
-  UploadCloud,
-  FileText,
-  CheckCircle2,
-  Loader2,
-  ExternalLink,
-  Trash2,
-  Eye,
-} from 'lucide-react';
+  RiUploadCloud2Line,
+  RiFileTextLine,
+  RiCheckboxCircleLine,
+  RiLoader4Line,
+  RiExternalLinkLine,
+  RiDeleteBinLine,
+  RiEyeLine,
+} from '@remixicon/react';
 import { FileCategory, Media } from '@/lib/types';
 import { getApiErrorMessage } from '@/lib/api';
 import { uploadFileDirectly, getFileDownloadUrl, deleteFileRecord } from '@/lib/file-upload';
@@ -18,6 +18,7 @@ import { useLanguageStore } from '@/stores/language-store';
 import { useTranslation } from '@/lib/translations';
 import { toast } from 'sonner';
 import { ImagePreviewDialog } from './image-preview-dialog';
+import { cx } from '@/utils/cx';
 
 export interface FileUploaderProps {
   category: FileCategory;
@@ -222,9 +223,9 @@ export function FileUploader({
   };
 
   return (
-    <div className={`space-y-1.5 ${className}`}>
+    <div className={cx('space-y-1.5', className)}>
       {label && (
-        <label className="text-xs font-semibold text-slate-700 block">
+        <label className="text-body-medium font-semibold text-text-primary block">
           {label}
         </label>
       )}
@@ -241,12 +242,12 @@ export function FileUploader({
 
       {/* Active File Preview Card */}
       {effectiveFileId && !isUploading ? (
-        <div className="relative group rounded-xl border border-slate-200 bg-white p-3 shadow-xs transition-all hover:border-slate-300">
+        <div className="relative group rounded-2xl border border-border-button-default bg-background-primary-default p-3 shadow-xs transition-all hover:border-border-button-hover">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 overflow-hidden">
               {/* Thumbnail / Icon */}
               {displayPreviewUrl && isImageCategory ? (
-                <div className="relative h-12 w-12 rounded-lg overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
+                <div className="relative size-12 rounded-xl overflow-hidden bg-background-secondary-default shrink-0 border border-border-button-default">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={displayPreviewUrl}
@@ -255,35 +256,35 @@ export function FileUploader({
                   />
                 </div>
               ) : (
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 shrink-0 border border-emerald-100">
-                  <FileText className="h-6 w-6" />
+                <div className="flex size-12 items-center justify-center rounded-xl bg-background-secondary-default text-accent-900 shrink-0 border border-border-button-default">
+                  <RiFileTextLine className="size-6" />
                 </div>
               )}
 
               {/* Details */}
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-                  <p className="text-xs font-semibold text-slate-900 truncate">
+                  <RiCheckboxCircleLine className="size-4 text-status-success shrink-0" />
+                  <p className="text-body-medium font-medium text-text-primary truncate">
                     {fileInfo?.name || (isEn ? 'File Uploaded' : 'ফাইল আপলোড সম্পন্ন')}
                   </p>
                 </div>
-                <p className="text-[11px] text-slate-500 mt-0.5 font-mono">
+                <p className="text-caption-1-semibold text-text-secondary mt-0.5 font-mono">
                   ID: #{effectiveFileId.substring(0, 8).toUpperCase()}
                 </p>
               </div>
             </div>
 
-{/* Actions */}
+            {/* Actions */}
             <div className="flex items-center gap-1 shrink-0">
               {displayPreviewUrl && isImageCategory && (
                 <button
                   type="button"
                   onClick={() => setPreviewOpen(true)}
-                  className="p-1.5 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                  className="p-1.5 text-foreground-icon-secondary hover:text-accent-900 hover:bg-background-secondary-hover rounded-lg transition-colors cursor-pointer"
                   title={isEn ? 'Preview' : 'প্রিভিউ'}
                 >
-                  <Eye className="h-4 w-4" />
+                  <RiEyeLine className="size-4" />
                 </button>
               )}
               {displayPreviewUrl && !isImageCategory && (
@@ -291,23 +292,23 @@ export function FileUploader({
                   href={displayPreviewUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-1.5 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                  className="p-1.5 text-foreground-icon-secondary hover:text-accent-900 hover:bg-background-secondary-hover rounded-lg transition-colors cursor-pointer"
                   title={isEn ? 'View / Download' : 'দেখুন / ডাউনলোড করুন'}
                 >
-                  <ExternalLink className="h-4 w-4" />
+                  <RiExternalLinkLine className="size-4" />
                 </a>
               )}
               {!disabled && (
                 <button
                   type="button"
                   onClick={handleRemove}
-                  className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                  className="p-1.5 text-foreground-icon-tertiary hover:text-text-error-primary hover:bg-status-error/10 rounded-lg transition-colors cursor-pointer"
                   title={mode === 'replace' ? t.replace : (isEn ? 'Remove File' : 'ফাইল মুছুন')}
                 >
                   {mode === 'replace' ? (
-                    <UploadCloud className="h-4 w-4" />
+                    <RiUploadCloud2Line className="size-4" />
                   ) : (
-                    <Trash2 className="h-4 w-4" />
+                    <RiDeleteBinLine className="size-4" />
                   )}
                 </button>
               )}
@@ -321,47 +322,49 @@ export function FileUploader({
           onDrop={handleDrop}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
-          className={`
-            relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-5 text-center transition-all cursor-pointer
-            ${isDragging ? 'border-emerald-500 bg-emerald-50/50 scale-[0.99]' : 'border-slate-200 bg-slate-50/50 hover:bg-white hover:border-emerald-400'}
-            ${disabled ? 'opacity-60 cursor-not-allowed' : ''}
-            ${isUploading ? 'cursor-wait bg-white border-emerald-300' : ''}
-          `}
+          className={cx(
+            "relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-5 text-center transition-all cursor-pointer",
+            isDragging
+              ? "border-accent-900 bg-accent-50/50 scale-[0.99]"
+              : "border-border-button-default bg-background-secondary-default/50 hover:bg-background-primary-default hover:border-accent-900/50",
+            disabled && "opacity-60 cursor-not-allowed",
+            isUploading && "cursor-wait bg-background-primary-default border-accent-900/40"
+          )}
         >
           {isUploading ? (
             /* Uploading State */
             <div className="w-full space-y-3 py-2">
-              <div className="flex items-center justify-center gap-2 text-emerald-600">
-                <Loader2 className="h-5 w-5 animate-spin" />
-                <span className="text-xs font-semibold">
+              <div className="flex items-center justify-center gap-2 text-accent-900">
+                <RiLoader4Line className="size-5 animate-spin" />
+                <span className="text-body-medium font-semibold">
                   {isEn ? 'Uploading directly to secure storage...' : 'স্টোরেজে সরাসরি আপলোড হচ্ছে...'}
                 </span>
               </div>
 
               {/* Progress bar */}
-              <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+              <div className="w-full bg-background-secondary-hover rounded-full h-2 overflow-hidden">
                 <div
-                  className="bg-emerald-600 h-2 rounded-full transition-all duration-300"
+                  className="bg-accent-900 h-2 rounded-full transition-all duration-300"
                   style={{ width: `${progress}%` }}
                 />
               </div>
-              <p className="text-[11px] text-slate-500 font-mono text-center">
+              <p className="text-caption-1-semibold text-text-secondary font-mono text-center">
                 {progress}%
               </p>
             </div>
           ) : (
             /* Idle State */
             <>
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-xs text-emerald-600 border border-slate-200 mb-2">
-                <UploadCloud className="h-5 w-5" />
+              <div className="flex size-10 items-center justify-center rounded-full bg-background-primary-default shadow-xs text-accent-900 border border-border-button-default mb-2">
+                <RiUploadCloud2Line className="size-5" />
               </div>
-              <p className="text-xs font-semibold text-slate-800">
+              <p className="text-body-medium font-semibold text-text-primary">
                 {isEn ? 'Click to upload' : 'ফাইল নির্বাচন করতে ক্লিক করুন'}{' '}
-                <span className="font-normal text-slate-500">
+                <span className="font-normal text-text-secondary">
                   {isEn ? 'or drag and drop' : 'অথবা ড্র্যাগ করে আনুন'}
                 </span>
               </p>
-              <p className="text-[11px] text-slate-400 mt-1">
+              <p className="text-caption-1-semibold text-text-tertiary mt-1">
                 {isImageCategory
                   ? isEn
                     ? `JPEG, PNG, WebP (Max ${maxSizeMB}MB)`
@@ -376,7 +379,7 @@ export function FileUploader({
       )}
 
       {description && !effectiveFileId && (
-        <p className="text-[11px] text-slate-500">{description}</p>
+        <p className="text-caption-1-semibold text-text-tertiary">{description}</p>
       )}
 
       {/* Image Preview Dialog */}

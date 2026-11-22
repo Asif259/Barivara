@@ -6,7 +6,7 @@ import {
   DialogContent,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Loader2, ImageOff } from 'lucide-react';
+import { RiLoader4Line, RiImageLine } from '@remixicon/react';
 import { useLanguageStore } from '@/stores/language-store';
 import { useTranslation } from '@/lib/translations';
 
@@ -58,14 +58,15 @@ export function ImagePreviewDialog({
           max-h-[90vh]
           p-0
           overflow-hidden
-          bg-white
-          border-slate-200
+          bg-background-primary-default
+          border-border-button-default
         "
       >
-        {/* Header */}
-          <DialogTitle className="text-base sm:text-lg font-semibold text-slate-900 truncate">
+        <div className="p-4 border-b border-border-separator-border">
+          <DialogTitle className="text-title-3-semibold text-text-primary truncate">
             {title || t.imagePreview}
           </DialogTitle>
+        </div>
 
         {/* Image Area */}
         <div
@@ -79,16 +80,15 @@ export function ImagePreviewDialog({
             max-h-[calc(90vh-64px)]
             p-4
             sm:p-6
-            bg-slate-50
+            bg-background-secondary-default
             overflow-auto
           "
         >
           {/* Loading */}
           {isLoading && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-50 z-10">
-              <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
-
-              <p className="mt-3 text-sm text-slate-500">
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-background-secondary-default z-10">
+              <RiLoader4Line className="size-8 animate-spin text-accent-900" />
+              <p className="mt-3 text-body-medium text-text-secondary">
                 {isEn ? 'Loading image...' : 'ছবি লোড হচ্ছে...'}
               </p>
             </div>
@@ -97,15 +97,13 @@ export function ImagePreviewDialog({
           {/* Error */}
           {hasError && (
             <div className="flex flex-col items-center justify-center text-center px-6 py-12">
-              <div className="w-16 h-16 rounded-full bg-amber-50 flex items-center justify-center mb-4">
-                <ImageOff className="w-8 h-8 text-amber-500" />
+              <div className="size-16 rounded-full bg-status-warning/10 flex items-center justify-center mb-4">
+                <RiImageLine className="size-8 text-status-warning" />
               </div>
-
-              <p className="text-sm font-medium text-slate-700">
+              <p className="text-body-medium font-medium text-text-primary">
                 {t.imageLoadError}
               </p>
-
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-caption-1-semibold text-text-secondary mt-1">
                 {isEn
                   ? 'The image could not be loaded.'
                   : 'ছবিটি লোড করা সম্ভব হয়নি।'}
@@ -116,11 +114,10 @@ export function ImagePreviewDialog({
           {/* No Image */}
           {!imageUrl && !hasError && !isLoading && (
             <div className="flex flex-col items-center justify-center text-center px-6 py-12">
-              <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
-                <ImageOff className="w-8 h-8 text-slate-400" />
+              <div className="size-16 rounded-full bg-background-secondary-default border border-border-button-default flex items-center justify-center mb-4">
+                <RiImageLine className="size-8 text-foreground-icon-tertiary" />
               </div>
-
-              <p className="text-sm font-medium text-slate-600">
+              <p className="text-body-medium font-medium text-text-secondary">
                 {t.noImageAvailable}
               </p>
             </div>
@@ -142,7 +139,7 @@ export function ImagePreviewDialog({
                 w-auto
                 h-auto
                 object-contain
-                rounded-lg
+                rounded-xl
                 shadow-sm
                 transition-opacity
                 duration-200

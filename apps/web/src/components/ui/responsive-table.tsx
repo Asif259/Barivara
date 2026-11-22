@@ -1,30 +1,19 @@
 "use client";
 
 import * as React from "react";
-import { ChevronRight } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { RiArrowRightSLine } from "@remixicon/react";
+import { cx } from "@/utils/cx";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface MobileDataRowProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** Line 1 Left: Primary Identity (e.g. Tenant name, Property name, Category) */
   identity: React.ReactNode;
-  /** Line 1 Right: Primary Value (e.g. Amount Due, Rent, Units). Always aligned right, tabular numerals. */
   value?: React.ReactNode;
-  /** Line 2 Left: State dot/badge + labeled supporting details (e.g. ● Overdue · Due Sep 10) */
   stateAndDetail?: React.ReactNode;
-  /** Line 2 Right: Action button, dropdown menu, or icon trigger */
   action?: React.ReactNode;
-  /** Optional click handler to expand row details / open BottomSheet */
   onClick?: () => void;
-  /** If true, shows a subtle chevron indicator on row tap */
   showChevron?: boolean;
 }
 
-/**
- * High-density 2-line mobile data row complying with the Global Responsive Table Design Pattern.
- * - Line 1: Primary Identity (Left) | Primary Value (Right)
- * - Line 2: State + Supporting Detail (Left) | Action / Detail CTA (Right)
- */
 export function MobileDataRow({
   identity,
   value,
@@ -46,38 +35,35 @@ export function MobileDataRow({
           onClick();
         }
       }}
-      className={cn(
-        "group relative flex flex-col justify-center px-4 py-3 border-b border-[#F1F5F9] bg-white transition-colors",
-        onClick && "cursor-pointer hover:bg-slate-50/80 active:bg-slate-100/70 select-none",
+      className={cx(
+        "group relative flex flex-col justify-center px-4 py-3 border-b border-border-separator-border bg-background-primary-default transition-colors",
+        onClick && "cursor-pointer hover:bg-background-secondary-hover active:bg-background-secondary-default select-none",
         className
       )}
       {...props}
     >
       {/* LINE 1: Primary Identity (Left) & Primary Value (Right) */}
       <div className="flex items-baseline justify-between gap-3 min-w-0">
-        <div className="font-medium text-sm text-[#0F172A] truncate flex-1 leading-snug">
+        <div className="text-body-medium font-medium text-text-primary truncate flex-1 leading-snug">
           {identity}
         </div>
-        {value && (
-          <div className="text-sm font-semibold text-[#0F172A] tabular-nums whitespace-nowrap text-right shrink-0 tracking-tight">
+        {value !== undefined && value !== null && (
+          <div className="text-body-medium font-semibold text-text-primary shrink-0 tabular-nums text-right ml-2">
             {value}
           </div>
         )}
       </div>
 
-      {/* LINE 2: State + Supporting Detail (Left) & Action (Right) */}
-      <div className="flex items-center justify-between gap-2 mt-1 min-w-0">
-        <div className="flex items-center gap-1.5 text-xs text-[#64748B] truncate flex-1 leading-tight">
+      {/* LINE 2: State/Badge + Labeled Detail (Left) & Action / Chevron (Right) */}
+      <div className="flex items-center justify-between gap-3 min-w-0 mt-1.5 text-caption-1-semibold text-text-secondary">
+        <div className="flex items-center gap-2 truncate flex-1 min-w-0">
           {stateAndDetail}
         </div>
-        
-        <div
-          className="flex items-center gap-1 shrink-0 ml-2"
-          onClick={(e) => e.stopPropagation()} // Prevent triggering row click when tapping action
-        >
+
+        <div className="flex items-center gap-1 shrink-0 ml-2">
           {action}
-          {showChevron && onClick && (
-            <ChevronRight className="w-4 h-4 text-[#94A3B8] group-hover:text-[#64748B] transition-colors" />
+          {showChevron && (
+            <RiArrowRightSLine className="size-4 text-foreground-icon-tertiary transition-transform group-hover:translate-x-0.5" />
           )}
         </div>
       </div>
@@ -85,26 +71,36 @@ export function MobileDataRow({
   );
 }
 
-/**
- * Mobile Table Skeleton with 2-line pulse rows matching the responsive mobile view geometry.
- */
+export function MobileDataRowSkeleton() {
+  return (
+    <div className="flex flex-col justify-center px-4 py-3.5 border-b border-border-separator-border bg-background-primary-default space-y-2.5">
+      <div className="flex items-center justify-between gap-3">
+        <Skeleton className="h-4 w-32" />
+        <Skeleton className="h-4 w-20" />
+      </div>
+      <div className="flex items-center justify-between gap-3">
+        <Skeleton className="h-3 w-40" />
+        <Skeleton className="h-4 w-4 rounded-full" />
+      </div>
+    </div>
+  );
+}
+
 export function MobileTableSkeleton({ rows = 5 }: { rows?: number }) {
   return (
-    <div className="divide-y divide-[#F1F5F9] bg-white rounded-lg border border-[#E2E8F0] overflow-hidden">
+    <div className="divide-y divide-border-separator-border bg-background-primary-default rounded-2xl border border-border-table overflow-hidden">
       {Array.from({ length: rows }).map((_, i) => (
         <div key={i} className="px-4 py-3 flex flex-col gap-2">
-          {/* Line 1 Skeleton */}
           <div className="flex items-center justify-between gap-4">
-            <Skeleton className="h-4 w-36 rounded" />
-            <Skeleton className="h-4 w-20 rounded" />
+            <Skeleton className="h-4 w-36 rounded-md" />
+            <Skeleton className="h-4 w-20 rounded-md" />
           </div>
-          {/* Line 2 Skeleton */}
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <Skeleton className="h-2 w-2 rounded-full" />
-              <Skeleton className="h-3 w-28 rounded" />
+              <Skeleton className="size-2 rounded-full" />
+              <Skeleton className="h-3 w-28 rounded-md" />
             </div>
-            <Skeleton className="h-4 w-6 rounded" />
+            <Skeleton className="h-4 w-6 rounded-md" />
           </div>
         </div>
       ))}
@@ -112,9 +108,6 @@ export function MobileTableSkeleton({ rows = 5 }: { rows?: number }) {
   );
 }
 
-/**
- * Compact Status Indicator (Dot + Label) for mobile rows
- */
 export function CompactStatus({
   label,
   variant = "neutral",
@@ -123,46 +116,78 @@ export function CompactStatus({
   variant?: "success" | "warning" | "danger" | "info" | "neutral";
 }) {
   const dotColor = {
-    success: "bg-emerald-500",
-    warning: "bg-amber-500",
-    danger: "bg-rose-500",
-    info: "bg-blue-500",
-    neutral: "bg-slate-400",
+    success: "bg-status-success",
+    warning: "bg-status-warning",
+    danger: "bg-status-error",
+    info: "bg-status-info",
+    neutral: "bg-text-tertiary",
   }[variant];
 
   const textColor = {
-    success: "text-emerald-700",
-    warning: "text-amber-700",
-    danger: "text-rose-700",
-    info: "text-blue-700",
-    neutral: "text-slate-600",
+    success: "text-status-success",
+    warning: "text-status-warning",
+    danger: "text-text-error-primary",
+    info: "text-status-info",
+    neutral: "text-text-secondary",
   }[variant];
 
   return (
-    <span className={cn("inline-flex items-center gap-1.5 font-medium text-xs", textColor)}>
-      <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", dotColor)} />
+    <span className={cx("inline-flex items-center gap-1.5 font-medium text-caption-1-semibold", textColor)}>
+      <span className={cx("size-1.5 rounded-full shrink-0", dotColor)} />
       <span>{label}</span>
     </span>
   );
 }
 
-/**
- * Container component wrapping both Desktop and Mobile representations.
- * Sets CSS container query context (`@container`) and standard mobile-first visibility.
- */
+export function MobileDataRowEmpty({
+  message = "কোনো তথ্য পাওয়া যায়নি",
+  action,
+}: {
+  message?: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col items-center justify-center p-8 text-center bg-background-primary-default border-b border-border-separator-border space-y-2">
+      <p className="text-body-medium font-medium text-text-secondary">{message}</p>
+      {action && <div className="pt-2">{action}</div>}
+    </div>
+  );
+}
+
 export function ResponsiveTableContainer({
   children,
   className,
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn(
-        "table-container w-full rounded-lg border border-[#E2E8F0] bg-white overflow-hidden shadow-none",
+      className={cx(
+        "table-container w-full rounded-2xl border border-border-table bg-background-primary-default overflow-hidden shadow-xs",
         className
       )}
       style={{ containerType: "inline-size" }}
     >
       {children}
+    </div>
+  );
+}
+
+interface ResponsiveTableProps {
+  desktopContent: React.ReactNode;
+  mobileContent: React.ReactNode;
+  className?: string;
+}
+
+export function ResponsiveTable({
+  desktopContent,
+  mobileContent,
+  className,
+}: ResponsiveTableProps) {
+  return (
+    <div className={cx("w-full", className)}>
+      <div className="hidden md:block">{desktopContent}</div>
+      <div className="block md:hidden rounded-2xl border border-border-table bg-background-primary-default overflow-hidden divide-y divide-border-separator-border shadow-xs">
+        {mobileContent}
+      </div>
     </div>
   );
 }

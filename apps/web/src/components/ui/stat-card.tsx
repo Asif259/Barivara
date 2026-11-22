@@ -1,14 +1,14 @@
 import React from 'react';
 import Link from 'next/link';
 import { Card, CardContent } from './card';
-import { LucideIcon, ArrowUpRight } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { RiArrowRightUpLine } from '@remixicon/react';
+import { cx } from '@/utils/cx';
 
 export interface StatCardProps {
   title: string;
   value: string | number;
   subtitle?: string;
-  icon: LucideIcon;
+  icon?: any;
   iconColor?: string;
   iconBgColor?: string;
   trend?: {
@@ -32,8 +32,8 @@ export function StatCard({
   value,
   subtitle,
   icon: Icon,
-  iconColor = 'text-[#12664F]',
-  iconBgColor = 'bg-[#E8F3EF]',
+  iconColor,
+  iconBgColor,
   trend,
   comparisonLabel = 'vs last month',
   badge,
@@ -44,9 +44,9 @@ export function StatCard({
 }: StatCardProps) {
   const content = (
     <Card
-      className={cn(
-        'group relative overflow-hidden rounded-[10px] border-[#E5E7EB] bg-white shadow-none transition-all duration-200',
-        (href || onClick) && 'cursor-pointer hover:border-[#10B981]/50 hover:shadow-sm active:scale-[0.99]',
+      className={cx(
+        'group relative overflow-hidden rounded-3xl border-border-button-default bg-background-primary-default shadow-xs transition-all duration-200',
+        (href || onClick) && 'cursor-pointer hover:border-accent-900/50 hover:shadow-sm active:scale-[0.99]',
         className
       )}
       onClick={onClick}
@@ -55,62 +55,58 @@ export function StatCard({
         <div className="flex items-start justify-between gap-3">
           <div className="space-y-1 min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <p className="text-[13px] font-medium text-[#6B7280] truncate">{title}</p>
+              <p className="text-caption-1-semibold text-text-secondary truncate">{title}</p>
               {badge && (
                 <span
-                  className={cn(
-                    'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold tabular-nums border',
-                    badge.variant === 'danger' && 'border-red-200 bg-red-50 text-red-700',
-                    badge.variant === 'warning' && 'border-amber-200 bg-amber-50 text-amber-700',
-                    badge.variant === 'success' && 'border-emerald-200 bg-emerald-50 text-emerald-700',
-                    badge.variant === 'info' && 'border-blue-200 bg-blue-50 text-blue-700',
-                    (!badge.variant || badge.variant === 'neutral') && 'border-gray-200 bg-gray-50 text-gray-600'
+                  className={cx(
+                    'inline-flex items-center rounded-full px-2 py-0.5 text-caption-1-semibold',
+                    badge.variant === 'success' && 'bg-status-success/10 text-status-success',
+                    badge.variant === 'warning' && 'bg-status-warning/10 text-status-warning',
+                    badge.variant === 'danger' && 'bg-status-error/10 text-text-error-primary',
+                    badge.variant === 'info' && 'bg-status-info/10 text-status-info',
+                    (!badge.variant || badge.variant === 'neutral') && 'bg-background-secondary-default text-text-secondary'
                   )}
                 >
                   {badge.text}
                 </span>
               )}
             </div>
-            <h3
-              className={cn(
-                'text-2xl font-semibold tracking-tight text-[#171717] tabular-nums',
-                valueClassName
-              )}
-            >
+            <p className={cx('text-title-1-medium text-text-primary tracking-tight font-semibold tabular-nums', valueClassName)}>
               {value}
-            </h3>
-            {subtitle && (
-              <p className="text-xs text-[#6B7280] truncate" title={subtitle}>
-                {subtitle}
-              </p>
-            )}
+            </p>
           </div>
-          <div className="flex items-center gap-1.5 shrink-0">
+
+          {Icon && (
             <div
-              className={cn(
-                'flex h-9 w-9 items-center justify-center rounded-lg border border-[#E5E7EB] transition-colors',
-                iconBgColor
+              className={cx(
+                'flex size-10 shrink-0 items-center justify-center rounded-2xl bg-background-secondary-default text-foreground-icon-primary transition-transform group-hover:scale-105',
+                iconBgColor,
+                iconColor
               )}
             >
-              <Icon className={cn('h-4 w-4', iconColor)} />
+              <Icon className="size-5" />
             </div>
-            {href && (
-              <ArrowUpRight className="h-4 w-4 text-[#9CA3AF] opacity-0 transition-all duration-150 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-            )}
-          </div>
+          )}
         </div>
 
-        {trend && (
-          <div className="mt-4 flex items-center gap-1.5 text-xs">
-            <span
-              className={cn(
-                'font-semibold tabular-nums',
-                trend.isPositive ? 'text-[#15803D]' : 'text-[#DC2626]'
-              )}
-            >
-              {trend.value}
+        {(trend || subtitle) && (
+          <div className="mt-3 flex items-center gap-2 pt-2 border-t border-border-separator-border text-caption-1-semibold">
+            {trend && (
+              <span
+                className={cx(
+                  'inline-flex items-center gap-0.5 font-medium',
+                  trend.isPositive ? 'text-status-success' : 'text-text-error-primary'
+                )}
+              >
+                <RiArrowRightUpLine
+                  className={cx('size-3.5', !trend.isPositive && 'rotate-90')}
+                />
+                {trend.value}
+              </span>
+            )}
+            <span className="text-text-tertiary truncate">
+              {subtitle || (trend?.label ? `${comparisonLabel}` : '')}
             </span>
-            <span className="text-[#9CA3AF]">{trend.label || comparisonLabel}</span>
           </div>
         )}
       </CardContent>
@@ -119,7 +115,7 @@ export function StatCard({
 
   if (href) {
     return (
-      <Link href={href} className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#10B981] rounded-[10px]">
+      <Link href={href} className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-border-focus-ring rounded-3xl">
         {content}
       </Link>
     );

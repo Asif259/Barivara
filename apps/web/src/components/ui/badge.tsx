@@ -1,24 +1,24 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "@/lib/utils";
+import { cx } from "@/utils/cx";
 
 const badgeVariants = cva(
-  "inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[#12664F] focus:ring-offset-2",
+  "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-caption-1-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-border-focus-ring",
   {
     variants: {
       variant: {
         default:
-          "bg-[#F3FAF5] text-[#166534] border border-[#D1FADE]",
+          "bg-background-secondary-default text-text-primary border border-border-button-default",
         secondary:
-          "bg-[#F8F9FA] text-[#4B5563] border border-[#E5E7EB]",
+          "bg-background-secondary-default text-text-secondary border border-border-button-default",
         destructive:
-          "bg-[#FEF7F7] text-[#B91C1C] border border-[#FECACA]",
+          "bg-status-error/10 text-text-error-primary border border-status-error/20",
         warning:
-          "bg-[#FFFCF2] text-[#92400E] border border-[#FDE7B2]",
+          "bg-status-warning/10 text-status-warning border border-status-warning/20",
         info:
-          "bg-[#F5F9FF] text-[#1D4ED8] border border-[#C7DBFF]",
+          "bg-status-info/10 text-status-info border border-status-info/20",
         outline:
-          "border border-[#E5E7EB] text-[#6B7280] bg-white",
+          "border border-border-button-default text-text-secondary bg-background-primary-default",
       },
     },
     defaultVariants: {
@@ -33,7 +33,7 @@ export interface BadgeProps
 
 function Badge({ className, variant, ...props }: BadgeProps) {
   return (
-    <div className={cn(badgeVariants({ variant }), className)} {...props} />
+    <div className={cx(badgeVariants({ variant }), className)} {...props} />
   );
 }
 

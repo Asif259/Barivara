@@ -1,97 +1,104 @@
-import React from 'react';
-import { Badge } from './badge';
-import { UnitStatus, RentStatus, AgreementStatus, PaymentStatus } from '@/lib/types';
-import { CheckCircle2, Clock, AlertTriangle, XCircle, Home, ShieldAlert } from 'lucide-react';
+import React from "react";
+import { UnitStatus, RentStatus, AgreementStatus, PaymentStatus } from "@/lib/types";
+import { Chip } from "@/components/base/badges/chip";
+import { StatusDot } from "@/components/base/badges/status-dot";
 
 interface StatusBadgeProps {
   status: UnitStatus | RentStatus | AgreementStatus | PaymentStatus | string;
-  lang?: 'bn' | 'en';
+  lang?: "bn" | "en";
 }
 
-export function StatusBadge({ status, lang = 'bn' }: StatusBadgeProps) {
-  const isEn = lang === 'en';
+export function StatusBadge({ status, lang = "bn" }: StatusBadgeProps) {
+  const isEn = lang === "en";
 
   switch (status) {
-    case 'PAID':
-    return (
-        <Badge variant="default">
-          <CheckCircle2 className="h-3 w-3 text-[#15803D]" />
-          {isEn ? 'Paid' : 'পরিশোধিত'}
-        </Badge>
-      );
-    case 'PARTIAL':
+    case "PAID":
       return (
-        <Badge variant="warning">
-          <Clock className="h-3 w-3 text-[#B45309]" />
-          {isEn ? 'Partial' : 'আংশিক পরিশোধ'}
-        </Badge>
+        <Chip color="lime" className="gap-1.5">
+          <StatusDot color="green" />
+          {isEn ? "Paid" : "পরিশোধিত"}
+        </Chip>
       );
-    case 'PENDING':
+    case "PARTIAL":
       return (
-        <Badge variant="secondary">
-          <Clock className="h-3 w-3 text-[#6B7280]" />
-          {isEn ? 'Pending' : 'অপেক্ষমান'}
-        </Badge>
+        <Chip color="yellow" className="gap-1.5">
+          <StatusDot color="yellow" />
+          {isEn ? "Partial" : "আংশিক পরিশোধ"}
+        </Chip>
       );
-    case 'OVERDUE':
+    case "PENDING":
       return (
-        <Badge variant="destructive">
-          <AlertTriangle className="h-3 w-3 text-[#DC2626]" />
-          {isEn ? 'Overdue' : 'মেয়াদোত্তীর্ণ'}
-        </Badge>
+        <Chip color="neutral" className="gap-1.5">
+          <StatusDot color="indigo" />
+          {isEn ? "Pending" : "অপেক্ষমান"}
+        </Chip>
       );
-    case 'CANCELLED':
+    case "OVERDUE":
       return (
-        <Badge variant="outline">
-          <XCircle className="h-3 w-3 text-[#9CA3AF]" />
-          {isEn ? 'Cancelled' : 'বাতিল'}
-        </Badge>
+        <Chip color="rose" className="gap-1.5">
+          <span className="size-1.5 rounded-full bg-status-error" />
+          {isEn ? "Overdue" : "মেয়াদোত্তীর্ণ"}
+        </Chip>
       );
-    case 'VACANT':
+    case "CANCELLED":
       return (
-        <Badge variant="info">
-          <Home className="h-3 w-3 text-[#2563EB]" />
-          {isEn ? 'Vacant' : 'খালি'}
-        </Badge>
+        <Chip color="neutral">
+          {isEn ? "Cancelled" : "বাতিল"}
+        </Chip>
       );
-    case 'OCCUPIED':
+    case "VACANT":
       return (
-        <Badge variant="default">
-          <CheckCircle2 className="h-3 w-3 text-[#15803D]" />
-          {isEn ? 'Occupied' : 'ভাড়া দেওয়া'}
-        </Badge>
+        <Chip color="cyan" className="gap-1.5">
+          <StatusDot color="indigo" />
+          {isEn ? "Vacant" : "খালি"}
+        </Chip>
       );
-    case 'MAINTENANCE':
+    case "OCCUPIED":
       return (
-        <Badge variant="warning">
-          <ShieldAlert className="h-3 w-3 text-[#B45309]" />
-          {isEn ? 'Maintenance' : 'মেরামত'}
-        </Badge>
+        <Chip color="lime" className="gap-1.5">
+          <StatusDot color="green" />
+          {isEn ? "Occupied" : "ভাড়া দেওয়া"}
+        </Chip>
       );
-    case 'ACTIVE':
+    case "MAINTENANCE":
       return (
-        <Badge variant="default">
-          <CheckCircle2 className="h-3 w-3 text-[#15803D]" />
-          {isEn ? 'Active' : 'সক্রিয়'}
-        </Badge>
+        <Chip color="yellow" className="gap-1.5">
+          <StatusDot color="yellow" />
+          {isEn ? "Maintenance" : "মেরামত"}
+        </Chip>
       );
-    case 'ENDED':
-      return <Badge variant="secondary">{isEn ? 'Ended' : 'সমাপ্ত'}</Badge>;
-    case 'COMPLETED':
+    case "ACTIVE":
       return (
-        <Badge variant="default">
-          <CheckCircle2 className="h-3 w-3 text-[#15803D]" />
-          {isEn ? 'Completed' : 'সম্পন্ন'}
-        </Badge>
+        <Chip color="lime" className="gap-1.5">
+          <StatusDot color="green" />
+          {isEn ? "Active" : "সক্রিয়"}
+        </Chip>
       );
-    case 'REVERSED':
+    case "ENDED":
       return (
-        <Badge variant="destructive" className="line-through">
-          <XCircle className="h-3 w-3 text-[#DC2626]" />
-          {isEn ? 'Reversed' : 'রিভার্সড (বাতিল)'}
-        </Badge>
+        <Chip color="neutral">
+          {isEn ? "Ended" : "সমাপ্ত"}
+        </Chip>
+      );
+    case "COMPLETED":
+      return (
+        <Chip color="lime" className="gap-1.5">
+          <StatusDot color="green" />
+          {isEn ? "Completed" : "সম্পন্ন"}
+        </Chip>
+      );
+    case "REVERSED":
+      return (
+        <Chip color="rose" className="line-through gap-1.5">
+          <span className="size-1.5 rounded-full bg-status-error" />
+          {isEn ? "Reversed" : "রিভার্সড (বাতিল)"}
+        </Chip>
       );
     default:
-      return <Badge variant="outline">{status}</Badge>;
+      return (
+        <Chip color="neutral">
+          {status}
+        </Chip>
+      );
   }
 }
