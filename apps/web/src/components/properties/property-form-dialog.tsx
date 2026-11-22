@@ -21,7 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { FileUploader } from '@/components/ui/file-uploader';
-import { Building2, Loader2, Save } from 'lucide-react';
+import { RiBuildingLine, RiLoader4Line, RiSaveLine } from '@remixicon/react';
 
 const propertySchema = z.object({
   name: z.string().min(2, 'বাড়ির নাম কমপক্ষে ২ অক্ষরের হতে হবে'),
@@ -116,11 +116,11 @@ export function PropertyFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Building2 className="w-5 h-5 text-emerald-600" />
+          <DialogTitle className="flex items-center gap-2 text-text-primary">
+            <RiBuildingLine className="w-5 h-5 text-accent-600" />
             {isEditing ? t.editProperty : t.addNewProperty}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-body-medium text-text-tertiary">
             {isEn
               ? 'Enter the details of your residential or commercial building.'
               : 'আপনার আবাসিক বা বাণিজ্যিক ভবনের বিবরণ লিখুন।'}
@@ -135,7 +135,7 @@ export function PropertyFormDialog({
               placeholder={isEn ? 'e.g. Green View Tower' : 'যেমন: গ্রিন ভিউ ভিলা'}
               {...register('name')}
             />
-            {errors.name && <p className="text-xs text-rose-500">{errors.name.message}</p>}
+            {errors.name && <p className="text-caption-1-regular text-text-error-primary">{errors.name.message}</p>}
           </div>
 
           <div className="space-y-2">
@@ -145,7 +145,7 @@ export function PropertyFormDialog({
               placeholder={isEn ? 'House 10, Road 4, Dhanmondi' : 'বাড়ি # ১০, রোড # ৪, ধানমন্ডি'}
               {...register('address')}
             />
-            {errors.address && <p className="text-xs text-rose-500">{errors.address.message}</p>}
+            {errors.address && <p className="text-caption-1-regular text-text-error-primary">{errors.address.message}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -172,7 +172,7 @@ export function PropertyFormDialog({
                 min="1"
                 {...register('totalFloors', { valueAsNumber: true })}
               />
-              {errors.totalFloors && <p className="text-xs text-rose-500">{errors.totalFloors.message}</p>}
+              {errors.totalFloors && <p className="text-caption-1-regular text-text-error-primary">{errors.totalFloors.message}</p>}
             </div>
           </div>
 
@@ -186,7 +186,7 @@ export function PropertyFormDialog({
           </div>
 
           {/* Property Image Upload */}
-          <div className="border-t border-slate-100 pt-3">
+          <div className="border-t border-separator-border pt-3">
             <FileUploader
               category="PROPERTY_IMAGE"
               entityType="property"
@@ -209,12 +209,12 @@ export function PropertyFormDialog({
             <Button type="submit" variant="default" disabled={isLoading} className="gap-2">
               {isLoading ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <RiLoader4Line className="w-4 h-4 animate-spin" />
                   {t.loading}
                 </>
               ) : (
                 <>
-                  <Save className="w-4 h-4" />
+                  <RiSaveLine className="w-4 h-4" />
                   {isEditing ? t.save : t.create}
                 </>
               )}

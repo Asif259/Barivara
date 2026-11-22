@@ -20,7 +20,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Home, Loader2, Save } from 'lucide-react';
+import { RiHomeLine, RiLoader4Line, RiSaveLine } from '@remixicon/react';
 
 const unitTypes: { value: UnitType; labelBn: string; labelEn: string }[] = [
   { value: 'APARTMENT', labelBn: 'অ্যাপার্টমেন্ট (Apartment)', labelEn: 'Apartment' },
@@ -142,11 +142,11 @@ export function UnitFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Home className="w-5 h-5 text-emerald-600" />
+          <DialogTitle className="flex items-center gap-2 text-text-primary">
+            <RiHomeLine className="w-5 h-5 text-accent-600" />
             {isEditing ? t.editUnit : t.addNewUnit}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-body-medium text-text-tertiary">
             {isEn ? 'Configure flat or unit rent and charges.' : 'ফ্ল্যাট বা ইউনিটের ভাড়া ও সার্ভিস চার্জ নির্ধারণ করুন।'}
           </DialogDescription>
         </DialogHeader>
@@ -156,7 +156,7 @@ export function UnitFormDialog({
             <div className="space-y-2">
               <Label htmlFor="unitNumber">{t.unitNumber}</Label>
               <Input id="unitNumber" placeholder={isEn ? 'e.g. 4A' : 'যেমন: 4A'} {...register('unitNumber')} />
-              {errors.unitNumber && <p className="text-xs text-rose-500">{errors.unitNumber.message}</p>}
+              {errors.unitNumber && <p className="text-caption-1-regular text-text-error-primary">{errors.unitNumber.message}</p>}
             </div>
 
             <div className="space-y-2">
@@ -170,7 +170,7 @@ export function UnitFormDialog({
               <Label htmlFor="unitType">{t.unitType}</Label>
               <select
                 id="unitType"
-                className="flex h-10 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                className="flex h-10 w-full rounded-xl border border-border-button-default bg-background-primary-default px-3 py-2 text-body-medium text-text-primary shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus-ring"
                 {...register('unitType')}
               >
                 {unitTypes.map((u) => (
@@ -185,7 +185,7 @@ export function UnitFormDialog({
               <Label htmlFor="status">{t.status}</Label>
               <select
                 id="status"
-                className="flex h-10 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                className="flex h-10 w-full rounded-xl border border-border-button-default bg-background-primary-default px-3 py-2 text-body-medium text-text-primary shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus-ring"
                 {...register('status')}
               >
                 {unitStatuses.map((s) => (
@@ -209,7 +209,7 @@ export function UnitFormDialog({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 border-t border-slate-100 pt-3">
+          <div className="grid grid-cols-2 gap-3 border-t border-separator-border pt-3">
             <div className="space-y-2">
               <Label htmlFor="monthlyBaseRent">{t.baseRent} (৳)</Label>
               <Input
@@ -261,12 +261,12 @@ export function UnitFormDialog({
             <Button type="submit" variant="default" disabled={isLoading} className="gap-2">
               {isLoading ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <RiLoader4Line className="w-4 h-4 animate-spin" />
                   {t.loading}
                 </>
               ) : (
                 <>
-                  <Save className="w-4 h-4" />
+                  <RiSaveLine className="w-4 h-4" />
                   {isEditing ? t.save : t.create}
                 </>
               )}

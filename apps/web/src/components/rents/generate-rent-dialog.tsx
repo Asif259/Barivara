@@ -22,7 +22,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Receipt, Loader2, Sparkles } from 'lucide-react';
+import { RiReceiptLine, RiLoader4Line, RiSparklingLine } from '@remixicon/react';
 
 const monthsBn = [
   { value: 1, label: 'জানুয়ারি (January)' },
@@ -157,11 +157,11 @@ export function GenerateRentDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Receipt className="w-5 h-5 text-emerald-600" />
+          <DialogTitle className="flex items-center gap-2 text-text-primary">
+            <RiReceiptLine className="w-5 h-5 text-accent-600" />
             {t.generateMonthlyRent}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-body-medium text-text-tertiary">
             {isEn
               ? 'Generate all missing rent invoices up to the selected Rent Month for active rental agreements.'
               : 'সকল সক্রিয় চুক্তির জন্য নির্বাচিত মাস পর্যন্ত অপরিশোধিত ও বকেয়া সকল মাসের বিল এক ক্লিকে তৈরি করুন।'}
@@ -174,7 +174,7 @@ export function GenerateRentDialog({
               <Label htmlFor="month">{isEn ? 'Month' : 'মাস'}</Label>
               <select
                 id="month"
-                className="flex h-10 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                className="flex h-10 w-full rounded-xl border border-border-button-default bg-background-primary-default px-3 py-2 text-body-medium text-text-primary shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus-ring"
                 {...register('month', { valueAsNumber: true })}
               >
                 {monthsBn.map((m) => (
@@ -192,7 +192,7 @@ export function GenerateRentDialog({
                 type="number"
                 {...register('year', { valueAsNumber: true })}
               />
-              {errors.year && <p className="text-xs text-rose-500">{errors.year.message}</p>}
+              {errors.year && <p className="text-caption-1-regular text-text-error-primary">{errors.year.message}</p>}
             </div>
           </div>
 
@@ -200,7 +200,7 @@ export function GenerateRentDialog({
             <Label htmlFor="propertyId">{t.propertyName} ({isEn ? 'All or specific property' : 'নির্দিষ্ট বাড়ি বা সকল বাড়ি'})</Label>
             <select
               id="propertyId"
-              className="flex h-10 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+              className="flex h-10 w-full rounded-xl border border-border-button-default bg-background-primary-default px-3 py-2 text-body-medium text-text-primary shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus-ring"
               {...register('propertyId')}
             >
               <option value="">{isEn ? '-- All Properties --' : '-- সকল বাড়ি --'}</option>
@@ -213,20 +213,20 @@ export function GenerateRentDialog({
           </div>
 
           {/* Option for new tenants starting current month (Default: Off) */}
-          <div className="flex items-start gap-2.5 p-3 rounded-xl border border-slate-200 bg-slate-50/70">
+          <div className="flex items-start gap-2.5 p-3 rounded-2xl border border-border-button-default bg-background-secondary-default">
             <input
               type="checkbox"
               id="includeCurrentMonthNewTenants"
-              className="h-4 w-4 mt-0.5 rounded-sm border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+              className="h-4 w-4 mt-0.5 rounded-sm border-border-button-default text-accent-600 focus:ring-border-focus-ring cursor-pointer"
               {...register('includeCurrentMonthNewTenants')}
             />
             <div className="space-y-0.5 leading-tight">
-              <Label htmlFor="includeCurrentMonthNewTenants" className="text-xs font-semibold text-slate-800 cursor-pointer">
+              <Label htmlFor="includeCurrentMonthNewTenants" className="text-caption-1-medium font-semibold text-text-primary cursor-pointer">
                 {isEn
                   ? "Also generate current month's rent for new tenants who started this month"
                   : 'চলতি মাসে চুক্তি শুরু করা নতুন ভাড়াটিয়াদের চলতি মাসের বিলও একসাথে তৈরি করুন'}
               </Label>
-              <p className="text-[11px] text-slate-500">
+              <p className="text-[11px] text-text-tertiary">
                 {isEn
                   ? 'Default (Off): New tenants starting this month will not receive previous month invoices. Check this if you collect current month rent in advance.'
                   : 'ডিফল্ট (বন্ধ): এই মাসে চুক্তি শুরু করা নতুন ভাড়াটিয়াদের গত মাসের বিল তৈরি হবে না। অগ্রিম ভাড়া আদায়ের জন্য এটি অন করুন।'}
@@ -246,12 +246,12 @@ export function GenerateRentDialog({
             <Button type="submit" variant="default" disabled={isLoading} className="gap-2">
               {isLoading ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <RiLoader4Line className="w-4 h-4 animate-spin" />
                   {t.loading}
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-4 h-4" />
+                  <RiSparklingLine className="w-4 h-4" />
                   {t.generateRent}
                 </>
               )}

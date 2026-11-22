@@ -2,7 +2,13 @@
 
 import React, { useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { CheckCircle2, Copy, Layers, Loader2, Save } from 'lucide-react';
+import {
+  RiStackLine,
+  RiCheckboxCircleLine,
+  RiFileCopyLine,
+  RiLoader4Line,
+  RiSaveLine,
+} from '@remixicon/react';
 import { unitsApi } from '@/lib/api';
 import { BulkUnitInput, Unit, UnitType } from '@/lib/types';
 import { useLanguageStore } from '@/stores/language-store';
@@ -11,6 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { cx } from '@/utils/cx';
 
 type NamingPattern = 'LETTER' | 'NUMERIC';
 
@@ -25,8 +32,13 @@ const unitTypes: { value: UnitType; labelBn: string; labelEn: string }[] = [
 ];
 
 const DEFAULTS: Omit<BulkUnitInput, 'unitNumber'> = {
-  unitType: 'APARTMENT', bedrooms: 3, bathrooms: 2, monthlyBaseRent: 15000,
-  defaultServiceFee: 2000, defaultParkingFee: 0, defaultExtraCharge: 0,
+  unitType: 'APARTMENT',
+  bedrooms: 3,
+  bathrooms: 2,
+  monthlyBaseRent: 15000,
+  defaultServiceFee: 2000,
+  defaultParkingFee: 0,
+  defaultExtraCharge: 0,
 };
 
 export function generateUnitNumbers(floor: number, count: number, pattern: NamingPattern) {
@@ -136,21 +148,57 @@ export function BulkUnitFormDialog({ propertyId, units: existingUnits, open, onO
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2"><Layers className="h-5 w-5 text-emerald-600" />{isEn ? 'Add Units by Floor' : 'তলা অনুযায়ী ইউনিট যোগ করুন'}</DialogTitle>
-          <DialogDescription>{isEn ? 'Set common defaults, then review and edit each generated unit number.' : 'একই তথ্য দিয়ে ইউনিট তৈরি করুন, তারপর প্রতিটি নম্বর যাচাই বা এডিট করুন।'}</DialogDescription>
+          <DialogTitle className="flex items-center gap-2 text-text-primary">
+            <RiStackLine className="h-5 w-5 text-accent-600" />
+            {isEn ? 'Add Units by Floor' : 'তলা অনুযায়ী ইউনিট যোগ করুন'}
+          </DialogTitle>
+          <DialogDescription className="text-body-medium text-text-tertiary">
+            {isEn ? 'Set common defaults, then review and edit each generated unit number.' : 'একই তথ্য দিয়ে ইউনিট তৈরি করুন, তারপর প্রতিটি নম্বর যাচাই বা এডিট করুন।'}
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-5">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <div className="space-y-2"><Label htmlFor="bulk-floor">{t.floor}</Label><Input id="bulk-floor" min="0" type="number" value={floor} onChange={(e) => { const value = Math.max(0, Number(e.target.value)); setFloor(value); regenerate(value, count, pattern); }} /></div>
-            <div className="space-y-2"><Label htmlFor="bulk-count">{t.numberOfUnits}</Label><Input id="bulk-count" min="1" max="100" type="number" value={count} onChange={(e) => { const value = Math.min(100, Math.max(1, Number(e.target.value))); setCount(value); regenerate(floor, value, pattern); }} /></div>
-            <div className="space-y-2"><Label htmlFor="bulk-pattern">{t.namingPattern}</Label><select id="bulk-pattern" value={pattern} onChange={(e) => { const value = e.target.value as NamingPattern; setPattern(value); regenerate(floor, count, value); }} className="flex h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm"><option value="LETTER">{isEn ? 'Letters (4A, 4B)' : 'অক্ষর (4A, 4B)'}</option><option value="NUMERIC">{isEn ? 'Numeric (401, 402)' : 'সংখ্যা (401, 402)'}</option></select></div>
+            <div className="space-y-2">
+              <Label htmlFor="bulk-floor">{t.floor}</Label>
+              <Input id="bulk-floor" min="0" type="number" value={floor} onChange={(e) => { const value = Math.max(0, Number(e.target.value)); setFloor(value); regenerate(value, count, pattern); }} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="bulk-count">{t.numberOfUnits}</Label>
+              <Input id="bulk-count" min="1" max="100" type="number" value={count} onChange={(e) => { const value = Math.min(100, Math.max(1, Number(e.target.value))); setCount(value); regenerate(floor, value, pattern); }} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="bulk-pattern">{t.namingPattern}</Label>
+              <select
+                id="bulk-pattern"
+                value={pattern}
+                onChange={(e) => { const value = e.target.value as NamingPattern; setPattern(value); regenerate(floor, count, value); }}
+                className="flex h-10 w-full rounded-xl border border-border-button-default bg-background-primary-default px-3 text-body-medium text-text-primary shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus-ring"
+              >
+                <option value="LETTER">{isEn ? 'Letters (4A, 4B)' : 'অক্ষর (4A, 4B)'}</option>
+                <option value="NUMERIC">{isEn ? 'Numeric (401, 402)' : 'সংখ্যা (401, 402)'}</option>
+              </select>
+            </div>
           </div>
 
-          <div className="flex justify-end"><Button type="button" variant="outline" size="sm" onClick={copyPreviousFloor} className="gap-1.5"><Copy className="h-3.5 w-3.5" />{t.copyPreviousFloor}</Button></div>
+          <div className="flex justify-end">
+            <Button type="button" variant="outline" size="sm" onClick={copyPreviousFloor} className="gap-1.5">
+              <RiFileCopyLine className="h-3.5 w-3.5" />
+              {t.copyPreviousFloor}
+            </Button>
+          </div>
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <div className="space-y-2"><Label>{t.unitType}</Label><select value={defaults.unitType} onChange={(e) => updateDefault('unitType', e.target.value)} className="flex h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm">{unitTypes.map((type) => <option key={type.value} value={type.value}>{isEn ? type.labelEn : type.labelBn}</option>)}</select></div>
+            <div className="space-y-2">
+              <Label>{t.unitType}</Label>
+              <select
+                value={defaults.unitType}
+                onChange={(e) => updateDefault('unitType', e.target.value)}
+                className="flex h-10 w-full rounded-xl border border-border-button-default bg-background-primary-default px-3 text-body-medium text-text-primary shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus-ring"
+              >
+                {unitTypes.map((type) => <option key={type.value} value={type.value}>{isEn ? type.labelEn : type.labelBn}</option>)}
+              </select>
+            </div>
             <div className="space-y-2"><Label>{t.bedrooms}</Label><Input min="0" type="number" value={defaults.bedrooms} onChange={(e) => updateDefault('bedrooms', e.target.value)} /></div>
             <div className="space-y-2"><Label>{t.bathrooms}</Label><Input min="0" type="number" value={defaults.bathrooms} onChange={(e) => updateDefault('bathrooms', e.target.value)} /></div>
             <div className="space-y-2"><Label>{t.baseRent} (৳)</Label><Input min="0" type="number" value={defaults.monthlyBaseRent} onChange={(e) => updateDefault('monthlyBaseRent', e.target.value)} /></div>
@@ -159,18 +207,40 @@ export function BulkUnitFormDialog({ propertyId, units: existingUnits, open, onO
             <div className="space-y-2"><Label>{t.extraCharge} (৳)</Label><Input min="0" type="number" value={defaults.defaultExtraCharge} onChange={(e) => updateDefault('defaultExtraCharge', e.target.value)} /></div>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-            <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-800"><CheckCircle2 className="h-4 w-4 text-emerald-600" />{t.livePreview}</div>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {unitNumbers.map((number, index) => <Input key={index} aria-label={`${isEn ? 'Unit number' : 'ইউনিট নম্বর'} ${index + 1}`} value={number} onChange={(e) => setUnitNumbers((current) => current.map((item, itemIndex) => itemIndex === index ? e.target.value : item))} className={hasInvalidNumbers && (!number.trim() || normalizedNumbers.indexOf(normalizedNumbers[index]) !== index || existingNumbers.has(normalizedNumbers[index])) ? 'border-rose-400 focus-visible:ring-rose-400' : ''} />)}
+          <div className="rounded-2xl border border-border-button-default bg-background-secondary-default p-3">
+            <div className="mb-2 flex items-center gap-2 text-body-medium font-semibold text-text-primary">
+              <RiCheckboxCircleLine className="h-4 w-4 text-accent-600" />
+              {t.livePreview}
             </div>
-            {duplicateNumbers.length > 0 && <p className="mt-2 text-xs text-rose-600">{isEn ? 'Duplicate unit numbers are not allowed.' : 'একই ইউনিট নম্বর একাধিকবার ব্যবহার করা যাবে না।'}</p>}
-            {conflictingNumbers.length > 0 && <p className="mt-2 text-xs text-rose-600">{isEn ? `Already exists: ${[...new Set(conflictingNumbers)].join(', ')}` : `ইতিমধ্যে রয়েছে: ${[...new Set(conflictingNumbers)].join(', ')}`}</p>}
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {unitNumbers.map((number, index) => (
+                <Input
+                  key={index}
+                  aria-label={`${isEn ? 'Unit number' : 'ইউনিট নম্বর'} ${index + 1}`}
+                  value={number}
+                  onChange={(e) => setUnitNumbers((current) => current.map((item, itemIndex) => itemIndex === index ? e.target.value : item))}
+                  className={cx(
+                    hasInvalidNumbers && (!number.trim() || normalizedNumbers.indexOf(normalizedNumbers[index]) !== index || existingNumbers.has(normalizedNumbers[index]))
+                      ? 'border-border-error-default focus-visible:ring-border-error-default'
+                      : ''
+                  )}
+                />
+              ))}
+            </div>
+            {duplicateNumbers.length > 0 && <p className="mt-2 text-caption-1-regular text-text-error-primary">{isEn ? 'Duplicate unit numbers are not allowed.' : 'একই ইউনিট নম্বর একাধিকবার ব্যবহার করা যাবে না।'}</p>}
+            {conflictingNumbers.length > 0 && <p className="mt-2 text-caption-1-regular text-text-error-primary">{isEn ? `Already exists: ${[...new Set(conflictingNumbers)].join(', ')}` : `ইতিমধ্যে রয়েছে: ${[...new Set(conflictingNumbers)].join(', ')}`}</p>}
           </div>
 
-          <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800">{summary}</p>
+          <p className="rounded-xl bg-background-secondary-default border border-border-button-default px-3 py-2 text-body-medium font-medium text-text-primary">{summary}</p>
         </div>
-        <DialogFooter><Button type="button" variant="outline" disabled={isSubmitting} onClick={() => onOpenChange(false)}>{t.cancel}</Button><Button type="button" variant="default" disabled={isSubmitting || hasInvalidNumbers} onClick={submit} className="gap-2">{isSubmitting ? <><Loader2 className="h-4 w-4 animate-spin" />{t.loading}</> : <><Save className="h-4 w-4" />{t.createUnits}</>}</Button></DialogFooter>
+        <DialogFooter>
+          <Button type="button" variant="outline" disabled={isSubmitting} onClick={() => onOpenChange(false)}>
+            {t.cancel}
+          </Button>
+          <Button type="button" variant="default" disabled={isSubmitting || hasInvalidNumbers} onClick={submit} className="gap-2">
+            {isSubmitting ? <><RiLoader4Line className="h-4 w-4 animate-spin" />{t.loading}</> : <><RiSaveLine className="h-4 w-4" />{t.createUnits}</>}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

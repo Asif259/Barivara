@@ -19,11 +19,11 @@ import { Label } from '@/components/ui/label';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { RentNoticeDialog, WhatsAppIcon } from './rent-notice-dialog';
 import {
-  FileText,
-  Loader2,
-  Eye,
-  AlertCircle,
-} from 'lucide-react';
+  RiFileList3Line,
+  RiLoader4Line,
+  RiEyeLine,
+  RiErrorWarningLine,
+} from '@remixicon/react';
 import {
   buildNoticeWhatsAppText,
   getWhatsAppShareUrl,
@@ -159,11 +159,11 @@ export function GenerateRentNoticesDialog({
       <Dialog open={open && !activeNoticeRent} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-slate-900">
-              <FileText className="w-5 h-5 text-emerald-600" />
+            <DialogTitle className="flex items-center gap-2 text-text-primary">
+              <RiFileList3Line className="w-5 h-5 text-accent-600" />
               {isEn ? 'Generate & Send Rent Notices' : 'ভাড়ার নোটিশ তৈরি ও প্রেরণ'}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-body-medium text-text-tertiary">
               {isEn
                 ? 'Generate payment request notices from existing rent invoices. Does not duplicate invoices or modify payment records.'
                 : 'বিদ্যমান ভাড়ার হিসাবের ভিত্তিতে ভাড়াটিয়াদের জন্য পরিশোধের নোটিশ তৈরি করুন। এটি কোনো ডুপ্লিকেট বিল তৈরি করে না।'}
@@ -171,16 +171,16 @@ export function GenerateRentNoticesDialog({
           </DialogHeader>
 
           {/* Filter Bar */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 rounded-2xl bg-background-secondary-default border border-border-button-default">
             <div className="space-y-1">
-              <Label htmlFor="noticeMonth" className="text-xs font-semibold text-slate-700">
+              <Label htmlFor="noticeMonth" className="text-caption-1-medium font-semibold text-text-secondary">
                 {isEn ? 'Rent Month' : 'ভাড়ার মাস'}
               </Label>
               <select
                 id="noticeMonth"
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(Number(e.target.value))}
-                className="flex h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-sm text-slate-900 shadow-xs focus:ring-2 focus:ring-emerald-500"
+                className="flex h-9 w-full rounded-xl border border-border-button-default bg-background-primary-default px-2.5 py-1 text-body-medium text-text-primary shadow-xs focus:ring-2 focus:ring-border-focus-ring"
               >
                 {monthsBn.map((m) => (
                   <option key={m.value} value={m.value}>
@@ -191,7 +191,7 @@ export function GenerateRentNoticesDialog({
             </div>
 
             <div className="space-y-1">
-              <Label htmlFor="noticeYear" className="text-xs font-semibold text-slate-700">
+              <Label htmlFor="noticeYear" className="text-caption-1-medium font-semibold text-text-secondary">
                 {isEn ? 'Year' : 'সাল'}
               </Label>
               <Input
@@ -199,19 +199,19 @@ export function GenerateRentNoticesDialog({
                 type="number"
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(Number(e.target.value))}
-                className="h-9 font-semibold text-sm"
+                className="h-9 font-semibold text-body-medium"
               />
             </div>
 
             <div className="space-y-1">
-              <Label htmlFor="noticeProperty" className="text-xs font-semibold text-slate-700">
+              <Label htmlFor="noticeProperty" className="text-caption-1-medium font-semibold text-text-secondary">
                 {isEn ? 'Property' : 'বাড়ি নির্বাচন'}
               </Label>
               <select
                 id="noticeProperty"
                 value={selectedPropertyId}
                 onChange={(e) => setSelectedPropertyId(e.target.value)}
-                className="flex h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-sm text-slate-900 shadow-xs focus:ring-2 focus:ring-emerald-500"
+                className="flex h-9 w-full rounded-xl border border-border-button-default bg-background-primary-default px-2.5 py-1 text-body-medium text-text-primary shadow-xs focus:ring-2 focus:ring-border-focus-ring"
               >
                 <option value="">{isEn ? '-- All Properties --' : '-- সকল বাড়ি --'}</option>
                 {properties?.map((p) => (
@@ -224,17 +224,17 @@ export function GenerateRentNoticesDialog({
           </div>
 
           <div className="flex items-center justify-between px-1">
-            <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
+            <label className="flex items-center gap-2 cursor-pointer text-caption-1-medium text-text-secondary">
               <input
                 type="checkbox"
                 checked={unpaidOnly}
                 onChange={(e) => setUnpaidOnly(e.target.checked)}
-                className="rounded-sm border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                className="rounded-sm border-border-button-default text-accent-600 focus:ring-border-focus-ring cursor-pointer"
               />
               {isEn ? 'Show only unpaid & partial balances' : 'শুধুমাত্র বকেয়া ও আংশিক পরিশোধিত বিল দেখান'}
             </label>
 
-            <span className="text-xs text-slate-500 font-medium">
+            <span className="text-caption-1-regular text-text-tertiary">
               {isEn ? `Found: ${filteredInvoices.length} invoices` : `মোট প্রাপ্ত: ${filteredInvoices.length} টি বিল`}
             </span>
           </div>
@@ -242,24 +242,24 @@ export function GenerateRentNoticesDialog({
           {/* Results List */}
           <div className="space-y-2.5 pt-1">
             {isLoading ? (
-              <div className="py-12 flex flex-col items-center justify-center text-slate-500 gap-2">
-                <Loader2 className="w-6 h-6 animate-spin text-emerald-600" />
-                <span className="text-xs font-medium">{isEn ? 'Loading rent records...' : 'ভাড়ার হিসাব লোড হচ্ছে...'}</span>
+              <div className="py-12 flex flex-col items-center justify-center text-text-tertiary gap-2">
+                <RiLoader4Line className="w-6 h-6 animate-spin text-accent-600" />
+                <span className="text-caption-1-medium">{isEn ? 'Loading rent records...' : 'ভাড়ার হিসাব লোড হচ্ছে...'}</span>
               </div>
             ) : filteredInvoices.length === 0 ? (
-              <div className="py-10 px-4 text-center rounded-xl bg-slate-50 border border-dashed border-slate-200 space-y-2">
-                <AlertCircle className="w-8 h-8 text-amber-500 mx-auto" />
-                <p className="text-sm font-semibold text-slate-800">
+              <div className="py-10 px-4 text-center rounded-2xl bg-background-secondary-default border border-dashed border-border-button-default space-y-2">
+                <RiErrorWarningLine className="w-8 h-8 text-amber-500 mx-auto" />
+                <p className="text-body-medium font-semibold text-text-primary">
                   {isEn ? 'No rent invoices found for this period' : 'এই মাসের জন্য কোনো ভাড়ার বিল পাওয়া যায়নি'}
                 </p>
-                <p className="text-xs text-slate-500 max-w-md mx-auto">
+                <p className="text-caption-1-regular text-text-tertiary max-w-md mx-auto">
                   {isEn
                     ? 'If invoices for this month have not been generated yet, click "Generate Rent" first to create invoices without recording payments.'
                     : 'যদি এই মাসের ভাড়ার হিসাব এখনও তৈরি না হয়ে থাকে, তবে প্রথমে "ভাড়া তৈরি করুন" দিয়ে মাসিক বিল তৈরি করে নিন।'}
                 </p>
               </div>
             ) : (
-              <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden bg-white">
+              <div className="divide-y divide-separator-border border border-border-button-default rounded-2xl overflow-hidden bg-background-primary-default">
                 {filteredInvoices.map((inv) => {
                   const tenant = inv.agreement?.tenant;
                   const unit = inv.agreement?.unit;
@@ -268,29 +268,29 @@ export function GenerateRentNoticesDialog({
                   return (
                     <div
                       key={inv.id}
-                      className="p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/80 transition-colors"
+                      className="p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-background-secondary-hover transition-colors"
                     >
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="font-bold text-slate-900 text-sm">
+                          <span className="font-bold text-text-primary text-body-medium">
                             {tenant?.name || 'Tenant'}
                           </span>
-                          <span className="text-xs text-slate-500">
+                          <span className="text-caption-1-regular text-text-tertiary">
                             • {unit?.unitNumber} ({property?.name})
                           </span>
                           <StatusBadge status={inv.status} lang={language} />
                         </div>
 
-                        <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                        <div className="flex flex-wrap items-center gap-3 text-caption-1-regular text-text-tertiary">
                           <span>
-                            {isEn ? 'Total:' : 'মোট:'} <strong className="text-slate-800">{formatCurrency(inv.totalAmount, language)}</strong>
+                            {isEn ? 'Total:' : 'মোট:'} <strong className="text-text-primary">{formatCurrency(inv.totalAmount, language)}</strong>
                           </span>
                           {Number(inv.paidAmount) > 0 && (
-                            <span className="text-emerald-700">
+                            <span className="text-accent-600">
                               {isEn ? 'Paid:' : 'পরিশোধিত:'} {formatCurrency(inv.paidAmount, language)}
                             </span>
                           )}
-                          <span className="text-amber-800 font-semibold">
+                          <span className="text-text-error-primary font-semibold">
                             {isEn ? 'Due:' : 'বকেয়া:'} {formatCurrency(inv.remainingAmount, language)}
                           </span>
                           <span>
@@ -305,9 +305,9 @@ export function GenerateRentNoticesDialog({
                           size="sm"
                           variant="outline"
                           onClick={() => setActiveNoticeRent(inv)}
-                          className="gap-1.5 h-8 text-xs font-semibold"
+                          className="gap-1.5 h-8 text-caption-1-medium font-semibold"
                         >
-                          <Eye className="w-3.5 h-3.5 text-slate-500" />
+                          <RiEyeLine className="w-3.5 h-3.5 text-foreground-icon-secondary" />
                           {isEn ? 'View Notice' : 'নোটিশ দেখুন'}
                         </Button>
 
@@ -315,7 +315,7 @@ export function GenerateRentNoticesDialog({
                           type="button"
                           size="sm"
                           onClick={() => handleQuickWhatsApp(inv)}
-                          className="gap-1.5 h-8 text-xs font-semibold bg-[#25D366] hover:bg-[#20bd5a] text-white"
+                          className="gap-1.5 h-8 text-caption-1-medium font-semibold bg-[#25D366] hover:bg-[#20bd5a] text-white"
                         >
                           <WhatsAppIcon className="w-3.5 h-3.5" />
                           {isEn ? 'WhatsApp' : 'হোয়াটসঅ্যাপ'}

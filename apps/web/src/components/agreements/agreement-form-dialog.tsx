@@ -22,7 +22,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { FileUploader } from '@/components/ui/file-uploader';
-import { FileText, Loader2, Save, AlertCircle, ExternalLink } from 'lucide-react';
+import {
+  RiFileList3Line,
+  RiLoader4Line,
+  RiSaveLine,
+  RiErrorWarningLine,
+  RiExternalLinkLine,
+} from '@remixicon/react';
 
 const agreementSchema = z.object({
   tenantId: z.string().min(1, 'ভাড়াটিয়া নির্বাচন করুন'),
@@ -331,11 +337,11 @@ export function AgreementFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <FileText className="w-5 h-5 text-emerald-600" />
+          <DialogTitle className="flex items-center gap-2 text-text-primary">
+            <RiFileList3Line className="w-5 h-5 text-accent-600" />
             {isEditing ? t.editAgreement : t.addNewAgreement}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-body-medium text-text-tertiary">
             {isEditing
               ? (isEn
                   ? 'Update any of the rental agreement terms, tenant, unit, dates, and charges.'
@@ -348,8 +354,8 @@ export function AgreementFormDialog({
 
         {isEditing && isFetchingAgreement ? (
           <div className="flex flex-col items-center justify-center py-12 space-y-3">
-            <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
-            <p className="text-sm text-slate-500 font-medium">
+            <RiLoader4Line className="w-8 h-8 animate-spin text-accent-600" />
+            <p className="text-body-medium text-text-tertiary font-medium">
               {isEn ? 'Loading agreement details...' : 'চুক্তির তথ্য লোড করা হচ্ছে...'}
             </p>
           </div>
@@ -360,7 +366,7 @@ export function AgreementFormDialog({
               <Label htmlFor="tenantId">{t.tenantName}</Label>
               <select
                 id="tenantId"
-                className="flex h-10 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                className="flex h-10 w-full rounded-xl border border-border-button-default bg-background-primary-default px-3 py-2 text-body-medium text-text-primary shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus-ring"
                 {...register('tenantId')}
               >
                 <option value="">{isEn ? '-- Select Tenant --' : '-- ভাড়াটিয়া নির্বাচন করুন --'}</option>
@@ -370,32 +376,32 @@ export function AgreementFormDialog({
                   </option>
                 ))}
               </select>
-              {errors.tenantId && <p className="text-xs text-rose-500">{errors.tenantId.message}</p>}
+              {errors.tenantId && <p className="text-caption-1-regular text-text-error-primary">{errors.tenantId.message}</p>}
 
               {/* Active Agreement Warning (Create mode only) */}
               {!isEditing && hasActiveAgreement && activeAgreement && (
-                <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl space-y-2.5 text-rose-900">
+                <div className="p-3.5 bg-background-tertiary-error border border-border-error-default rounded-xl space-y-2.5 text-text-error-primary">
                   <div className="flex items-start gap-2.5">
-                    <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+                    <RiErrorWarningLine className="w-5 h-5 text-text-error-primary shrink-0 mt-0.5" />
                     <div className="space-y-1">
-                      <p className="text-xs font-bold text-rose-950">
+                      <p className="text-caption-1-medium font-bold text-text-error-primary">
                         {t.tenantHasActiveAgreement}
                       </p>
-                      <p className="text-[11px] text-rose-800 leading-relaxed">
+                      <p className="text-caption-1-regular leading-relaxed">
                         {t.tenantActiveAgreementWarning}
                       </p>
                     </div>
                   </div>
 
-                  <div className="bg-white/90 p-2.5 rounded-lg border border-rose-200 text-xs space-y-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-rose-800 block">
+                  <div className="bg-background-primary-default p-2.5 rounded-lg border border-border-error-default text-caption-1-medium space-y-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider block text-text-error-primary">
                       {t.currentActiveAgreement}:
                     </span>
-                    <div className="flex items-center justify-between text-slate-800 font-medium">
+                    <div className="flex items-center justify-between text-text-primary font-medium">
                       <span>
                         {isEn ? 'Unit' : 'ইউনিট'}: {activeAgreement.unit?.unitNumber || '-'} {activeAgreement.unit?.property?.name ? `(${activeAgreement.unit.property.name})` : ''}
                       </span>
-                      <span className="font-semibold text-slate-950">৳{activeAgreement.monthlyRent}</span>
+                      <span className="font-semibold">৳{activeAgreement.monthlyRent}</span>
                     </div>
                   </div>
 
@@ -405,9 +411,9 @@ export function AgreementFormDialog({
                       variant="outline"
                       size="sm"
                       onClick={() => window.open('/agreements', '_blank')}
-                      className="h-7 text-xs gap-1.5 border-rose-300 text-rose-800 hover:bg-rose-100 cursor-pointer"
+                      className="h-7 text-caption-1-medium gap-1.5 border-border-error-default text-text-error-primary hover:bg-background-secondary-hover cursor-pointer"
                     >
-                      <ExternalLink className="w-3.5 h-3.5" />
+                      <RiExternalLinkLine className="w-3.5 h-3.5" />
                       {t.viewExistingAgreement}
                     </Button>
                   </div>
@@ -423,7 +429,7 @@ export function AgreementFormDialog({
                   id="propertySelect"
                   value={selectedPropertyId}
                   onChange={(e) => setSelectedPropertyId(e.target.value)}
-                  className="flex h-10 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                  className="flex h-10 w-full rounded-xl border border-border-button-default bg-background-primary-default px-3 py-2 text-body-medium text-text-primary shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus-ring"
                 >
                   <option value="">{isEn ? '-- Select Property --' : '-- বাড়ি নির্বাচন করুন --'}</option>
                   {properties?.map((p) => (
@@ -442,7 +448,7 @@ export function AgreementFormDialog({
                   id="unitId"
                   value={watch('unitId')}
                   onChange={handleUnitSelect}
-                  className="flex h-10 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                  className="flex h-10 w-full rounded-xl border border-border-button-default bg-background-primary-default px-3 py-2 text-body-medium text-text-primary shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus-ring"
                 >
                   <option value="">{isEn ? '-- Select Unit --' : '-- ইউনিট নির্বাচন করুন --'}</option>
                   {units?.map((u) => (
@@ -451,12 +457,12 @@ export function AgreementFormDialog({
                     </option>
                   ))}
                 </select>
-                {errors.unitId && <p className="text-xs text-rose-500">{errors.unitId.message}</p>}
+                {errors.unitId && <p className="text-caption-1-regular text-text-error-primary">{errors.unitId.message}</p>}
               </div>
             </div>
 
             {/* 3. Base Rent & Service Fee */}
-            <div className="grid grid-cols-2 gap-3 border-t border-slate-100 pt-3">
+            <div className="grid grid-cols-2 gap-3 border-t border-separator-border pt-3">
               <div className="space-y-2">
                 <Label htmlFor="monthlyRent">{t.baseRent} (৳)</Label>
                 <Input
@@ -464,7 +470,7 @@ export function AgreementFormDialog({
                   type="number"
                   {...register('monthlyRent', { valueAsNumber: true })}
                 />
-                {errors.monthlyRent && <p className="text-xs text-rose-500">{errors.monthlyRent.message}</p>}
+                {errors.monthlyRent && <p className="text-caption-1-regular text-text-error-primary">{errors.monthlyRent.message}</p>}
               </div>
 
               <div className="space-y-2">
@@ -527,7 +533,7 @@ export function AgreementFormDialog({
               <div className="space-y-2">
                 <Label htmlFor="startDate">{t.startDate}</Label>
                 <Input id="startDate" type="date" {...register('startDate')} />
-                {errors.startDate && <p className="text-xs text-rose-500">{errors.startDate.message}</p>}
+                {errors.startDate && <p className="text-caption-1-regular text-text-error-primary">{errors.startDate.message}</p>}
               </div>
 
               <div className="space-y-2">
@@ -542,7 +548,7 @@ export function AgreementFormDialog({
                 <Label htmlFor="status">{t.status || 'স্ট্যাটাস'}</Label>
                 <select
                   id="status"
-                  className="flex h-10 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                  className="flex h-10 w-full rounded-xl border border-border-button-default bg-background-primary-default px-3 py-2 text-body-medium text-text-primary shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus-ring"
                   {...register('status')}
                 >
                   <option value="ACTIVE">{isEn ? 'ACTIVE (Active Agreement)' : 'সক্রিয় (ACTIVE)'}</option>
@@ -568,17 +574,17 @@ export function AgreementFormDialog({
                 <input
                   type="checkbox"
                   id="generateCurrentMonthRent"
-                  className="h-4 w-4 rounded-sm border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                  className="h-4 w-4 rounded-sm border-border-button-default text-accent-600 focus:ring-border-focus-ring cursor-pointer"
                   {...register('generateCurrentMonthRent')}
                 />
-                <Label htmlFor="generateCurrentMonthRent" className="text-xs text-slate-700 cursor-pointer">
+                <Label htmlFor="generateCurrentMonthRent" className="text-caption-1-medium text-text-secondary cursor-pointer">
                   {isEn ? 'Generate current month rent invoice immediately' : 'তাত্ক্ষণিকভাবে চলতি মাসের ভাড়ার বিল তৈরি করুন'}
                 </Label>
               </div>
             )}
 
             {/* 10. Agreement Contract Scan Upload */}
-            <div className="border-t border-slate-100 pt-3">
+            <div className="border-t border-separator-border pt-3">
               <FileUploader
                 category="AGREEMENT_DOCUMENT"
                 entityType="agreement"
@@ -607,12 +613,12 @@ export function AgreementFormDialog({
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <RiLoader4Line className="w-4 h-4 animate-spin" />
                     {t.loading}
                   </>
                 ) : (
                   <>
-                    <Save className="w-4 h-4" />
+                    <RiSaveLine className="w-4 h-4" />
                     {isEditing
                       ? t.save
                       : hasActiveAgreement

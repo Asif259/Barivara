@@ -24,7 +24,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { FileUploader } from '@/components/ui/file-uploader';
-import { Loader2, CreditCard, CheckCircle2, User, Home, DollarSign, Calendar, Clock } from 'lucide-react';
+import {
+  RiLoader4Line,
+  RiBankCardLine,
+  RiCheckboxCircleLine,
+  RiUser3Line,
+  RiHomeLine,
+  RiMoneyDollarCircleLine,
+  RiCalendarLine,
+  RiTimeLine,
+} from '@remixicon/react';
 import { PaymentReceiptDialog } from './payment-receipt-dialog';
 
 const getTodayString = () => {
@@ -104,7 +113,6 @@ export function CollectPaymentDialog({
     }
     return rent;
   }, [selectedRentId, invoiceOptions, rent]);
-
 
   const remaining = activeRent ? activeRent.remainingAmount : 0;
 
@@ -218,11 +226,11 @@ export function CollectPaymentDialog({
       <Dialog open={open && !receiptPayment} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-slate-900">
-            <CreditCard className="w-5 h-5 text-emerald-600" />
+          <DialogTitle className="flex items-center gap-2 text-text-primary">
+            <RiBankCardLine className="w-5 h-5 text-accent-600" />
             {isEn ? 'Collect Rent Payment' : 'ভাড়া আদায় / পেমেন্ট গ্রহণ'}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-body-medium text-text-tertiary">
             {isEn
               ? 'Record a payment against an outstanding or partially paid rent invoice.'
               : 'নির্দিষ্ট বকেয়া বা আংশিক পরিশোধিত ভাড়ার বিলের বিপরীতে পেমেন্ট রেকর্ড করুন।'}
@@ -232,12 +240,12 @@ export function CollectPaymentDialog({
         {/* 1. Explicit Rent Month / Invoice Selector */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <Label htmlFor="invoiceSelect" className="text-xs font-semibold text-slate-800">
+            <Label htmlFor="invoiceSelect" className="text-caption-1-medium font-semibold text-text-primary">
               {isEn ? 'Rent Month / Invoice' : 'ভাড়ার মাস ও বিল নির্বাচন'}
             </Label>
             {isLoadingInvoices && (
-              <span className="text-[11px] text-slate-400 flex items-center gap-1">
-                <Loader2 className="w-3 h-3 animate-spin" />
+              <span className="text-[11px] text-text-tertiary flex items-center gap-1">
+                <RiLoader4Line className="w-3 h-3 animate-spin" />
                 {isEn ? 'Loading bills...' : 'বিল খোঁজা হচ্ছে...'}
               </span>
             )}
@@ -254,7 +262,7 @@ export function CollectPaymentDialog({
               }
             }}
             disabled={invoiceOptions.length <= 1}
-            className="flex h-10 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 font-medium"
+            className="flex h-10 w-full rounded-xl border border-border-button-default bg-background-primary-default px-3 py-2 text-body-medium text-text-primary shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus-ring font-medium"
           >
             {invoiceOptions.map((inv) => (
               <option key={inv.id} value={inv.id}>
@@ -267,52 +275,52 @@ export function CollectPaymentDialog({
         </div>
 
         {/* 2. Bill Summary Card */}
-        <div className="rounded-2xl bg-slate-50 border border-slate-200/80 p-4 space-y-2.5 text-sm">
-          <div className="flex items-center justify-between text-slate-600">
+        <div className="rounded-2xl bg-background-secondary-default border border-border-button-default p-4 space-y-2.5 text-body-medium">
+          <div className="flex items-center justify-between text-text-secondary">
             <span className="flex items-center gap-1.5">
-              <User className="w-4 h-4 text-slate-400" /> {t.tenantName}:
+              <RiUser3Line className="w-4 h-4 text-foreground-icon-tertiary" /> {t.tenantName}:
             </span>
-            <span className="font-semibold text-slate-900">
+            <span className="font-semibold text-text-primary">
               {activeRent.agreement?.tenant?.name || 'Tenant'}
             </span>
           </div>
-          <div className="flex items-center justify-between text-slate-600">
+          <div className="flex items-center justify-between text-text-secondary">
             <span className="flex items-center gap-1.5">
-              <Home className="w-4 h-4 text-slate-400" /> {t.unitNumber}:
+              <RiHomeLine className="w-4 h-4 text-foreground-icon-tertiary" /> {t.unitNumber}:
             </span>
-            <span className="font-semibold text-slate-900">
+            <span className="font-semibold text-text-primary">
               {activeRent.agreement?.unit?.unitNumber} ({activeRent.agreement?.unit?.property?.name})
             </span>
           </div>
-          <div className="flex items-center justify-between text-slate-600">
+          <div className="flex items-center justify-between text-text-secondary">
             <span className="flex items-center gap-1.5">
-              <Calendar className="w-4 h-4 text-slate-400" /> {isEn ? 'Rent Month' : 'ভাড়ার মাস'}:
+              <RiCalendarLine className="w-4 h-4 text-foreground-icon-tertiary" /> {isEn ? 'Rent Month' : 'ভাড়ার মাস'}:
             </span>
-            <span className="font-semibold text-emerald-800">
+            <span className="font-semibold text-accent-700 dark:text-accent-300">
               {getMonthLabel(activeRent.month, activeRent.year)}
             </span>
           </div>
-          <div className="flex items-center justify-between text-slate-600">
+          <div className="flex items-center justify-between text-text-secondary">
             <span className="flex items-center gap-1.5">
-              <Clock className="w-4 h-4 text-slate-400" /> {isEn ? 'Due Date' : 'পরিশোধের শেষ তারিখ'}:
+              <RiTimeLine className="w-4 h-4 text-foreground-icon-tertiary" /> {isEn ? 'Due Date' : 'পরিশোধের শেষ তারিখ'}:
             </span>
-            <span className="font-medium text-slate-900">
+            <span className="font-medium text-text-primary">
               {formatBnDate(activeRent.dueDate, language)}
             </span>
           </div>
-          <div className="flex items-center justify-between text-slate-600">
+          <div className="flex items-center justify-between text-text-secondary">
             <span>{isEn ? 'Status' : 'বিল স্ট্যাটাস'}:</span>
             <StatusBadge status={activeRent.status} lang={language} />
           </div>
-          <div className="border-t border-slate-200 pt-2 flex items-center justify-between">
-            <span className="text-slate-600">{t.total}:</span>
-            <span className="font-bold text-slate-900">{formatCurrency(activeRent.totalAmount, language)}</span>
+          <div className="border-t border-separator-border pt-2 flex items-center justify-between">
+            <span className="text-text-secondary">{t.total}:</span>
+            <span className="font-bold text-text-primary">{formatCurrency(activeRent.totalAmount, language)}</span>
           </div>
-          <div className="flex items-center justify-between text-emerald-700 font-medium">
+          <div className="flex items-center justify-between text-accent-600 font-medium">
             <span>{t.paid}:</span>
             <span>{formatCurrency(activeRent.paidAmount, language)}</span>
           </div>
-          <div className="flex items-center justify-between text-rose-700 font-bold text-base">
+          <div className="flex items-center justify-between text-text-error-primary font-bold text-base">
             <span>{t.remaining}:</span>
             <span>{formatCurrency(activeRent.remainingAmount, language)}</span>
           </div>
@@ -322,24 +330,24 @@ export function CollectPaymentDialog({
           <div className="space-y-2">
             <Label htmlFor="paymentDate">{t.paymentDate || (isEn ? 'Payment Date' : 'পেমেন্টের তারিখ')}</Label>
             <div className="relative">
-              <Calendar className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
+              <RiCalendarLine className="absolute left-3.5 top-3 h-4 w-4 text-foreground-icon-tertiary" />
               <Input
                 id="paymentDate"
                 type="date"
                 max={getTodayString()}
-                className="pl-10 font-semibold text-sm"
+                className="pl-10 font-semibold text-body-medium"
                 {...register('paymentDate')}
               />
             </div>
             {errors.paymentDate && (
-              <p className="text-xs font-medium text-rose-500">{errors.paymentDate.message}</p>
+              <p className="text-caption-1-regular font-medium text-text-error-primary">{errors.paymentDate.message}</p>
             )}
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="amount">{isEn ? 'Payment Amount (৳)' : 'পরিশোধিত টাকার পরিমাণ (৳)'}</Label>
             <div className="relative">
-              <DollarSign className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
+              <RiMoneyDollarCircleLine className="absolute left-3.5 top-3 h-4 w-4 text-foreground-icon-tertiary" />
               <Input
                 id="amount"
                 type="number"
@@ -349,7 +357,7 @@ export function CollectPaymentDialog({
               />
             </div>
             {errors.amount && (
-              <p className="text-xs font-medium text-rose-500">{errors.amount.message}</p>
+              <p className="text-caption-1-regular font-medium text-text-error-primary">{errors.amount.message}</p>
             )}
           </div>
 
@@ -357,7 +365,7 @@ export function CollectPaymentDialog({
             <Label htmlFor="paymentMethod">{t.paymentMethod}</Label>
             <select
               id="paymentMethod"
-              className="flex h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-900 shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+              className="flex h-10 w-full rounded-xl border border-border-button-default bg-background-primary-default px-3.5 py-2 text-body-medium text-text-primary shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus-ring"
               {...register('paymentMethod')}
             >
               {paymentMethods.map((m) => (
@@ -367,7 +375,7 @@ export function CollectPaymentDialog({
               ))}
             </select>
             {errors.paymentMethod && (
-              <p className="text-xs font-medium text-rose-500">{errors.paymentMethod.message}</p>
+              <p className="text-caption-1-regular font-medium text-text-error-primary">{errors.paymentMethod.message}</p>
             )}
           </div>
 
@@ -392,7 +400,7 @@ export function CollectPaymentDialog({
           </div>
 
           {/* Payment Receipt / Deposit Voucher Upload */}
-          <div className="border-t border-slate-100 pt-3">
+          <div className="border-t border-separator-border pt-3">
             <FileUploader
               category="PAYMENT_RECEIPT"
               entityType="payment"
@@ -419,12 +427,12 @@ export function CollectPaymentDialog({
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <RiLoader4Line className="w-4 h-4 animate-spin" />
                   {t.loading}
                 </>
               ) : (
                 <>
-                  <CheckCircle2 className="w-4 h-4" />
+                  <RiCheckboxCircleLine className="w-4 h-4" />
                   {t.confirm}
                 </>
               )}

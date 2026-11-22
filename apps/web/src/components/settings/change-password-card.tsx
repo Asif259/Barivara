@@ -5,7 +5,15 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import { Lock, KeyRound, Eye, EyeOff, Loader2, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import {
+  RiLockLine,
+  RiKey2Line,
+  RiEyeLine,
+  RiEyeOffLine,
+  RiLoader4Line,
+  RiShieldCheckLine,
+  RiCheckboxCircleLine,
+} from '@remixicon/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +21,7 @@ import { Label } from '@/components/ui/label';
 import { useLanguageStore } from '@/stores/language-store';
 import { useTranslation } from '@/lib/translations';
 import { authApi, getApiErrorMessage } from '@/lib/api';
+import { cx } from '@/utils/cx';
 
 const passwordPattern = /((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/;
 
@@ -106,97 +115,108 @@ export function ChangePasswordCard() {
   };
 
   return (
-    <Card className="rounded-[10px] border-[#E5E7EB] shadow-none">
+    <Card className="rounded-3xl border-border-button-default bg-background-primary-default shadow-xs">
       <CardHeader>
-        <CardTitle className="text-lg flex items-center gap-2">
-          <KeyRound className="w-5 h-5 text-[#12664F]" />
+        <CardTitle className="text-title-3-semibold text-text-primary flex items-center gap-2">
+          <RiKey2Line className="w-5 h-5 text-accent-600" />
           {t.securitySettingsTitle}
         </CardTitle>
-        <CardDescription>{t.securitySettingsDesc}</CardDescription>
+        <CardDescription className="text-body-medium text-text-tertiary">
+          {t.securitySettingsDesc}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 max-w-xl">
           {/* Current Password */}
           <div className="space-y-1.5">
-            <Label htmlFor="settingsCurrentPassword" className="text-xs text-[#374151]">
+            <Label htmlFor="settingsCurrentPassword" className="text-caption-1-medium text-text-secondary">
               {t.currentPassword}
             </Label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <RiLockLine className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-icon-tertiary" />
               <Input
                 id="settingsCurrentPassword"
                 type={showCurrentPassword ? 'text' : 'password'}
                 placeholder="••••••••"
-                className={`pl-9 pr-10 rounded-xl ${errors.currentPassword ? 'border-red-500' : ''}`}
+                className={cx(
+                  'pl-9 pr-10 rounded-xl',
+                  errors.currentPassword && 'border-border-error-default'
+                )}
                 {...register('currentPassword')}
               />
               <button
                 type="button"
                 onClick={() => setShowCurrentPassword((prev) => !prev)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground-icon-tertiary hover:text-text-primary cursor-pointer"
                 tabIndex={-1}
               >
-                {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showCurrentPassword ? <RiEyeOffLine className="w-4 h-4" /> : <RiEyeLine className="w-4 h-4" />}
               </button>
             </div>
             {errors.currentPassword && (
-              <p className="text-xs text-red-500">{errors.currentPassword.message}</p>
+              <p className="text-caption-1-regular text-text-error-primary">{errors.currentPassword.message}</p>
             )}
           </div>
 
           {/* New Password */}
           <div className="space-y-1.5">
-            <Label htmlFor="settingsNewPassword" className="text-xs text-[#374151]">
+            <Label htmlFor="settingsNewPassword" className="text-caption-1-medium text-text-secondary">
               {t.newPassword}
             </Label>
             <div className="relative">
-              <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <RiKey2Line className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-icon-tertiary" />
               <Input
                 id="settingsNewPassword"
                 type={showNewPassword ? 'text' : 'password'}
                 placeholder="••••••••"
-                className={`pl-9 pr-10 rounded-xl ${errors.newPassword ? 'border-red-500' : ''}`}
+                className={cx(
+                  'pl-9 pr-10 rounded-xl',
+                  errors.newPassword && 'border-border-error-default'
+                )}
                 {...register('newPassword')}
               />
               <button
                 type="button"
                 onClick={() => setShowNewPassword((prev) => !prev)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground-icon-tertiary hover:text-text-primary cursor-pointer"
                 tabIndex={-1}
               >
-                {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showNewPassword ? <RiEyeOffLine className="w-4 h-4" /> : <RiEyeLine className="w-4 h-4" />}
               </button>
             </div>
             {errors.newPassword && (
-              <p className="text-xs text-red-500">{errors.newPassword.message}</p>
+              <p className="text-caption-1-regular text-text-error-primary">{errors.newPassword.message}</p>
             )}
           </div>
 
           {/* Confirm New Password */}
           <div className="space-y-1.5">
-            <Label htmlFor="settingsConfirmPassword" className="text-xs text-[#374151]">
+            <Label htmlFor="settingsConfirmPassword" className="text-caption-1-medium text-text-secondary">
               {t.confirmNewPassword}
             </Label>
             <div className="relative">
-              <ShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <RiShieldCheckLine className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-icon-tertiary" />
               <Input
                 id="settingsConfirmPassword"
                 type={showConfirmPassword ? 'text' : 'password'}
                 placeholder="••••••••"
-                className={`pl-9 pr-10 rounded-xl ${errors.confirmPassword ? 'border-red-500' : ''}`}
+                className={cx(
+                  'pl-9 pr-10 rounded-xl',
+                  errors.confirmPassword && 'border-border-error-default'
+                )}
                 {...register('confirmPassword')}
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword((prev) => !prev)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground-icon-tertiary hover:text-text-primary cursor-pointer"
                 tabIndex={-1}
               >
-                {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showConfirmPassword ? <RiEyeOffLine className="w-4 h-4" /> : <RiEyeLine className="w-4 h-4" />}
               </button>
             </div>
             {errors.confirmPassword && (
-              <p className="text-xs text-red-500">{errors.confirmPassword.message}</p>
+              <p className="text-caption-1-regular text-text-error-primary">{errors.confirmPassword.message}</p>
             )}
           </div>
 
@@ -204,16 +224,16 @@ export function ChangePasswordCard() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium text-xs h-9 px-4 gap-1.5"
+              className="bg-linear-to-b from-accent-500 to-accent-600 hover:from-accent-600 hover:to-accent-700 text-white rounded-xl font-medium text-caption-1-medium h-9 px-4 gap-1.5 shadow-xs"
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <RiLoader4Line className="w-4 h-4 animate-spin" />
                   {t.changingPassword}
                 </>
               ) : (
                 <>
-                  <CheckCircle2 className="w-4 h-4" />
+                  <RiCheckboxCircleLine className="w-4 h-4" />
                   {t.changePassword}
                 </>
               )}

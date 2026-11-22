@@ -22,7 +22,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { FileUploader } from '@/components/ui/file-uploader';
-import { Wallet, Loader2, Save } from 'lucide-react';
+import { RiWallet3Line, RiLoader4Line, RiSaveLine } from '@remixicon/react';
 
 const expenseCategories: { value: ExpenseCategory; labelBn: string; labelEn: string }[] = [
   { value: 'ELECTRICITY', labelBn: 'বিদ্যুৎ বিল (Electricity)', labelEn: 'Electricity' },
@@ -187,11 +187,11 @@ export function ExpenseFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Wallet className="w-5 h-5 text-emerald-600" />
+          <DialogTitle className="flex items-center gap-2 text-text-primary">
+            <RiWallet3Line className="w-5 h-5 text-accent-600" />
             {isEditing ? (isEn ? 'Edit Expense' : 'খরচ এডিট করুন') : (isEn ? 'Record Property Expense' : 'নতুন খরচ যুক্ত করুন')}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-body-medium text-text-tertiary">
             {isEn ? 'Track electricity, maintenance, and building costs.' : 'বাড়ির বিদ্যুৎ, গ্যাস বা রক্ষণাবেক্ষণ খরচ লিপিবদ্ধ করুন।'}
           </DialogDescription>
         </DialogHeader>
@@ -201,7 +201,7 @@ export function ExpenseFormDialog({
             <Label htmlFor="propertyId">{t.propertyName}</Label>
             <select
               id="propertyId"
-              className="flex h-10 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+              className="flex h-10 w-full rounded-xl border border-border-button-default bg-background-primary-default px-3 py-2 text-body-medium text-text-primary shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus-ring"
               {...register('propertyId')}
             >
               <option value="">{isEn ? '-- Select Property --' : '-- বাড়ি নির্বাচন করুন --'}</option>
@@ -211,7 +211,7 @@ export function ExpenseFormDialog({
                 </option>
               ))}
             </select>
-            {errors.propertyId && <p className="text-xs text-rose-500">{errors.propertyId.message}</p>}
+            {errors.propertyId && <p className="text-caption-1-regular text-text-error-primary">{errors.propertyId.message}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -219,7 +219,7 @@ export function ExpenseFormDialog({
               <Label htmlFor="category">{isEn ? 'Category' : 'খরচের খাত'}</Label>
               <select
                 id="category"
-                className="flex h-10 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                className="flex h-10 w-full rounded-xl border border-border-button-default bg-background-primary-default px-3 py-2 text-body-medium text-text-primary shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus-ring"
                 {...register('category')}
               >
                 {expenseCategories.map((c) => (
@@ -238,7 +238,7 @@ export function ExpenseFormDialog({
                 step="any"
                 {...register('amount', { valueAsNumber: true })}
               />
-              {errors.amount && <p className="text-xs text-rose-500">{errors.amount.message}</p>}
+              {errors.amount && <p className="text-caption-1-regular text-text-error-primary">{errors.amount.message}</p>}
             </div>
           </div>
 
@@ -252,7 +252,7 @@ export function ExpenseFormDialog({
               <Label htmlFor="paymentMethod">{t.paymentMethod}</Label>
               <select
                 id="paymentMethod"
-                className="flex h-10 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                className="flex h-10 w-full rounded-xl border border-border-button-default bg-background-primary-default px-3 py-2 text-body-medium text-text-primary shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus-ring"
                 {...register('paymentMethod')}
               >
                 {paymentMethods.map((m) => (
@@ -285,7 +285,7 @@ export function ExpenseFormDialog({
           </div>
 
           {/* Expense Bill / Voucher Upload */}
-          <div className="border-t border-slate-100 pt-3">
+          <div className="border-t border-separator-border pt-3">
             <FileUploader
               category="OTHER"
               entityType="expense"
@@ -310,12 +310,12 @@ export function ExpenseFormDialog({
             <Button type="submit" variant="default" disabled={isLoading} className="gap-2">
               {isLoading ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <RiLoader4Line className="w-4 h-4 animate-spin" />
                   {t.loading}
                 </>
               ) : (
                 <>
-                  <Save className="w-4 h-4" />
+                  <RiSaveLine className="w-4 h-4" />
                   {isEditing ? t.save : t.create}
                 </>
               )}

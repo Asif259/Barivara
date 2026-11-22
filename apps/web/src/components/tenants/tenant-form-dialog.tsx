@@ -21,10 +21,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { FileUploader } from '@/components/ui/file-uploader';
-import { User, Loader2, Save } from 'lucide-react';
+import { RiUser3Line, RiLoader4Line, RiSaveLine } from '@remixicon/react';
 
 const tenantSchema = z.object({
-  name: z.string().min(2, 'ভাড়া টিয়ার নাম লিখুন'),
+  name: z.string().min(2, 'ভাড়াটিয়ার নাম লিখুন'),
   phone: z.string().optional().or(z.literal('')),
   email: z.union([z.literal(''), z.string().email('সঠিক ইমেইল দিন')]).optional(),
   profilePictureId: z.string().optional().nullable(),
@@ -130,11 +130,11 @@ export function TenantFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <User className="w-5 h-5 text-emerald-600" />
+          <DialogTitle className="flex items-center gap-2 text-text-primary">
+            <RiUser3Line className="w-5 h-5 text-accent-600" />
             {isEditing ? t.editTenant : t.addNewTenant}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-body-medium text-text-tertiary">
             {isEn ? 'Enter tenant personal and contact details.' : 'ভাড়াটিয়ার ব্যক্তিগত ও যোগাযোগের তথ্য দিন।'}
           </DialogDescription>
         </DialogHeader>
@@ -144,20 +144,20 @@ export function TenantFormDialog({
             <div className="space-y-2">
               <Label htmlFor="name">{t.tenantName}</Label>
               <Input id="name" placeholder={isEn ? 'e.g. Kamal Hossain' : 'যেমন: কামাল হোসেন'} {...register('name')} />
-              {errors.name && <p className="text-xs text-rose-500">{errors.name.message}</p>}
+              {errors.name && <p className="text-caption-1-regular text-text-error-primary">{errors.name.message}</p>}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="phone">{t.phone} ({isEn ? 'Optional' : 'ঐচ্ছিক'})</Label>
               <Input id="phone" placeholder="01812345678" {...register('phone')} />
-              {errors.phone && <p className="text-xs text-rose-500">{errors.phone.message}</p>}
+              {errors.phone && <p className="text-caption-1-regular text-text-error-primary">{errors.phone.message}</p>}
             </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="email">{t.email} ({isEn ? 'Optional' : 'ঐচ্ছিক'})</Label>
             <Input id="email" type="email" placeholder="kamal@example.com" {...register('email')} />
-            {errors.email && <p className="text-xs text-rose-500">{errors.email.message}</p>}
+            {errors.email && <p className="text-caption-1-regular text-text-error-primary">{errors.email.message}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -172,7 +172,7 @@ export function TenantFormDialog({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 border-t border-slate-100 pt-3">
+          <div className="grid grid-cols-2 gap-3 border-t border-separator-border pt-3">
             <div className="space-y-2">
               <Label htmlFor="emergencyContactName">{isEn ? 'Emergency Contact Name' : 'জরুরি যোগাযোগের নাম'}</Label>
               <Input id="emergencyContactName" placeholder={isEn ? 'Contact Person' : 'অভিভাবক/আত্মীয়'} {...register('emergencyContactName')} />
@@ -189,45 +189,45 @@ export function TenantFormDialog({
             <Input id="notes" placeholder={isEn ? 'Family members, references...' : 'পরিবারের সদস্য সংখ্যা বা অন্যান্য তথ্য'} {...register('notes')} />
           </div>
 
-{/* Tenant NID Upload — Front & Back */}
-           <div className="border-t border-slate-100 pt-3 space-y-3">
-             <FileUploader
-               category="TENANT_PROFILE_PICTURE"
-               entityType="tenant"
-               entityId={tenant?.id}
-               value={watch('profilePictureId') || tenant?.profilePictureId || null}
-               onChange={(id) => setValue('profilePictureId', id || '')}
-               label={isEn ? 'Profile Picture' : 'প্রোফাইল ছবি'}
-               description={
-                 isEn
-                   ? 'Upload tenant profile picture (Max 5MB)'
-                   : 'ভাড়াটিয়ার প্রোফাইল ছবি আপলোড করুন (সর্বোচ্চ ৫MB)'
-               }
-               maxSizeMB={5}
-               mode="replace"
-             />
+          {/* Tenant NID Upload — Front & Back */}
+          <div className="border-t border-separator-border pt-3 space-y-3">
+            <FileUploader
+              category="TENANT_PROFILE_PICTURE"
+              entityType="tenant"
+              entityId={tenant?.id}
+              value={watch('profilePictureId') || tenant?.profilePictureId || null}
+              onChange={(id) => setValue('profilePictureId', id || '')}
+              label={isEn ? 'Profile Picture' : 'প্রোফাইল ছবি'}
+              description={
+                isEn
+                  ? 'Upload tenant profile picture (Max 5MB)'
+                  : 'ভাড়াটিয়ার প্রোফাইল ছবি আপলোড করুন (সর্বোচ্চ ৫MB)'
+              }
+              maxSizeMB={5}
+              mode="replace"
+            />
 
-             <FileUploader
-               category="TENANT_FRONT_NID"
-               entityType="tenant"
-               entityId={tenant?.id}
-               value={watch('nidFrontImageId') || tenant?.nidFrontImageId || null}
-               onChange={(id) => setValue('nidFrontImageId', id || '')}
-               label={isEn ? 'NID Card — Front Side (Private & Secure)' : 'এনআইডি কার্ড — সামনের পাশ (সুরক্ষিত)'}
-               description={isEn ? 'Upload front side of National ID card (Max 5MB)' : 'জাতীয় পরিচয়পত্রের সামনের কপি আপলোড করুন (সর্বোচ্চ ৫MB)'}
-               maxSizeMB={5}
-             />
-             <FileUploader
-               category="TENANT_BACK_NID"
-               entityType="tenant"
-               entityId={tenant?.id}
-               value={watch('nidBackImageId') || tenant?.nidBackImageId || null}
-               onChange={(id) => setValue('nidBackImageId', id || '')}
-               label={isEn ? 'NID Card — Back Side (Private & Secure)' : 'এনআইডি কার্ড — পেছনের পাশ (সুরক্ষিত)'}
-               description={isEn ? 'Upload back side of National ID card (Max 5MB)' : 'জাতীয় পরিচয়পত্রের পেছনের কপি আপলোড করুন (সর্বোচ্চ ৫MB)'}
-               maxSizeMB={5}
-             />
-           </div>
+            <FileUploader
+              category="TENANT_FRONT_NID"
+              entityType="tenant"
+              entityId={tenant?.id}
+              value={watch('nidFrontImageId') || tenant?.nidFrontImageId || null}
+              onChange={(id) => setValue('nidFrontImageId', id || '')}
+              label={isEn ? 'NID Card — Front Side (Private & Secure)' : 'এনআইডি কার্ড — সামনের পাশ (সুরক্ষিত)'}
+              description={isEn ? 'Upload front side of National ID card (Max 5MB)' : 'জাতীয় পরিচয়পত্রের সামনের কপি আপলোড করুন (সর্বোচ্চ ৫MB)'}
+              maxSizeMB={5}
+            />
+            <FileUploader
+              category="TENANT_BACK_NID"
+              entityType="tenant"
+              entityId={tenant?.id}
+              value={watch('nidBackImageId') || tenant?.nidBackImageId || null}
+              onChange={(id) => setValue('nidBackImageId', id || '')}
+              label={isEn ? 'NID Card — Back Side (Private & Secure)' : 'এনআইডি কার্ড — পেছনের পাশ (সুরক্ষিত)'}
+              description={isEn ? 'Upload back side of National ID card (Max 5MB)' : 'জাতীয় পরিচয়পত্রের পেছনের কপি আপলোড করুন (সর্বোচ্চ ৫MB)'}
+              maxSizeMB={5}
+            />
+          </div>
 
           <DialogFooter className="pt-2">
             <Button
@@ -241,12 +241,12 @@ export function TenantFormDialog({
             <Button type="submit" variant="default" disabled={isLoading} className="gap-2">
               {isLoading ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <RiLoader4Line className="w-4 h-4 animate-spin" />
                   {t.loading}
                 </>
               ) : (
                 <>
-                  <Save className="w-4 h-4" />
+                  <RiSaveLine className="w-4 h-4" />
                   {isEditing ? t.save : t.create}
                 </>
               )}

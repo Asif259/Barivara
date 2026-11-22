@@ -23,17 +23,17 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import {
-  Download,
-  Loader2,
-  Copy,
-  Check,
-  Share2,
-  Printer,
-  AlertCircle,
-  ExternalLink,
-  Info,
-  Receipt,
-} from 'lucide-react';
+  RiDownloadLine as Download,
+  RiLoader4Line as Loader2,
+  RiFileCopyLine as Copy,
+  RiCheckLine as Check,
+  RiShareLine as Share2,
+  RiPrinterLine as Printer,
+  RiErrorWarningLine as AlertCircle,
+  RiExternalLinkLine as ExternalLink,
+  RiInformationLine as Info,
+  RiReceiptLine as Receipt,
+} from '@remixicon/react';
 import { toPng } from 'html-to-image';
 import { toast } from 'sonner';
 
@@ -637,12 +637,12 @@ export function RentNoticeDialog({
                 size="sm"
                 onClick={handleDownload}
                 disabled={actionsDisabled}
-                className="gap-1.5 shadow-xs font-medium text-slate-700 hover:text-slate-900 border-stone-300 flex-1 sm:flex-none cursor-pointer"
+                className="gap-1.5 shadow-xs font-medium text-text-secondary hover:text-text-primary border-border-button-default flex-1 sm:flex-none cursor-pointer"
               >
                 {isDownloading ? (
-                  <Loader2 className="w-4 h-4 animate-spin text-slate-600" />
+                  <Loader2 className="w-4 h-4 animate-spin text-foreground-icon-secondary" />
                 ) : (
-                  <Download className="w-4 h-4 text-slate-600" />
+                  <Download className="w-4 h-4 text-foreground-icon-secondary" />
                 )}
                 {isEn ? 'Download' : 'ডাউনলোড'}
               </Button>
@@ -654,13 +654,13 @@ export function RentNoticeDialog({
                 size="sm"
                 onClick={handleCopyImage}
                 disabled={actionsDisabled || isCopyingImage}
-                className="gap-1.5 shadow-xs font-medium text-slate-700 hover:text-slate-900 border-stone-300 flex-1 sm:flex-none cursor-pointer"
+                className="gap-1.5 shadow-xs font-medium text-text-secondary hover:text-text-primary border-border-button-default flex-1 sm:flex-none cursor-pointer"
                 title={isEn ? 'Copy notice image to clipboard' : 'নোটিশ ইমেজ ক্লিপবোর্ডে কপি করুন'}
               >
                 {isCopyingImage ? (
-                  <Loader2 className="w-4 h-4 animate-spin text-slate-600" />
+                  <Loader2 className="w-4 h-4 animate-spin text-foreground-icon-secondary" />
                 ) : (
-                  <Copy className="w-4 h-4 text-slate-600" />
+                  <Copy className="w-4 h-4 text-foreground-icon-secondary" />
                 )}
                 {isEn ? 'Copy Image' : 'ছবি কপি'}
               </Button>
@@ -759,17 +759,17 @@ function WhatsAppShareFallbackDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-sm p-5 bg-white rounded-2xl shadow-2xl border border-slate-200">
+      <DialogContent className="sm:max-w-sm p-5 bg-background-primary-default rounded-3xl shadow-2xl border border-border-button-default text-text-primary">
         <DialogHeader className="space-y-1.5 pb-1">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-[#25D366]/15 flex items-center justify-center text-[#25D366] shrink-0">
+            <div className="h-10 w-10 rounded-full bg-accent-50 dark:bg-accent-950/40 flex items-center justify-center text-accent-600 shrink-0">
               <WhatsAppIcon className="w-6 h-6" />
             </div>
             <div>
-              <DialogTitle className="text-base font-bold text-slate-900 leading-tight">
+              <DialogTitle className="text-title-3-semibold text-text-primary leading-tight">
                 {isEn ? `Send to ${data.tenantName}` : `${data.tenantName}-কে পাঠান`}
               </DialogTitle>
-              <DialogDescription className="text-xs text-slate-500">
+              <DialogDescription className="text-caption-1-regular text-text-tertiary">
                 {data.phone
                   ? (isEn ? `WhatsApp: ${data.phone}` : `নম্বর: ${data.phone}`)
                   : (isEn ? 'Choose contact in WhatsApp' : 'হোয়াটসঅ্যাপে কন্টাক্ট নির্বাচন করুন')}
@@ -780,13 +780,13 @@ function WhatsAppShareFallbackDialog({
 
         {/* Popup blocked warning */}
         {data.popupBlocked && (
-          <div className="flex items-start gap-2 p-2.5 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs">
-            <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+          <div className="flex items-start gap-2 p-2.5 bg-background-tertiary-error border border-border-error-default rounded-xl text-text-error-primary text-caption-1-medium">
+            <AlertCircle className="w-4 h-4 text-text-error-primary shrink-0 mt-0.5" />
             <div className="space-y-1">
               <span className="font-semibold block">
                 {isEn ? 'Pop-up blocked by browser' : 'ব্রাউজার পপ-আপ ব্লক করেছে'}
               </span>
-              <p className="text-[11px] text-amber-800">
+              <p className="text-[11px] leading-relaxed">
                 {isEn
                   ? 'Click "Open WhatsApp" below to continue to the chat.'
                   : 'নিচের "হোয়াটসঅ্যাপ খুলুন" বাটনে চাপ দিয়ে সরাসরি চ্যাট খুলুন।'}
@@ -796,9 +796,9 @@ function WhatsAppShareFallbackDialog({
         )}
 
         {/* Desktop Attachment Instruction Hint */}
-        <div className="flex items-start gap-2 p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 text-xs">
-          <Info className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-          <p className="text-[11px] text-slate-600 leading-normal">
+        <div className="flex items-start gap-2 p-2.5 bg-background-secondary-default border border-border-button-default rounded-xl text-text-secondary text-caption-1-regular">
+          <Info className="w-4 h-4 text-accent-600 shrink-0 mt-0.5" />
+          <p className="text-[11px] text-text-secondary leading-normal">
             {isEn
               ? 'Due to browser security restrictions, WhatsApp Web cannot automatically attach files. Download the notice image and drag or attach it into the opened chat.'
               : 'ব্রাউজার সিকিউরিটির কারণে ওয়েব ব্রাউজার স্বয়ংক্রিয়ভাবে হোয়াটসঅ্যাপে ফাইল যুক্ত করতে পারে না। নোটিশটি ডাউনলোড করে হোয়াটসঅ্যাপ চ্যাটে ড্র্যাগ বা অ্যাটাচ করুন।'}
@@ -807,19 +807,19 @@ function WhatsAppShareFallbackDialog({
 
         {/* Prefilled message preview */}
         <div className="space-y-1">
-          <div className="flex items-center justify-between text-[11px] font-medium text-slate-700">
+          <div className="flex items-center justify-between text-[11px] font-medium text-text-secondary">
             <span>{isEn ? 'Prefilled message:' : 'প্রি-ফিলড মেসেজ:'}</span>
             <Button
               type="button"
               variant="ghost"
               size="sm"
               onClick={handleCopyText}
-              className="h-6 px-2 text-[11px] gap-1 text-slate-600 hover:text-slate-900 cursor-pointer"
+              className="h-6 px-2 text-[11px] gap-1 text-text-secondary hover:text-text-primary cursor-pointer"
             >
               {copiedText ? (
                 <>
-                  <Check className="w-3.5 h-3.5 text-emerald-600" />
-                  <span className="text-emerald-700 font-semibold">{isEn ? 'Copied' : 'কপি হয়েছে'}</span>
+                  <Check className="w-3.5 h-3.5 text-accent-600" />
+                  <span className="text-accent-700 font-semibold">{isEn ? 'Copied' : 'কপি হয়েছে'}</span>
                 </>
               ) : (
                 <>
@@ -829,7 +829,7 @@ function WhatsAppShareFallbackDialog({
               )}
             </Button>
           </div>
-          <pre className="text-[11px] font-sans bg-slate-100 p-2.5 rounded-lg border border-slate-200 whitespace-pre-wrap text-slate-800 leading-relaxed max-h-48 overflow-y-auto">
+          <pre className="text-[11px] font-mono bg-background-secondary-default p-2.5 rounded-xl border border-border-button-default whitespace-pre-wrap text-text-primary leading-relaxed max-h-48 overflow-y-auto">
             {data.messageText}
           </pre>
         </div>
