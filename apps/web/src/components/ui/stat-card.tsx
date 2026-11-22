@@ -46,7 +46,7 @@ export function StatCard({
     <Card
       className={cx(
         'group relative overflow-hidden rounded-3xl border-border-button-default bg-background-primary-default shadow-xs transition-all duration-200',
-        (href || onClick) && 'cursor-pointer hover:border-accent-900/50 hover:shadow-sm active:scale-[0.99]',
+        (href || onClick) && 'cursor-pointer hover:border-accent-600/50 hover:shadow-sm active:scale-[0.99]',
         className
       )}
       onClick={onClick}
@@ -94,7 +94,7 @@ export function StatCard({
             {trend && (
               <span
                 className={cx(
-                  'inline-flex items-center gap-0.5 font-medium',
+                  'inline-flex items-center gap-0.5 font-medium tabular-nums',
                   trend.isPositive ? 'text-status-success' : 'text-text-error-primary'
                 )}
               >

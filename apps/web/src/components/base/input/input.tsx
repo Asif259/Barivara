@@ -156,7 +156,7 @@ const inputStyles = sortCx({
 
   input: [
     "min-w-0 flex-1 bg-transparent border-0 outline-none p-0 m-0",
-    "font-sans text-body-regular text-text-primary",
+    "font-sans text-base sm:text-body-regular text-text-primary",
     "placeholder:text-text-tertiary",
     "focus:placeholder:text-text-primary",
     "disabled:text-input-disabled-text disabled:placeholder:text-input-disabled-text",

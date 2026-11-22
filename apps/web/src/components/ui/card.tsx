@@ -35,7 +35,7 @@ const CardTitle = React.forwardRef<
   <h3
     ref={ref}
     className={cx(
-      "text-title-3-semibold text-text-primary leading-tight tracking-tight",
+      "text-title-3-semibold text-text-primary leading-tight tracking-tight text-balance",
       className
     )}
     {...props}
@@ -49,7 +49,7 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cx("text-body-regular text-text-secondary", className)}
+    className={cx("text-body-regular text-text-secondary text-pretty", className)}
     {...props}
   />
 ));

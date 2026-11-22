@@ -101,10 +101,15 @@ TableHead.displayName = "TableHead";
 const TableCell = React.forwardRef<
   HTMLTableCellElement,
   React.TdHTMLAttributes<HTMLTableCellElement>
->(({ className, ...props }, ref) => (
+>(({ className, align, ...props }, ref) => (
   <td
     ref={ref}
-    className={cx("p-4 align-middle text-text-primary [&:has([role=checkbox])]:pr-0", className)}
+    align={align}
+    className={cx(
+      "p-4 align-middle text-text-primary [&:has([role=checkbox])]:pr-0",
+      align === "right" && "tabular-nums",
+      className
+    )}
     {...props}
   />
 ));

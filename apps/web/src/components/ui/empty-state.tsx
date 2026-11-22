@@ -25,9 +25,9 @@ export function EmptyState({
       <div className="flex size-12 items-center justify-center rounded-2xl bg-background-primary-default border border-border-button-default text-foreground-icon-secondary mb-4 shadow-xs">
         <Icon className="size-6" />
       </div>
-      <h3 className="text-title-3-semibold text-text-primary mb-1">{title}</h3>
+      <h3 className="text-title-3-semibold text-text-primary mb-1 text-balance">{title}</h3>
       {description && (
-        <p className="text-body-regular text-text-secondary max-w-sm mb-6">{description}</p>
+        <p className="text-body-regular text-text-secondary max-w-sm mb-6 text-pretty">{description}</p>
       )}
       {actionLabel && onAction && (
         <Button onClick={onAction} variant="default">

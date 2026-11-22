@@ -780,7 +780,7 @@ function WhatsAppShareFallbackDialog({
       <DialogContent className="sm:max-w-sm p-5 bg-background-primary-default rounded-3xl shadow-2xl border border-border-button-default text-text-primary">
         <DialogHeader className="space-y-1.5 pb-1">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-accent-50 dark:bg-accent-950/40 flex items-center justify-center text-accent-600 shrink-0">
+            <div className="h-10 w-10 rounded-full bg-button-ghost-background flex items-center justify-center text-button-ghost-foreground shrink-0">
               <WhatsAppIcon className="w-6 h-6" />
             </div>
             <div>

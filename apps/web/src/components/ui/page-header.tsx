@@ -12,9 +12,9 @@ export function PageHeader({ title, description, action, className }: PageHeader
   return (
     <div className={cx("flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-5 border-b border-border-separator-border mb-6", className)}>
       <div>
-        <h1 className="text-title-1-medium font-semibold tracking-tight text-text-primary">{title}</h1>
+        <h1 className="text-title-1-medium font-semibold tracking-tight text-text-primary text-balance">{title}</h1>
         {description && (
-          <p className="text-body-regular text-text-secondary mt-1.5">{description}</p>
+          <p className="text-body-regular text-text-secondary mt-1.5 text-pretty max-w-2xl">{description}</p>
         )}
       </div>
       {action && <div className="flex items-center gap-3">{action}</div>}

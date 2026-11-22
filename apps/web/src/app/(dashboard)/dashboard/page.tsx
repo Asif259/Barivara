@@ -290,16 +290,16 @@ export default function DashboardPage() {
 
         {/* Action Alert Banner for Overdue / Pending items */}
         {outstandingCount > 0 && (
-          <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-amber-300 dark:border-amber-900/60 bg-amber-50/70 dark:bg-amber-950/30 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-status-orange-text/20 bg-status-orange-background/40 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-status-orange-background text-status-orange-text">
                 <AlertCircle className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-body-medium font-semibold text-amber-900 dark:text-amber-200">
+                <p className="text-body-medium font-semibold text-text-primary">
                   {formatNumber(outstandingCount, language)} {isEn ? 'unpaid or overdue invoices require attention' : 'টি অপরিশোধিত বা বকেয়া রসিদে মনোযোগ প্রয়োজন'}
                 </p>
-                <p className="text-caption-1-regular text-amber-700 dark:text-amber-400">
+                <p className="text-caption-1-regular text-text-secondary tabular-nums">
                   {isEn
                     ? `Total outstanding due: ${formatCurrency(currentMonth?.outstanding || 0, language)}`
                     : `মোট বকেয়া টাকার পরিমাণ: ${formatCurrency(currentMonth?.outstanding || 0, language)}`}
@@ -308,7 +308,7 @@ export default function DashboardPage() {
             </div>
             <Link
               href="/rents?status=OVERDUE"
-              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber-600 px-3.5 py-2 text-caption-1-medium font-medium text-white transition-colors hover:bg-amber-700 shrink-0"
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-accent-600 px-3.5 py-2 text-caption-1-medium font-medium text-white transition-colors hover:bg-accent-700 shrink-0 shadow-xs"
             >
               <span>{isEn ? 'Review Invoices & Send Notices' : 'বকেয়া রসিদ দেখুন ও নোটিশ পাঠান'}</span>
               <ArrowUpRight className="h-3.5 w-3.5" />

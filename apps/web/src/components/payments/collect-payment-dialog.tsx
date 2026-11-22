@@ -296,7 +296,7 @@ export function CollectPaymentDialog({
             <span className="flex items-center gap-1.5">
               <RiCalendarLine className="w-4 h-4 text-foreground-icon-tertiary" /> {isEn ? 'Rent Month' : 'ভাড়ার মাস'}:
             </span>
-            <span className="font-semibold text-accent-700 dark:text-accent-300">
+            <span className="font-semibold text-button-ghost-foreground">
               {getMonthLabel(activeRent.month, activeRent.year)}
             </span>
           </div>

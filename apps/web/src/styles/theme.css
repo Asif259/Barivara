@@ -23,26 +23,22 @@
   --color-blue-400:    #3392ff;
 
   /* ----- Accent ramp ---------------------------------------------------------
-   * The CTA hue. Interactive/selection surfaces (primary button gradient,
-   * ghost + link buttons, checkbox, radio, switch, slider, tabs, sidebar
-   * selected, focus ring, date-range selection) reference accent-* instead of
-   * a raw hue, so the whole system re-tints by overriding these eleven
-   * variables at runtime (see components/application/theme/accent.ts) or in
-   * a customer project after importing this file. Defaults to the blue
-   * primitives above. Content/data blues (charts, status chips, calendar
-   * events, info notifications) deliberately keep referencing blue-*.
+   * Primary brand anchor: #50C878 (Emerald Green).
+   * Interactive/selection surfaces (primary button gradient, ghost + link buttons,
+   * checkbox, radio, switch, slider, tabs, sidebar selected, focus ring,
+   * date-range selection) reference accent-* instead of a raw hue.
    * --------------------------------------------------------------------------*/
-  --color-accent-50:  var(--color-emerald-50);
-  --color-accent-100: var(--color-emerald-100);
-  --color-accent-200: var(--color-emerald-200);
-  --color-accent-300: var(--color-emerald-300);
-  --color-accent-400: var(--color-emerald-400);
-  --color-accent-500: var(--color-emerald-500);
-  --color-accent-600: var(--color-emerald-600);
-  --color-accent-700: var(--color-emerald-700);
-  --color-accent-800: var(--color-emerald-800);
-  --color-accent-900: var(--color-emerald-900);
-  --color-accent-950: var(--color-emerald-950);
+  --color-accent-50:  #effbf4;
+  --color-accent-100: #d8f7e3;
+  --color-accent-200: #b5efcc;
+  --color-accent-300: #84e1aa;
+  --color-accent-400: #5fd386;
+  --color-accent-500: #50c878;
+  --color-accent-600: #34a85e;
+  --color-accent-700: #258348;
+  --color-accent-800: #21683c;
+  --color-accent-900: #1c5533;
+  --color-accent-950: #0a2f1a;
 
   /* ----- Typography ----------------------------------------------------------
    * Font sizes, weights, line-heights, and tracking all match Tailwind v4
